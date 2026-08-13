@@ -1,6 +1,25 @@
 {
   "$comment": "Traceability knowledge graph: REQ <-> US <-> tests, plus screens (US <-> SCR -> states/components), decisions (US -> ADR) and lessons-learned edges. Edited in the same PR as the artifacts it links; validated by tools/aidlc-check.mjs; traceability-matrix.md is generated from it (never hand-edited).",
-  "requirements": {},
+  "requirements": {
+    "REQ-001": { "stories": [] },
+    "REQ-002": { "stories": [] },
+    "REQ-003": { "stories": [] },
+    "REQ-004": { "stories": [] },
+    "REQ-005": { "stories": [] },
+    "REQ-006": { "stories": [] },
+    "REQ-007": { "stories": [] },
+    "REQ-008": { "stories": [] },
+    "REQ-009": { "stories": [] },
+    "REQ-010": { "stories": [] },
+    "REQ-011": { "stories": [] },
+    "REQ-012": { "stories": [] },
+    "REQ-013": { "stories": [] },
+    "REQ-014": { "stories": [] },
+    "NFR-001": { "stories": [] },
+    "NFR-002": { "stories": [] },
+    "NFR-003": { "stories": [] },
+    "NFR-004": { "stories": [] }
+  },
   "stories": {},
   "screens": {},
   "lessons": []
