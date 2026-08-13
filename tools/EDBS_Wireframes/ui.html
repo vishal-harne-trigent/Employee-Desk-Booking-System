@@ -1,0 +1,67 @@
+<style>
+  body {
+    font: 13px/1.4 Inter, system-ui, sans-serif;
+    margin: 16px;
+    color: #18181b;
+  }
+  h1 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 12px; color: #71717a; }
+  ul { margin: 0 0 16px; padding-left: 18px; color: #52525b; }
+  button {
+    width: 100%;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #generate { background: #2563eb; color: #fff; }
+  #generate:disabled { opacity: 0.6; cursor: wait; }
+  #cancel { background: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; }
+  #status { font-size: 12px; min-height: 20px; margin-top: 8px; }
+  #status.ok { color: #15803d; }
+  #status.err { color: #dc2626; }
+</style>
+
+<h1>EDBS Wireframes</h1>
+<p>Generates 22 low-fidelity frames from approved requirements (SCR-001 … SCR-004).</p>
+<ul>
+  <li>Sign In — 4 states</li>
+  <li>Book a Desk — 7 states</li>
+  <li>My Bookings — 5 states</li>
+  <li>Admin Bookings — 6 states</li>
+</ul>
+<button id="generate">Generate wireframes</button>
+<button id="cancel">Close</button>
+<p id="status"></p>
+
+<script>
+  const status = document.getElementById('status');
+  const generateBtn = document.getElementById('generate');
+
+  document.getElementById('generate').onclick = () => {
+    generateBtn.disabled = true;
+    status.textContent = 'Creating frames…';
+    status.className = '';
+    parent.postMessage({ pluginMessage: { type: 'generate' } }, '*');
+  };
+
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+  };
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    generateBtn.disabled = false;
+    if (msg.type === 'done') {
+      status.textContent = 'Done — ' + msg.count + ' frames on "EDBS Wireframes" page.';
+      status.className = 'ok';
+    }
+    if (msg.type === 'error') {
+      status.textContent = msg.message;
+      status.className = 'err';
+    }
+  };
+</script>
