@@ -244,14 +244,16 @@ Navigation: Employees use **Desk Availability · My Bookings**; Admins use **Des
 
 ## 5. Non-functional requirements
 
-| ID | Category | Requirement | Priority | Traces to |
-| -- | -------- | ----------- | -------- | --------- |
-| NFR-001 | Locale/time | All booking dates and “today” boundary use office local timezone. | Must | BRD NFR-001 |
-| NFR-002 | Scope | Exactly one office location in this release. | Must | BRD NFR-002 |
-| NFR-003 | Security | Credentials protected in transit (HTTPS when deployed). | Must | BRD NFR-003 |
-| NFR-004 | Usability | Desktop-only vs mobile-responsive: `TBD (owner: PO/client)`. | Should | BRD NFR-004 |
-| NFR-005 | Notifications | Transactional emails sent reliably; failures logged. | Must | BRD NFR-005, SRS-F-068 |
-| NFR-006 | Notifications | Push requires opt-in; unsupported browsers degrade to email only. | Must | BRD NFR-006 |
+Canonical definitions: **BRD-001 §5** (NFR-001 … NFR-006). The table below adds implementation notes only — it does **not** redefine BRD requirements.
+
+| BRD reference | Category | Implementation note | Priority |
+| ------------- | -------- | ------------------- | -------- |
+| BRD-001 / NFR-001 | Locale/time | All booking dates and “today” boundary use office local timezone. | Must |
+| BRD-001 / NFR-002 | Scope | Exactly one office location in this release. | Must |
+| BRD-001 / NFR-003 | Security | Credentials protected in transit (HTTPS when deployed). | Must |
+| BRD-001 / NFR-004 | Usability | Desktop-only vs mobile-responsive: `TBD (owner: PO/client)`. | Should |
+| BRD-001 / NFR-005 | Notifications | Transactional emails sent reliably; failures logged. | Must |
+| BRD-001 / NFR-006 | Notifications | Push requires opt-in; unsupported browsers degrade to email only. | Must |
 
 ---
 
@@ -344,33 +346,33 @@ Canonical statements and examples remain in **BRD-001 §6**. Implementers shall 
 
 ## Appendix A — Requirement traceability
 
-| BRD REQ | SRS coverage | UI screen |
-| ------- | ------------ | --------- |
-| REQ-001 | §2.1, §4.1 | All SCR |
-| REQ-002 | SRS-F-001, SRS-F-002 | SCR-001 |
-| REQ-003 | SRS-F-004 | All authenticated SCR |
-| REQ-004 | SRS-F-005 | SCR-001, SCR-005, SCR-006 |
-| REQ-005 | SRS-F-003, SRS-F-052 | SCR-001, SCR-006 |
-| REQ-006 | SRS-F-010, SRS-F-011 | SCR-002 |
-| REQ-007 | SRS-F-012, SRS-F-016 | SCR-002 |
-| REQ-008 | SRS-F-013 … SRS-F-017 | SCR-002 |
-| REQ-009 | SRS-F-018 | SCR-003 |
-| REQ-010 | SRS-F-019, SRS-F-020 | SCR-003 |
-| REQ-011 | SRS-F-030 | SCR-004 |
-| REQ-012 | SRS-F-031 | SCR-004 |
-| REQ-013 | SRS-F-032 | SCR-004 |
-| REQ-014 | SRS-F-033 | SCR-004 |
-| REQ-015 | SRS-F-040 | SCR-005 |
-| REQ-016 | SRS-F-041 | SCR-005 |
-| REQ-017 | SRS-F-042 … SRS-F-044 | SCR-005 |
-| REQ-018 | SRS-F-050 | SCR-006 |
-| REQ-019 | SRS-F-051 | SCR-006 |
-| REQ-020 | SRS-F-052, SRS-F-055 | SCR-006 |
-| REQ-021 | SRS-F-053 | SCR-006 |
-| REQ-022 | SRS-F-054, SRS-F-055 | SCR-006 |
-| REQ-023 | SRS-F-060, SRS-F-062 | (email — no dedicated SCR) |
-| REQ-024 | SRS-F-061, SRS-F-062 | (email) |
-| REQ-025 | SRS-F-063, SRS-F-064, SRS-F-067 | (email / scheduler) |
-| REQ-026 | SRS-F-065 | SCR-007 |
-| REQ-027 | SRS-F-066, SRS-F-067 | SCR-007 |
-| NFR-001 … NFR-006 | §5 | Per manifest |
+| BRD reference | SRS coverage | UI screen |
+| ------------- | ------------ | --------- |
+| BRD-001 / REQ-001 | §2.1, §4.1 | All SCR |
+| BRD-001 / REQ-002 | SRS-F-001, SRS-F-002 | SCR-001 |
+| BRD-001 / REQ-003 | SRS-F-004 | All authenticated SCR |
+| BRD-001 / REQ-004 | SRS-F-005 | SCR-001, SCR-005, SCR-006 |
+| BRD-001 / REQ-005 | SRS-F-003, SRS-F-052 | SCR-001, SCR-006 |
+| BRD-001 / REQ-006 | SRS-F-010, SRS-F-011 | SCR-002 |
+| BRD-001 / REQ-007 | SRS-F-012, SRS-F-016 | SCR-002 |
+| BRD-001 / REQ-008 | SRS-F-013 … SRS-F-017 | SCR-002 |
+| BRD-001 / REQ-009 | SRS-F-018 | SCR-003 |
+| BRD-001 / REQ-010 | SRS-F-019, SRS-F-020 | SCR-003 |
+| BRD-001 / REQ-011 | SRS-F-030 | SCR-004 |
+| BRD-001 / REQ-012 | SRS-F-031 | SCR-004 |
+| BRD-001 / REQ-013 | SRS-F-032 | SCR-004 |
+| BRD-001 / REQ-014 | SRS-F-033 | SCR-004 |
+| BRD-001 / REQ-015 | SRS-F-040 | SCR-005 |
+| BRD-001 / REQ-016 | SRS-F-041 | SCR-005 |
+| BRD-001 / REQ-017 | SRS-F-042 … SRS-F-044 | SCR-005 |
+| BRD-001 / REQ-018 | SRS-F-050 | SCR-006 |
+| BRD-001 / REQ-019 | SRS-F-051 | SCR-006 |
+| BRD-001 / REQ-020 | SRS-F-052, SRS-F-055 | SCR-006 |
+| BRD-001 / REQ-021 | SRS-F-053 | SCR-006 |
+| BRD-001 / REQ-022 | SRS-F-054, SRS-F-055 | SCR-006 |
+| BRD-001 / REQ-023 | SRS-F-060, SRS-F-062 | (email — no dedicated SCR) |
+| BRD-001 / REQ-024 | SRS-F-061, SRS-F-062 | (email) |
+| BRD-001 / REQ-025 | SRS-F-063, SRS-F-064, SRS-F-067 | (email / scheduler) |
+| BRD-001 / REQ-026 | SRS-F-065 | SCR-007 |
+| BRD-001 / REQ-027 | SRS-F-066, SRS-F-067 | SCR-007 |
+| BRD-001 / NFR-001 … NFR-006 | §5 | Per manifest |

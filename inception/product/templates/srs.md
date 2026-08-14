@@ -2,6 +2,8 @@
 
 > Software Requirements Specification derived from an approved BRD. Approval = PO/BA human reviewing + merging this document's PR (Gate 1 companion artifact). GitHub records who approved what.
 
+> **ID rule:** REQ/NFR/RISK IDs are defined only in the BRD. In SRS tables, reference them as `BRD-### / REQ-###` in the first column — never `| REQ-001 |` alone (aidlc-check treats that as a duplicate definition).
+
 |                  |                                                                                  |
 | ---------------- | -------------------------------------------------------------------------------- |
 | **Author**       | BA persona (AI draft) with <human name>                                          |
@@ -62,12 +64,13 @@
 
 ## 3. System features
 
-> Each subsection maps to BRD REQ IDs. Wording is implementation-oriented but technology-neutral unless the BRD specifies otherwise.
+> Use SRS-F-### IDs for software requirements. Trace to BRD REQ IDs in the last column (not as table row IDs).
 
 ### 3.1 <Feature area>
 
 | ID | Software requirement | Priority | Traces to |
 | -- | -------------------- | -------- | --------- |
+| SRS-F-001 | | Must | BRD-001 / REQ-### |
 
 ## 4. External interface requirements
 
@@ -86,8 +89,10 @@
 
 ## 5. Non-functional requirements
 
-| ID | Category | Requirement | Priority | Traces to |
-| -- | -------- | ----------- | -------- | --------- |
+> Point to BRD §5 for canonical NFR definitions. Use `BRD-### / NFR-###` in the first column.
+
+| BRD reference | Category | Implementation note | Priority |
+| ------------- | -------- | ------------------- | -------- |
 
 ## 6. Data requirements
 
@@ -118,5 +123,6 @@
 
 ## Appendix A — Requirement traceability
 
-| BRD REQ | SRS section | UI screen (if any) |
-| ------- | ----------- | ------------------ |
+| BRD reference | SRS section | UI screen (if any) |
+| ------------- | ----------- | ------------------ |
+| BRD-001 / REQ-001 | | |
