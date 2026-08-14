@@ -1,40 +1,51 @@
+import {
+  WIREFRAMES,
+  FRAME_WIDTH,
+  FRAME_HEIGHT,
+  COLUMNS,
+  GAP,
+  WireElement,
+  WireframeState,
+} from './wireframe-data';
+
 const C = {
   bg: { r: 0.96, g: 0.96, b: 0.96 },
   surface: { r: 1, g: 1, b: 1 },
-  border: { r: 0.8, g: 0.8, b: 0.8 },
-  text: { r: 0.15, g: 0.15, b: 0.15 },
+  border: { r: 0.75, g: 0.75, b: 0.75 },
+  borderStrong: { r: 0.2, g: 0.2, b: 0.2 },
+  text: { r: 0.1, g: 0.1, b: 0.1 },
   muted: { r: 0.45, g: 0.45, b: 0.45 },
-  primary: { r: 0.15, g: 0.39, b: 0.92 },
-  primaryText: { r: 1, g: 1, b: 1 },
-  errorBg: { r: 1, g: 0.95, b: 0.95 },
-  errorBorder: { r: 0.99, g: 0.8, b: 0.8 },
-  infoBg: { r: 1, g: 0.98, b: 0.88 },
-  skeleton: { r: 0.9, g: 0.9, b: 0.9 },
+  fillDark: { r: 0.15, g: 0.15, b: 0.15 },
+  fillLight: { r: 0.92, g: 0.92, b: 0.92 },
+  onDark: { r: 1, g: 1, b: 1 },
+  alertBg: { r: 0.94, g: 0.94, b: 0.94 },
+  skeleton: { r: 0.88, g: 0.88, b: 0.88 },
+  overlay: { r: 0, g: 0, b: 0 },
 };
 
 let yCursor = 0;
 const PAD = 32;
 const CONTENT_W = FRAME_WIDTH - PAD * 2;
 
-async function loadFonts() {
+async function loadFonts(): Promise<void> {
   await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
   await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
   await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
 }
 
-function solid(color, opacity = 1) {
+function solid(color: RGB, opacity = 1): SolidPaint {
   return { type: 'SOLID', color, opacity };
 }
 
 function text(
-  parent,
-  content,
-  size,
-  weight = 'Regular',
-  color = C.text,
+  parent: FrameNode | GroupNode,
+  content: string,
+  size: number,
+  weight: 'Regular' | 'Medium' | 'Bold' = 'Regular',
+  color: RGB = C.text,
   x = PAD,
   width = CONTENT_W,
-) {
+): TextNode {
   const node = figma.createText();
   node.fontName = { family: 'Inter', style: weight };
   node.characters = content;
@@ -50,13 +61,13 @@ function text(
 }
 
 function box(
-  parent,
-  w,
-  h,
-  fill = C.surface,
+  parent: FrameNode,
+  w: number,
+  h: number,
+  fill: RGB = C.surface,
   stroke = true,
   x = PAD,
-) {
+): RectangleNode {
   const rect = figma.createRectangle();
   rect.x = x;
   rect.y = yCursor;
@@ -73,11 +84,11 @@ function box(
 }
 
 function button(
-  parent,
-  label,
+  parent: FrameNode,
+  label: string,
   primary = false,
   width = 200,
-) {
+): void {
   const h = 40;
   const rect = box(parent, width, h, primary ? C.primary : C.surface, true);
   rect.strokes = primary ? [] : [solid(C.border)];
@@ -91,7 +102,7 @@ function button(
   parent.appendChild(labelNode);
 }
 
-function renderElement(parent, el) {
+function renderElement(parent: FrameNode, el: WireElement): void {
   switch (el.type) {
     case 'title':
       text(parent, el.text, 22, 'Bold');
@@ -358,7 +369,7 @@ function renderElement(parent, el) {
   }
 }
 
-function buildFrame(state) {
+function buildFrame(state: WireframeState): FrameNode {
   yCursor = PAD;
   const frame = figma.createFrame();
   frame.name = `${state.screenId}/${state.stateId} — ${state.title}`;
@@ -381,15 +392,11 @@ function buildFrame(state) {
   return frame;
 }
 
-async function generateWireframes() {
+async function generateWireframes(): Promise<number> {
   await loadFonts();
 
-  let page = figma.currentPage;
-  if (page.name !== 'EDBS Wireframes') {
-    page = figma.createPage();
-    page.name = 'EDBS Wireframes';
-    figma.currentPage = page;
-  }
+  // Free (Starter) plans allow only 3 pages — never createPage(); use the active page.
+  const page = figma.currentPage;
 
   const existing = page.findAll(
     (n) => n.type === 'FRAME' && n.name.startsWith('SCR-'),
@@ -398,7 +405,15 @@ async function generateWireframes() {
     node.remove();
   }
 
-  const frames = [];
+  let startY = 0;
+  for (const child of page.children) {
+    if (child.type === 'FRAME' || child.type === 'GROUP') {
+      const bottom = child.y + ('height' in child ? child.height : 0);
+      startY = Math.max(startY, bottom + GAP);
+    }
+  }
+
+  const frames: FrameNode[] = [];
   for (const state of WIREFRAMES) {
     frames.push(buildFrame(state));
   }
@@ -407,7 +422,7 @@ async function generateWireframes() {
     const col = index % COLUMNS;
     const row = Math.floor(index / COLUMNS);
     frame.x = col * (FRAME_WIDTH + GAP);
-    frame.y = row * (FRAME_HEIGHT + GAP);
+    frame.y = startY + row * (FRAME_HEIGHT + GAP);
     page.appendChild(frame);
   });
 
@@ -417,12 +432,12 @@ async function generateWireframes() {
 
 figma.showUI(__html__, { width: 360, height: 280 });
 
-figma.ui.onmessage = async (msg) => {
+figma.ui.onmessage = async (msg: { type: string }) => {
   if (msg.type === 'generate') {
     try {
       const count = await generateWireframes();
       figma.ui.postMessage({ type: 'done', count });
-      figma.notify(`Created ${count} wireframe frames on "EDBS Wireframes" page`);
+      figma.notify(`Created ${count} wireframe frames on "${figma.currentPage.name}"`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       figma.ui.postMessage({ type: 'error', message });

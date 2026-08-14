@@ -15,17 +15,19 @@ Let an Employee pick a working day within the booking window, see which desks (b
 
 ## Layout
 
+Navy top navigation (DB brand mark, Desk Availability · My Bookings, avatar, Sign out). Page background muted grey; white cards for date filter and desk table.
+
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ EDBS   Book Desk · My Bookings              Sign out     │
+│ [DB] Desk Booking   Desk Availability · My Bookings  JS  │
 ├──────────────────────────────────────────────────────────┤
-│ Book a desk for: [ date picker ▼ ]  (office timezone)    │
-│                                                          │
-│  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐       │
-│  │ A-01    │ │ A-02    │ │ B-01    │ │ B-02    │       │
-│  │ ✓ Avail │ │ ✗ Booked│ │ ✓ Avail │ │ ✓ Avail │       │
-│  │ [Book]  │ │         │ │ [Book]  │ │ [Book]  │       │
-│  └─────────┘ └─────────┘ └─────────┘ └─────────┘       │
+│ Desk Availability                                        │
+│ ┌ Office date [____]  [ Check availability ] ─────────┐│
+│ └───────────────────────────────────────────────────────┘│
+│ ┌ Desk ─── Status ───────── Action ────────────────────┐ │
+│ │ A-01   ● Available      [ Book desk ]                │ │
+│ │ A-02   ● Booked                                      │ │
+│ └──────────────────────────────────────────────────────┘ │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -46,7 +48,7 @@ Let an Employee pick a working day within the booking window, see which desks (b
 ### ST-03 Desks available
 
 - **When** Desks returned for selected working day
-- **Shows** Desk cards with unique numbers; Available (icon + label + Book) or Booked (icon + label, no action)
+- **Shows** Desk table with unique numbers; Available (pill + Book desk) or Booked (pill, no action)
 - **Can do** Book an available desk (opens ST-07), change date
 
 ### ST-04 Empty
@@ -90,8 +92,8 @@ Let an Employee pick a working day within the booking window, see which desks (b
 
 | Decision | Rationale | Alternative rejected |
 | -------- | --------- | -------------------- |
-| Card grid for desks | Scannable desk numbers at a glance | Floor plan — no REQ for map |
-| Confirm modal before book | Prevents mis-clicks on adjacent desks | Instant book |
+| Table for desks | Matches client hi-fi; scannable list without floor-plan map | Card grid — rejected for styling pass |
+| Confirm modal before book | Prevents mis-clicks; client SCR-03 is same step as modal, not a route | Separate confirm page |
 | Block second booking same day | BR-001.1 — banner + link to cancel | Allow override |
 
 ## Conflicts and open questions
@@ -99,7 +101,8 @@ Let an Employee pick a working day within the booking window, see which desks (b
 | #   | Conflict / question | Between | Owner | Status |
 | --- | ------------------- | ------- | ----- | ------ |
 | 1   | Public holidays not in BRD — weekend-only enforced in date picker | BR-001.3 / open Q#2 | PO/client | open |
-| 2   | Mobile-responsive layout vs desktop-only | NFR-004 | PO/client | open |
+| 3   | Client mockup includes Location column — not in BRD (single office, desk number only) | Client hi-fi / REQ-007 | PO/client | resolved — omitted |
+| 4   | Mobile-responsive layout vs desktop-only | NFR-004 | PO/client | open |
 
 ## Designer handoff
 

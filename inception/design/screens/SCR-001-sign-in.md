@@ -15,16 +15,18 @@ Let a user authenticate with email and password before accessing desk booking. S
 
 ## Layout
 
+Navy full-bleed login canvas; centred white card with DB brand mark, “Welcome back” heading, email/password fields, green primary button.
+
 ```
 ┌──────────────────────────────────────────────┐
-│              Employee Desk Booking           │
-│  ┌────────────────────────────────────────┐  │
-│  │  Sign in                               │  │
-│  │  Email    [________________________]   │  │
-│  │  Password [________________________]   │  │
-│  │            [ Sign in ]                 │  │
-│  │  (error banner when applicable)        │  │
-│  └────────────────────────────────────────┘  │
+│  (navy background)                           │
+│       ┌────────────────────────────┐         │
+│       │ [DB]  Welcome back         │         │
+│       │ Email    [_______________] │         │
+│       │ Password [_______________] │         │
+│       │      [ Sign in ]           │         │
+│       │ (error banner when needed) │         │
+│       └────────────────────────────┘         │
 └──────────────────────────────────────────────┘
 ```
 
@@ -71,7 +73,7 @@ Let a user authenticate with email and password before accessing desk booking. S
 
 | Decision | Rationale | Alternative rejected |
 | -------- | --------- | -------------------- |
-| Single centered card | Focuses task; no nav before auth | Split marketing + login — out of scope |
+| Single centered card on navy canvas | Matches client hi-fi; focuses task before auth | Split marketing + login — out of scope |
 | No forgot-password link | REQ out of scope per BRD §10 | Link that goes nowhere |
 | Role-based redirect after login | REQ-004 — one role per user | Role picker on login |
 

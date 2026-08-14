@@ -1,30 +1,41 @@
 /**
  * EDBS design tokens — canonical source.
+ * Palette: client hi-fi designs (navy + green accent).
  * Generated export: inception/design/tokens.json (run aidlc-check --write)
  */
 :root {
   --color-bg: #ffffff;
-  --color-bg-muted: #f4f4f5;
+  --color-bg-muted: #f0f2f5;
+  --color-bg-canvas: #dfe3ea;
   --color-surface: #ffffff;
-  --color-text: #18181b;
-  --color-text-muted: #71717a;
-  --color-border: #e4e4e7;
-  --color-primary: #2563eb;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-foreground: #ffffff;
-  --color-success: #15803d;
-  --color-success-bg: #dcfce7;
-  --color-success-border: #86efac;
+  --color-text: #0d1b2a;
+  --color-text-muted: #64748b;
+  --color-border: #e2e8f0;
+  --color-input-border: #cbd5e1;
+  --color-nav: #0d1b2a;
+  --color-nav-light: #1b2d45;
+  --color-nav-text: rgba(255, 255, 255, 0.75);
+  --color-nav-text-hover: #ffffff;
+  --color-primary: #00e676;
+  --color-primary-hover: #00c853;
+  --color-primary-foreground: #0d1b2a;
+  --color-brand-mark-bg: #00e676;
+  --color-brand-mark-text: #0d1b2a;
+  --color-success: #047857;
+  --color-success-bg: #ecfdf5;
+  --color-success-border: #a7f3d0;
+  --color-success-text: #047857;
   --color-warning: #a16207;
   --color-warning-bg: #fef9c3;
-  --color-error: #dc2626;
+  --color-error: #ef4444;
   --color-error-bg: #fef2f2;
   --color-error-border: #fecaca;
-  --color-unavailable: #71717a;
-  --color-unavailable-bg: #f4f4f5;
-  --focus-ring: 0 0 0 2px var(--color-primary);
-  --radius-sm: 4px;
-  --radius-md: 8px;
+  --color-unavailable: #64748b;
+  --color-unavailable-bg: #f1f5f9;
+  --color-overlay: rgba(13, 27, 42, 0.4);
+  --focus-ring: 0 0 0 3px rgba(0, 230, 118, 0.2);
+  --radius-sm: 8px;
+  --radius-md: 12px;
   --radius-lg: 12px;
   --space-1: 4px;
   --space-2: 8px;
@@ -32,36 +43,38 @@
   --space-4: 16px;
   --space-6: 24px;
   --space-8: 32px;
-  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;
   --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.07);
+  --font-size-2xl: 1.75rem;
+  --shadow-sm: 0 1px 3px rgba(13, 27, 42, 0.06);
+  --shadow-md: 0 4px 24px rgba(13, 27, 42, 0.08);
+  --shadow-primary: 0 2px 8px rgba(0, 230, 118, 0.35);
 }
 
 [data-theme='dark'] {
-  --color-bg: #09090b;
-  --color-bg-muted: #18181b;
-  --color-surface: #18181b;
-  --color-text: #fafafa;
-  --color-text-muted: #a1a1aa;
-  --color-border: #3f3f46;
-  --color-primary: #3b82f6;
-  --color-primary-hover: #60a5fa;
-  --color-primary-foreground: #ffffff;
-  --color-success: #4ade80;
-  --color-success-bg: #14532d;
-  --color-success-border: #166534;
-  --color-warning: #facc15;
-  --color-warning-bg: #422006;
+  --color-bg: #0d1b2a;
+  --color-bg-muted: #1b2d45;
+  --color-bg-canvas: #091320;
+  --color-surface: #1b2d45;
+  --color-text: #f8fafc;
+  --color-text-muted: #94a3b8;
+  --color-border: #334155;
+  --color-input-border: #475569;
+  --color-nav: #091320;
+  --color-nav-light: #1b2d45;
+  --color-primary: #00e676;
+  --color-primary-hover: #34d399;
+  --color-primary-foreground: #0d1b2a;
+  --color-success: #34d399;
+  --color-success-bg: #064e3b;
+  --color-success-border: #047857;
   --color-error: #f87171;
   --color-error-bg: #450a0a;
   --color-error-border: #991b1b;
-  --color-unavailable: #a1a1aa;
-  --color-unavailable-bg: #27272a;
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px rgb(0 0 0 / 0.4);
+  --color-unavailable-bg: #1e293b;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.4);
 }

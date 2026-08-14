@@ -4,101 +4,78 @@
 <head>
   <meta charset="UTF-8" />
   <title>Sign In — component preview</title>
-  <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-bg-muted: #f4f4f5;
-      --color-text: #18181b;
-      --color-text-muted: #71717a;
-      --color-border: #e4e4e7;
-      --color-primary: #2563eb;
-      --color-primary-foreground: #ffffff;
-      --color-error: #dc2626;
-      --color-error-bg: #fef2f2;
-      --color-error-border: #fecaca;
-      --focus-ring: 0 0 0 2px var(--color-primary);
-      --radius-md: 8px;
-      --space-2: 8px;
-      --space-4: 16px;
-      --space-6: 24px;
-      --font-sans: system-ui, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: var(--font-sans); background: var(--color-bg-muted); margin: 0; padding: var(--space-6); color: var(--color-text); }
-    .preview-block { margin-bottom: 48px; }
-    .preview-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: var(--space-2); text-transform: uppercase; letter-spacing: 0.05em; }
-    .page { max-width: 420px; margin: 0 auto; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-6); box-shadow: 0 4px 6px rgb(0 0 0 / 0.07); }
-    h1 { font-size: 1.25rem; text-align: center; margin: 0 0 var(--space-6); }
-    h2 { font-size: 1rem; margin: 0 0 var(--space-4); }
-    label { display: block; font-size: 0.875rem; margin-bottom: var(--space-2); }
-    input { width: 100%; padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-4); }
-    input:focus { outline: none; box-shadow: var(--focus-ring); }
-    button { width: 100%; padding: var(--space-2) var(--space-4); background: var(--color-primary); color: var(--color-primary-foreground); border: none; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; }
-    button:disabled { opacity: 0.6; cursor: not-allowed; }
-    .alert { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4); font-size: 0.875rem; }
-    .alert-error { background: var(--color-error-bg); border: 1px solid var(--color-error-border); color: var(--color-error); }
-    .alert-icon { font-weight: bold; }
-    .spinner { display: inline-block; width: 1em; height: 1em; border: 2px solid transparent; border-top-color: currentColor; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: var(--space-2); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
 </head>
-<body>
+<body class="preview-doc">
 
 <!-- @state SCR-001/ST-01 -->
 <div class="preview-block">
   <div class="preview-label">SCR-001 / ST-01 — Default</div>
-  <div class="page">
-    <h1>Employee Desk Booking</h1>
-    <h2>Sign in</h2>
-    <label for="email1">Email</label>
-    <input id="email1" type="email" placeholder="you@company.com" />
-    <label for="pw1">Password</label>
-    <input id="pw1" type="password" />
-    <button type="button">Sign in</button>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="brand-mark">DB</div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email1">Email address</label><input id="email1" type="email" placeholder="you@company.com" /></div>
+        <div class="field"><label for="pw1">Password</label><input id="pw1" type="password" placeholder="Enter your password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- @state SCR-001/ST-02 -->
 <div class="preview-block">
   <div class="preview-label">SCR-001 / ST-02 — Loading</div>
-  <div class="page">
-    <h1>Employee Desk Booking</h1>
-    <h2>Sign in</h2>
-    <label for="email2">Email</label>
-    <input id="email2" type="email" value="jane@company.com" disabled />
-    <label for="pw2">Password</label>
-    <input id="pw2" type="password" disabled />
-    <button type="button" disabled><span class="spinner"></span>Signing in…</button>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="brand-mark">DB</div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email2">Email address</label><input id="email2" type="email" value="jane@company.com" disabled /></div>
+        <div class="field"><label for="pw2">Password</label><input id="pw2" type="password" disabled /></div>
+        <button type="button" class="btn btn-primary" disabled><span class="spinner"></span>Signing in…</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- @state SCR-001/ST-03 -->
 <div class="preview-block">
   <div class="preview-label">SCR-001 / ST-03 — Invalid credentials</div>
-  <div class="page">
-    <h1>Employee Desk Booking</h1>
-    <div class="alert alert-error" role="alert"><span class="alert-icon" aria-hidden="true">!</span><span>Invalid email or password. Please try again.</span></div>
-    <h2>Sign in</h2>
-    <label for="email3">Email</label>
-    <input id="email3" type="email" value="jane@company.com" />
-    <label for="pw3">Password</label>
-    <input id="pw3" type="password" />
-    <button type="button">Sign in</button>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="brand-mark">DB</div>
+        <div class="alert alert-error" role="alert"><span aria-hidden="true">!</span><span>Invalid email or password. Please try again.</span></div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email3">Email address</label><input id="email3" type="email" value="jane@company.com" /></div>
+        <div class="field"><label for="pw3">Password</label><input id="pw3" type="password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- @state SCR-001/ST-04 -->
 <div class="preview-block">
   <div class="preview-label">SCR-001 / ST-04 — Deactivated account</div>
-  <div class="page">
-    <h1>Employee Desk Booking</h1>
-    <div class="alert alert-error" role="alert"><span class="alert-icon" aria-hidden="true">!</span><span>Your account has been deactivated. Contact your administrator.</span></div>
-    <h2>Sign in</h2>
-    <label for="email4">Email</label>
-    <input id="email4" type="email" value="former@company.com" />
-    <label for="pw4">Password</label>
-    <input id="pw4" type="password" />
-    <button type="button">Sign in</button>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <div class="brand-mark">DB</div>
+        <div class="alert alert-error" role="alert"><span aria-hidden="true">!</span><span>Your account has been deactivated. Contact your administrator.</span></div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email4">Email address</label><input id="email4" type="email" value="former@company.com" /></div>
+        <div class="field"><label for="pw4">Password</label><input id="pw4" type="password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
   </div>
 </div>
 

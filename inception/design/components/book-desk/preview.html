@@ -4,82 +4,46 @@
 <head>
   <meta charset="UTF-8" />
   <title>Book Desk — component preview</title>
-  <style>
-    :root {
-      --color-bg: #ffffff;
-      --color-bg-muted: #f4f4f5;
-      --color-text: #18181b;
-      --color-text-muted: #71717a;
-      --color-border: #e4e4e7;
-      --color-primary: #2563eb;
-      --color-primary-foreground: #ffffff;
-      --color-success: #15803d;
-      --color-success-bg: #dcfce7;
-      --color-unavailable-bg: #f4f4f5;
-      --color-error: #dc2626;
-      --color-error-bg: #fef2f2;
-      --color-warning-bg: #fef9c3;
-      --color-warning: #a16207;
-      --focus-ring: 0 0 0 2px var(--color-primary);
-      --radius-md: 8px;
-      --space-2: 8px;
-      --space-3: 12px;
-      --space-4: 16px;
-      --space-6: 24px;
-      --font-sans: system-ui, sans-serif;
-    }
-    * { box-sizing: border-box; }
-    body { font-family: var(--font-sans); background: var(--color-bg-muted); margin: 0; padding: var(--space-6); color: var(--color-text); }
-    .preview-block { margin-bottom: 48px; }
-    .preview-label { font-size: 12px; color: var(--color-text-muted); margin-bottom: var(--space-2); text-transform: uppercase; }
-    .shell { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); overflow: hidden; max-width: 900px; }
-    .header { display: flex; justify-content: space-between; align-items: center; padding: var(--space-4); border-bottom: 1px solid var(--color-border); }
-    .nav a { margin-right: var(--space-4); color: var(--color-primary); text-decoration: none; font-weight: 600; }
-    .nav a.muted { color: var(--color-text-muted); font-weight: 400; }
-    .body { padding: var(--space-6); }
-    .date-row { margin-bottom: var(--space-6); }
-    select { padding: var(--space-2) var(--space-4); border: 1px solid var(--color-border); border-radius: var(--radius-md); }
-    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
-    .desk { border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-4); text-align: center; }
-    .desk-num { font-weight: 700; font-size: 1.125rem; }
-    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.75rem; margin: var(--space-2) 0; padding: 2px 8px; border-radius: 999px; }
-    .badge-avail { background: var(--color-success-bg); color: var(--color-success); }
-    .badge-booked { background: var(--color-unavailable-bg); color: var(--color-text-muted); }
-    .btn-sm { margin-top: var(--space-2); padding: var(--space-2) var(--space-3); background: var(--color-primary); color: var(--color-primary-foreground); border: none; border-radius: var(--radius-md); font-size: 0.875rem; cursor: pointer; }
-    .alert { padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4); font-size: 0.875rem; display: flex; gap: var(--space-2); }
-    .alert-info { background: var(--color-warning-bg); color: var(--color-warning); }
-    .alert-error { background: var(--color-error-bg); color: var(--color-error); }
-    .empty { text-align: center; padding: var(--space-6); color: var(--color-text-muted); }
-    .skeleton { height: 100px; background: var(--color-unavailable-bg); border-radius: var(--radius-md); animation: pulse 1.5s ease infinite; }
-    @keyframes pulse { 50% { opacity: 0.5; } }
-    .modal-backdrop { background: rgb(0 0 0 / 0.4); padding: var(--space-6); display: flex; align-items: center; justify-content: center; min-height: 200px; }
-    .modal { background: var(--color-bg); padding: var(--space-6); border-radius: var(--radius-md); max-width: 360px; width: 100%; }
-    .modal-actions { display: flex; gap: var(--space-2); margin-top: var(--space-4); }
-    .btn-secondary { background: var(--color-bg-muted); color: var(--color-text); border: 1px solid var(--color-border); }
-  </style>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
 </head>
-<body>
+<body class="preview-doc">
 
 <!-- @state SCR-002/ST-01 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-01 — Default</div>
-  <div class="shell">
-    <div class="header"><strong>EDBS</strong><div class="nav"><a href="#">Book Desk</a><a href="#" class="muted">My Bookings</a></div><button class="btn-sm" style="width:auto">Sign out</button></div>
-    <div class="body">
-      <div class="date-row"><label>Book a desk for:</label> <select><option>Thu 14 Aug 2026 (today)</option></select></div>
-      <p style="color:var(--color-text-muted)">Select a date to view desk availability.</p>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>Desk Availability</h2><p>Choose a date to see which desks are open for booking.</p></div>
+      <div class="card">
+        <div class="form-row">
+          <div><label for="date1">Office date</label><input id="date1" type="date" value="2026-08-14" /></div>
+          <button type="button" class="btn btn-primary">Check availability</button>
+        </div>
+      </div>
+      <p style="color:var(--color-text-muted);margin:0">Select a date to view desk availability.</p>
     </div>
+    <div class="footer">© 2026 Employee Desk Booking System</div>
   </div>
 </div>
 
 <!-- @state SCR-002/ST-02 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-02 — Loading</div>
-  <div class="shell">
-    <div class="header"><strong>EDBS</strong><div class="nav"><a href="#">Book Desk</a><a href="#" class="muted">My Bookings</a></div></div>
-    <div class="body" aria-busy="true">
-      <div class="date-row"><select disabled><option>Thu 14 Aug 2026</option></select></div>
-      <div class="grid"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span></div>
+    </header>
+    <div class="main" aria-busy="true">
+      <div class="page-head"><h2>Desk Availability</h2></div>
+      <div class="card"><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div></div>
     </div>
   </div>
 </div>
@@ -87,37 +51,46 @@
 <!-- @state SCR-002/ST-03 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-03 — Desks available</div>
-  <div class="shell">
-    <div class="header"><strong>EDBS</strong><div class="nav"><a href="#">Book Desk</a><a href="#" class="muted">My Bookings</a></div></div>
-    <div class="body">
-      <div class="date-row"><select><option>Thu 14 Aug 2026</option></select></div>
-      <div class="grid">
-        <div class="desk"><div class="desk-num">A-01</div><span class="badge badge-avail">✓ Available</span><button class="btn-sm">Book</button></div>
-        <div class="desk"><div class="desk-num">A-02</div><span class="badge badge-booked">✗ Booked</span></div>
-        <div class="desk"><div class="desk-num">B-01</div><span class="badge badge-avail">✓ Available</span><button class="btn-sm">Book</button></div>
-        <div class="desk"><div class="desk-num">B-02</div><span class="badge badge-avail">✓ Available</span><button class="btn-sm">Book</button></div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>Desk Availability</h2></div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Desk</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="desk-id">A-01</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+            <tr><td class="desk-id">A-02</td><td><span class="pill pill-booked">Booked</span></td><td></td></tr>
+            <tr><td class="desk-id">B-01</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+            <tr><td class="desk-id">B-02</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
+    <div class="footer">© 2026 Employee Desk Booking System</div>
   </div>
 </div>
 
 <!-- @state SCR-002/ST-04 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-04 — Empty</div>
-  <div class="shell">
-    <div class="header"><strong>EDBS</strong></div>
-    <div class="body">
-      <div class="empty"><p>✗ All desks are booked for this date.</p><p>Try another working day.</p></div>
-    </div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div></header>
+    <div class="main"><div class="empty"><p>✗ All desks are booked for this date.</p><p>Try another working day.</p></div></div>
   </div>
 </div>
 
 <!-- @state SCR-002/ST-05 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-05 — Error</div>
-  <div class="shell">
-    <div class="body">
-      <div class="alert alert-error"><span>!</span><span>Could not load desks. <button class="btn-sm" style="width:auto;margin:0">Retry</button></span></div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div></header>
+    <div class="main">
+      <div class="alert alert-error"><span>!</span><span>Could not load desks. <button type="button" class="btn btn-primary btn-sm">Retry</button></span></div>
     </div>
   </div>
 </div>
@@ -125,8 +98,9 @@
 <!-- @state SCR-002/ST-06 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-06 — Already booked</div>
-  <div class="shell">
-    <div class="body">
+  <div class="device">
+    <header class="topnav"><div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div></header>
+    <div class="main">
       <div class="alert alert-info"><span>ℹ</span><span>You already have desk <strong>A-01</strong> on this date. Cancel it in My Bookings to choose another desk.</span></div>
     </div>
   </div>
@@ -135,13 +109,16 @@
 <!-- @state SCR-002/ST-07 -->
 <div class="preview-block">
   <div class="preview-label">SCR-002 / ST-07 — Confirm booking</div>
-  <div class="modal-backdrop">
-    <div class="modal" role="dialog">
-      <h3 style="margin-top:0">Confirm booking</h3>
-      <p>Desk <strong>B-01</strong> on <strong>Thu 14 Aug 2026</strong></p>
-      <div class="modal-actions">
-        <button class="btn-sm btn-secondary" style="flex:1">Cancel</button>
-        <button class="btn-sm" style="flex:1">Confirm</button>
+  <div class="device">
+    <header class="topnav"><div class="brand"><div class="brand-mark">DB</div><span class="brand-name">Desk Booking</span></div></header>
+    <div class="main modal-backdrop" style="min-height:360px">
+      <div class="modal" role="dialog" aria-labelledby="confirm-title">
+        <h3 id="confirm-title">Confirm booking</h3>
+        <p>Desk <strong>B-01</strong> on <strong>Thu 14 Aug 2026</strong></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary">Cancel</button>
+          <button type="button" class="btn btn-primary">Confirm</button>
+        </div>
       </div>
     </div>
   </div>
