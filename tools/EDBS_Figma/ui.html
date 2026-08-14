@@ -16,7 +16,7 @@
 <p><strong>Colourful full hi-fi screens</strong> from <code>inception/design/tokens.css</code>. Does not create wireframes.</p>
 <p>Wireframes first: <strong>EDBS_Wireframes</strong> (<code>tools/EDBS_Wireframes/plugin</code>).</p>
 <button id="beside-wireframes">Colourful screens beside wireframes</button>
-<button id="generate-all">All 22 colourful screens (grid)</button>
+<button id="generate-all">All 44 colourful screens (grid)</button>
 <button id="cancel">Close</button>
 <p id="status"></p>
 
@@ -36,7 +36,7 @@
 
   btnAll.onclick = () => {
     setBusy(true);
-    status.textContent = 'Creating 22 colourful hi-fi screens…';
+    status.textContent = 'Creating 44 colourful hi-fi screens…';
     status.className = '';
     parent.postMessage({ pluginMessage: { type: 'generate-all' } }, '*');
   };

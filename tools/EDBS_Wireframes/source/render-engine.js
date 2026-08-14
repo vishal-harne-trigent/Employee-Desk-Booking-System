@@ -6,12 +6,55 @@ function createGenerator(config) {
   let padX = 32;
   let contentW = FRAME_WIDTH - 64;
   let layoutAuth = false;
+  let logoImage = null;
   const PAD = 32;
 
   async function loadFonts() {
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
     await figma.loadFontAsync({ family: 'Inter', style: 'Medium' });
     await figma.loadFontAsync({ family: 'Inter', style: 'Bold' });
+  }
+
+  async function loadLogo() {
+    if (!hifi || typeof LOGO_BASE64 === 'undefined') return;
+    const binary = atob(LOGO_BASE64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    logoImage = figma.createImage(bytes);
+  }
+
+  function placeLogo(parent, x, y, height) {
+    const aspect = typeof LOGO_ASPECT === 'number' ? LOGO_ASPECT : 4.93;
+    const w = height * aspect;
+    if (hifi && logoImage) {
+      const rect = figma.createRectangle();
+      rect.name = 'Logo';
+      rect.x = x;
+      rect.y = y;
+      rect.resize(w, height);
+      rect.fills = [{ type: 'IMAGE', scaleMode: 'FIT', imageHash: logoImage.hash }];
+      parent.appendChild(rect);
+      return w;
+    }
+    const rect = figma.createRectangle();
+    rect.name = 'Logo';
+    rect.x = x;
+    rect.y = y;
+    rect.resize(w, height);
+    rect.fills = [solid(C.surface)];
+    rect.strokes = [solid(C.border)];
+    rect.strokeWeight = 1;
+    rect.cornerRadius = 4;
+    parent.appendChild(rect);
+    const label = figma.createText();
+    label.fontName = { family: 'Inter', style: 'Medium' };
+    label.characters = 'Desk Booking';
+    label.fontSize = 11;
+    label.fills = [solid(C.muted)];
+    label.x = x + 8;
+    label.y = y + Math.max(4, (height - 14) / 2);
+    parent.appendChild(label);
+    return w;
   }
 
   function solid(color, opacity = 1) {
@@ -132,6 +175,14 @@ function createGenerator(config) {
 
   function renderElement(parent, el) {
     switch (el.type) {
+      case 'logo': {
+        const logoH = hifi ? 56 : 32;
+        const logoW = logoH * (typeof LOGO_ASPECT === 'number' ? LOGO_ASPECT : 4.93);
+        const lx = hifi && layoutAuth ? padX + (contentW - logoW) / 2 : padX;
+        placeLogo(parent, lx, yCursor, logoH);
+        yCursor += logoH + (hifi ? 24 : 16);
+        break;
+      }
       case 'title': {
         const node = text(parent, el.text, hifi ? 20 : 22, 'Bold');
         if (hifi && layoutAuth) {
@@ -199,39 +250,18 @@ function createGenerator(config) {
         bar.strokeWeight = 1;
         bar.strokeAlign = 'INSIDE';
         parent.appendChild(bar);
-        if (hifi) {
-          const mark = figma.createRectangle();
-          mark.x = padX;
-          mark.y = 16;
-          mark.resize(36, 36);
-          mark.fills = [solid(C.primary)];
-          mark.cornerRadius = 10;
-          bar.appendChild(mark);
-          const markT = figma.createText();
-          markT.fontName = { family: 'Inter', style: 'Bold' };
-          markT.characters = 'DB';
-          markT.fontSize = 10;
-          markT.fills = [solid(C.onPrimary)];
-          markT.x = padX + 10;
-          markT.y = 26;
-          bar.appendChild(markT);
-        }
-        const title = figma.createText();
-        title.fontName = { family: 'Inter', style: 'Bold' };
-        title.characters = el.title;
-        title.fontSize = 16;
-        title.fills = [solid(hifi ? C.onDark : C.text)];
-        title.x = hifi ? padX + 48 : padX;
-        title.y = hifi ? 24 : 18;
-        bar.appendChild(title);
+        const logoH = hifi ? 36 : 28;
+        const logoY = hifi ? 16 : 14;
+        const logoW = placeLogo(bar, padX, logoY, logoH);
         if (el.nav?.length) {
-          let nx = hifi ? 220 : 200;
+          let nx = padX + logoW + 24;
           el.nav.forEach((item, i) => {
+            const isActive = el.activeNav ? item === el.activeNav : i === 0;
             const navItem = figma.createText();
-            navItem.fontName = { family: 'Inter', style: i === 0 && hifi ? 'Bold' : 'Regular' };
+            navItem.fontName = { family: 'Inter', style: isActive && hifi ? 'Bold' : isActive ? 'Medium' : 'Regular' };
             navItem.characters = item;
             navItem.fontSize = 13;
-            if (hifi && i === 0) {
+            if (hifi && isActive) {
               const pill = figma.createRectangle();
               pill.x = nx - 8;
               pill.y = 18;
@@ -241,7 +271,7 @@ function createGenerator(config) {
               bar.appendChild(pill);
               navItem.fills = [solid(C.onPrimary)];
             } else {
-              navItem.fills = [solid(hifi ? C.onDark : i === 0 ? C.primary : C.muted, hifi ? 0.75 : 1)];
+              navItem.fills = [solid(hifi ? C.onDark : isActive ? C.text : C.muted, hifi ? (isActive ? 1 : 0.75) : 1)];
             }
             navItem.x = nx;
             navItem.y = hifi ? 26 : 20;
@@ -566,6 +596,7 @@ function createGenerator(config) {
 
   async function generate() {
     await loadFonts();
+    await loadLogo();
     const page = figma.currentPage;
 
     if (hifi) {

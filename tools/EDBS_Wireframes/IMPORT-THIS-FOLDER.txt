@@ -1,11 +1,12 @@
-Import this folder into Figma:
+DO NOT import this parent folder into Figma.
 
-  Plugins → Development → Import plugin from manifest…
+Import the plugin subfolder only:
 
-Select THIS directory (tools/EDBS_Wireframes).
+  tools/EDBS_Wireframes/plugin
 
-Plugin steps:
-  1. Generate wireframes (B&W)
-  2. Generate hi-fi designs (coloured — beside wireframes)
+Steps:
+  1. Run build.ps1 in tools/EDBS_Wireframes (if code.js is missing)
+  2. Figma → Plugins → Development → Import plugin from manifest…
+  3. Select tools/EDBS_Wireframes/plugin  (contains IMPORT-ME.txt)
 
-Run build.ps1 if code.js is missing (~30 KB).
+For hi-fi colourful screens, use tools/EDBS_Figma/plugin (separate plugin).

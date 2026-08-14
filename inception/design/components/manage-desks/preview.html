@@ -1,0 +1,82 @@
+<!-- @dsCard group="Admin" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Desks — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-005/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-01 — Default</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#" class="active">Desks</a><a href="#">Users</a><a href="#">All Bookings</a></nav>
+      <div class="right"><div class="avatar">ML</div><span class="user-label">Admin</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head-row page-head" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h2>Manage desks</h2><p>Add, edit, or deactivate desk inventory.</p></div>
+        <button type="button" class="btn btn-primary">+ Add desk</button>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Desk</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td class="desk-id">A-12</td><td><span class="pill pill-confirmed">Active</span></td><td><a class="link-action" href="#">Edit</a> · <a class="link-action" href="#">Deactivate</a></td></tr>
+            <tr><td class="desk-id">B-03</td><td><span class="pill pill-booked">Inactive</span></td><td><a class="link-action" href="#">Edit</a> · <a class="link-action" href="#">Activate</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-005/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-02 — Loading</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main" aria-busy="true"><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-03 — Empty</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="empty"><p>No desks yet.</p><button type="button" class="btn btn-primary btn-sm">+ Add desk</button></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-04 — Error</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="alert alert-error">! Could not load desks. <button type="button" class="btn btn-primary btn-sm">Retry</button></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-05 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-05 — Add desk</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:360px"><div class="modal" role="dialog"><h3>Add desk</h3><label>Desk number</label><input type="text" placeholder="e.g. A-12" /><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Save</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-06 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-06 — Edit desk</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:360px"><div class="modal" role="dialog"><h3>Edit desk</h3><label>Desk number</label><input type="text" value="A-12" /><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Save</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-07 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-07 — Deactivate confirm</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:360px"><div class="modal" role="dialog"><h3>Deactivate desk?</h3><p>Desk <strong>A-12</strong> will no longer appear for booking.</p><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-danger">Deactivate</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-005/ST-08 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-005 / ST-08 — Deactivate blocked</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="alert alert-error"><span>!</span><span>Cannot deactivate <strong>B-03</strong> — future confirmed bookings exist. Cancel them in All Bookings first.</span></div></div></div>
+</div>
+
+</body>
+</html>
