@@ -1,0 +1,11 @@
+Import this folder into Figma:
+
+  Plugins → Development → Import plugin from manifest…
+
+Select THIS directory (tools/EDBS_Wireframes).
+
+Plugin steps:
+  1. Generate wireframes (B&W)
+  2. Generate hi-fi designs (coloured — beside wireframes)
+
+Run build.ps1 if code.js is missing (~30 KB).

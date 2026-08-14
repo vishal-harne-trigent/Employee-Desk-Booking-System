@@ -1,0 +1,8 @@
+EDBS_Figma — HI-FI SCREENS ONLY (no wireframes)
+
+Import: tools/EDBS_Figma/plugin
+
+1. Wireframes: use EDBS_Wireframes plugin first
+2. Hi-fi: run EDBS_Figma
+
+Or use "All 22 hi-fi screens (grid)" without wireframes.
