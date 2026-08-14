@@ -15,7 +15,7 @@ Let an Employee pick a working day within the booking window, see which desks (b
 
 ## Layout
 
-Navy top navigation (DB brand mark, Desk Availability · My Bookings, avatar, Sign out). Page background muted grey; white cards for date filter and desk table.
+Navy top navigation (Desk Booking logo, Desk Availability · My Bookings, avatar, Sign out). Page background muted grey; white cards for date filter and desk table.
 
 ```
 ┌──────────────────────────────────────────────────────────┐

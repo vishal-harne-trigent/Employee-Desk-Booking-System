@@ -17,7 +17,7 @@ Let an Admin view every employee booking, filter by date and status, and cancel 
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│ EDBS Admin   All Bookings                   Sign out     │
+│ [DB] Admin   Desks · Users · All Bookings     Sign out     │
 ├──────────────────────────────────────────────────────────┤
 │ Filters: [ Date ▼ ]  [ Status: All ▼ ]   [ Apply ]      │
 │ ┌──────────┬───────────┬──────────┬─────────┬────────┐ │
@@ -83,7 +83,7 @@ Let an Admin view every employee booking, filter by date and status, and cancel 
 
 | Decision | Rationale | Alternative rejected |
 | -------- | --------- | -------------------- |
-| Separate Admin shell (no Book Desk nav) | Admin REQ set is bookings-only; no employee flows | Unified nav — adds noise |
+| Admin nav: Desks · Users · All Bookings | Full admin toolset per BRD REQ-015..022 | Bookings-only shell |
 | Explicit Apply on filters | Clear fetch boundary for server-filtered list | Instant filter on every keystroke |
 | Cancel only today/future Confirmed | BR-001.6 parity with employee rules | Admin can cancel Completed |
 
@@ -91,7 +91,7 @@ Let an Admin view every employee booking, filter by date and status, and cancel 
 
 | #   | Conflict / question | Between | Owner | Status |
 | --- | ------------------- | ------- | ----- | ------ |
-| 1   | No in-app user/desk admin UI in BRD | Admin role description vs REQ scope | PO/client | open (see BRD Q#1) |
+| 1   | Deactivate desk with future bookings flow | BR-001.9 / open Q#6 | PO/client | open |
 
 ## Designer handoff
 

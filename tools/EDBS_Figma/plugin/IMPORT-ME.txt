@@ -1,8 +1,20 @@
-EDBS_Figma — HI-FI SCREENS ONLY (no wireframes)
+IMPORT THIS EXACT FOLDER INTO FIGMA
+===================================
 
-Import: tools/EDBS_Figma/plugin
+Path: tools/EDBS_Figma/plugin
 
-1. Wireframes: use EDBS_Wireframes plugin first
-2. Hi-fi: run EDBS_Figma
+This folder must contain ONLY:
+  manifest.json
+  ui.html
+  code.js   (~177 KB — NOT a one-line error)
 
-Or use "All 22 hi-fi screens (grid)" without wireframes.
+Steps:
+  1. Run:  powershell -File tools/install-figma-plugins.ps1
+  2. Figma -> Plugins -> Development -> remove ALL old "EDBS" plugins
+  3. Import plugin from manifest... -> select THIS folder's manifest.json
+
+WRONG (causes TypeScript error):
+  tools/EDBS_Figma               (parent folder — had code.ts)
+  tools/EDBS_Figma/source
+
+Wireframes first: tools/EDBS_Wireframes/plugin

@@ -52,20 +52,18 @@ body.preview-doc {
 
 .brand { display: flex; align-items: center; gap: 0.65rem; }
 
-.brand-mark {
-  width: 36px;
+.brand-logo {
   height: 36px;
-  background: var(--color-brand-mark-bg);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 800;
-  font-size: 0.75rem;
-  color: var(--color-brand-mark-text);
+  width: auto;
+  display: block;
 }
 
-.brand-name { color: var(--color-nav-text-hover); font-weight: 600; font-size: 0.95rem; }
+.login-card .brand-logo {
+  height: 56px;
+  margin-bottom: 1.5rem;
+}
+
+.login-card h2 { margin: 0 0 0.35rem; font-size: 1.65rem; font-weight: 700; }
 
 .topnav nav { display: flex; gap: 0.25rem; }
 
@@ -263,10 +261,6 @@ input:focus, select:focus {
   position: relative;
   z-index: 1;
 }
-
-.login-card .brand-mark { width: 48px; height: 48px; font-size: 0.85rem; margin-bottom: 1.5rem; }
-
-.login-card h2 { margin: 0 0 0.35rem; font-size: 1.65rem; font-weight: 700; }
 
 .login-card .sub { color: var(--color-text-muted); margin-bottom: 2rem; font-size: 0.9rem; }
 

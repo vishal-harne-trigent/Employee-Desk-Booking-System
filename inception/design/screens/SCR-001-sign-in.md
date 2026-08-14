@@ -15,7 +15,7 @@ Let a user authenticate with email and password before accessing desk booking. S
 
 ## Layout
 
-Navy full-bleed login canvas; centred white card with DB brand mark, “Welcome back” heading, email/password fields, green primary button.
+Navy full-bleed login canvas; centred white card with Desk Booking logo, “Welcome back” heading, email/password fields, green primary button.
 
 ```
 ┌──────────────────────────────────────────────┐
