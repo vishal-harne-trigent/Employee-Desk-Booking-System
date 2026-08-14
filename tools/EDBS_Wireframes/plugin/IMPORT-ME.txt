@@ -1,0 +1,18 @@
+╔══════════════════════════════════════════════════════════════╗
+║  IMPORT THIS FOLDER INTO FIGMA (not the parent folder)        ║
+╚══════════════════════════════════════════════════════════════╝
+
+  Plugins → Development → Import plugin from manifest…
+
+  Select:  tools/EDBS_Wireframes/plugin
+
+  This folder contains ONLY:
+    manifest.json
+    ui.html
+    code.js   (~30 KB — if smaller, run ../build.ps1 first)
+
+  Do NOT import:
+    tools/EDBS_Wireframes        (parent — has source/ and .ts files)
+    tools/EDBS_Wireframes/source
+
+After updating code, run build.ps1 then remove + re-import this plugin folder in Figma.

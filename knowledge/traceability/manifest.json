@@ -1,7 +1,70 @@
 {
   "$comment": "Traceability knowledge graph: REQ <-> US <-> tests, plus screens (US <-> SCR -> states/components), decisions (US -> ADR) and lessons-learned edges. Edited in the same PR as the artifacts it links; validated by tools/aidlc-check.mjs; traceability-matrix.md is generated from it (never hand-edited).",
-  "requirements": {},
+  "requirements": {
+    "REQ-001": { "stories": [], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004"] },
+    "REQ-002": { "stories": [], "screens": ["SCR-001"] },
+    "REQ-003": { "stories": [], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004"] },
+    "REQ-004": { "stories": [], "screens": ["SCR-001"] },
+    "REQ-005": { "stories": [], "screens": ["SCR-001"] },
+    "REQ-006": { "stories": [], "screens": ["SCR-002"] },
+    "REQ-007": { "stories": [], "screens": ["SCR-002"] },
+    "REQ-008": { "stories": [], "screens": ["SCR-002"] },
+    "REQ-009": { "stories": [], "screens": ["SCR-003"] },
+    "REQ-010": { "stories": [], "screens": ["SCR-003"] },
+    "REQ-011": { "stories": [], "screens": ["SCR-004"] },
+    "REQ-012": { "stories": [], "screens": ["SCR-004"] },
+    "REQ-013": { "stories": [], "screens": ["SCR-004"] },
+    "REQ-014": { "stories": [], "screens": ["SCR-004"] },
+    "REQ-015": { "stories": [], "screens": [] },
+    "REQ-016": { "stories": [], "screens": [] },
+    "REQ-017": { "stories": [], "screens": [] },
+    "REQ-018": { "stories": [], "screens": [] },
+    "REQ-019": { "stories": [], "screens": [] },
+    "REQ-020": { "stories": [], "screens": [] },
+    "REQ-021": { "stories": [], "screens": [] },
+    "REQ-022": { "stories": [], "screens": [] },
+    "REQ-023": { "stories": [], "screens": [] },
+    "REQ-024": { "stories": [], "screens": [] },
+    "REQ-025": { "stories": [], "screens": [] },
+    "REQ-026": { "stories": [], "screens": [] },
+    "REQ-027": { "stories": [], "screens": [] },
+    "NFR-001": { "stories": [], "screens": ["SCR-002"] },
+    "NFR-002": { "stories": [], "screens": ["SCR-002"] },
+    "NFR-003": { "stories": [], "screens": ["SCR-001"] },
+    "NFR-004": { "stories": [], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004"] },
+    "NFR-005": { "stories": [], "screens": [] },
+    "NFR-006": { "stories": [], "screens": [] }
+  },
   "stories": {},
-  "screens": {},
+  "screens": {
+    "SCR-001": {
+      "artifact": "inception/design/screens/SCR-001-sign-in.md",
+      "requirements": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "NFR-003", "NFR-004"],
+      "stories": [],
+      "states": ["ST-01", "ST-02", "ST-03", "ST-04"],
+      "components": ["sign-in"]
+    },
+    "SCR-002": {
+      "artifact": "inception/design/screens/SCR-002-book-desk.md",
+      "requirements": ["REQ-001", "REQ-003", "REQ-006", "REQ-007", "REQ-008", "NFR-001", "NFR-002", "NFR-004"],
+      "stories": [],
+      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06", "ST-07"],
+      "components": ["book-desk"]
+    },
+    "SCR-003": {
+      "artifact": "inception/design/screens/SCR-003-my-bookings.md",
+      "requirements": ["REQ-001", "REQ-003", "REQ-009", "REQ-010", "NFR-004"],
+      "stories": [],
+      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05"],
+      "components": ["my-bookings"]
+    },
+    "SCR-004": {
+      "artifact": "inception/design/screens/SCR-004-admin-bookings.md",
+      "requirements": ["REQ-001", "REQ-003", "REQ-011", "REQ-012", "REQ-013", "REQ-014", "NFR-004"],
+      "stories": [],
+      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06"],
+      "components": ["admin-bookings"]
+    }
+  },
   "lessons": []
 }
