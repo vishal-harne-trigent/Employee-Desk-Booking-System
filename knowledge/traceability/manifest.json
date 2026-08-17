@@ -1,110 +1,513 @@
 {
   "$comment": "Traceability knowledge graph: REQ <-> US <-> tests, plus screens (US <-> SCR -> states/components), decisions (US -> ADR) and lessons-learned edges. Edited in the same PR as the artifacts it links; validated by tools/aidlc-check.mjs; traceability-matrix.md is generated from it (never hand-edited).",
   "requirements": {
-    "REQ-001": { "stories": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-008"], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004", "SCR-005", "SCR-006", "SCR-007"] },
-    "REQ-002": { "stories": ["US-001"], "screens": ["SCR-001"] },
-    "REQ-003": { "stories": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-008"], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004", "SCR-005", "SCR-006", "SCR-007"] },
-    "REQ-004": { "stories": ["US-001", "US-005", "US-006"], "screens": ["SCR-001", "SCR-005", "SCR-006"] },
-    "REQ-005": { "stories": ["US-001", "US-006"], "screens": ["SCR-001", "SCR-006"] },
-    "REQ-006": { "stories": ["US-002"], "screens": ["SCR-002"] },
-    "REQ-007": { "stories": ["US-002"], "screens": ["SCR-002"] },
-    "REQ-008": { "stories": ["US-002"], "screens": ["SCR-002"] },
-    "REQ-009": { "stories": ["US-003", "US-009"], "screens": ["SCR-003"] },
-    "REQ-010": { "stories": ["US-003"], "screens": ["SCR-003"] },
-    "REQ-011": { "stories": ["US-004", "US-009"], "screens": ["SCR-004"] },
-    "REQ-012": { "stories": ["US-004"], "screens": ["SCR-004"] },
-    "REQ-013": { "stories": ["US-004", "US-009"], "screens": ["SCR-004"] },
-    "REQ-014": { "stories": ["US-004"], "screens": ["SCR-004"] },
-    "REQ-015": { "stories": ["US-005"], "screens": ["SCR-005"] },
-    "REQ-016": { "stories": ["US-005"], "screens": ["SCR-005"] },
-    "REQ-017": { "stories": ["US-005"], "screens": ["SCR-005"] },
-    "REQ-018": { "stories": ["US-006"], "screens": ["SCR-006"] },
-    "REQ-019": { "stories": ["US-006"], "screens": ["SCR-006"] },
-    "REQ-020": { "stories": ["US-006"], "screens": ["SCR-006"] },
-    "REQ-021": { "stories": ["US-006"], "screens": ["SCR-006"] },
-    "REQ-022": { "stories": ["US-006"], "screens": ["SCR-006"] },
-    "REQ-023": { "stories": ["US-007"], "screens": [] },
-    "REQ-024": { "stories": ["US-007"], "screens": [] },
-    "REQ-025": { "stories": ["US-007"], "screens": [] },
-    "REQ-026": { "stories": ["US-008"], "screens": ["SCR-007"] },
-    "REQ-027": { "stories": ["US-008"], "screens": ["SCR-007"] },
-    "NFR-001": { "stories": ["US-002"], "screens": ["SCR-002"] },
-    "NFR-002": { "stories": ["US-002"], "screens": ["SCR-002"] },
-    "NFR-003": { "stories": ["US-001"], "screens": ["SCR-001"] },
-    "NFR-004": { "stories": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-008"], "screens": ["SCR-001", "SCR-002", "SCR-003", "SCR-004", "SCR-005", "SCR-006", "SCR-007"] },
-    "NFR-005": { "stories": ["US-007"], "screens": [] },
-    "NFR-006": { "stories": ["US-008"], "screens": ["SCR-007"] }
+    "REQ-001": {
+      "stories": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006",
+        "US-008"
+      ],
+      "screens": [
+        "SCR-001",
+        "SCR-002",
+        "SCR-003",
+        "SCR-004",
+        "SCR-005",
+        "SCR-006",
+        "SCR-007"
+      ]
+    },
+    "REQ-002": {
+      "stories": [
+        "US-001"
+      ],
+      "screens": [
+        "SCR-001"
+      ]
+    },
+    "REQ-003": {
+      "stories": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006",
+        "US-008"
+      ],
+      "screens": [
+        "SCR-001",
+        "SCR-002",
+        "SCR-003",
+        "SCR-004",
+        "SCR-005",
+        "SCR-006",
+        "SCR-007"
+      ]
+    },
+    "REQ-004": {
+      "stories": [
+        "US-001",
+        "US-005",
+        "US-006"
+      ],
+      "screens": [
+        "SCR-001",
+        "SCR-005",
+        "SCR-006"
+      ]
+    },
+    "REQ-005": {
+      "stories": [
+        "US-001",
+        "US-006"
+      ],
+      "screens": [
+        "SCR-001",
+        "SCR-006"
+      ]
+    },
+    "REQ-006": {
+      "stories": [
+        "US-002"
+      ],
+      "screens": [
+        "SCR-002"
+      ]
+    },
+    "REQ-007": {
+      "stories": [
+        "US-002"
+      ],
+      "screens": [
+        "SCR-002"
+      ]
+    },
+    "REQ-008": {
+      "stories": [
+        "US-002"
+      ],
+      "screens": [
+        "SCR-002"
+      ]
+    },
+    "REQ-009": {
+      "stories": [
+        "US-003",
+        "US-009"
+      ],
+      "screens": [
+        "SCR-003"
+      ]
+    },
+    "REQ-010": {
+      "stories": [
+        "US-003"
+      ],
+      "screens": [
+        "SCR-003"
+      ]
+    },
+    "REQ-011": {
+      "stories": [
+        "US-004",
+        "US-009"
+      ],
+      "screens": [
+        "SCR-004"
+      ]
+    },
+    "REQ-012": {
+      "stories": [
+        "US-004"
+      ],
+      "screens": [
+        "SCR-004"
+      ]
+    },
+    "REQ-013": {
+      "stories": [
+        "US-004",
+        "US-009"
+      ],
+      "screens": [
+        "SCR-004"
+      ]
+    },
+    "REQ-014": {
+      "stories": [
+        "US-004"
+      ],
+      "screens": [
+        "SCR-004"
+      ]
+    },
+    "REQ-015": {
+      "stories": [
+        "US-005"
+      ],
+      "screens": [
+        "SCR-005"
+      ]
+    },
+    "REQ-016": {
+      "stories": [
+        "US-005"
+      ],
+      "screens": [
+        "SCR-005"
+      ]
+    },
+    "REQ-017": {
+      "stories": [
+        "US-005"
+      ],
+      "screens": [
+        "SCR-005"
+      ]
+    },
+    "REQ-018": {
+      "stories": [
+        "US-006"
+      ],
+      "screens": [
+        "SCR-006"
+      ]
+    },
+    "REQ-019": {
+      "stories": [
+        "US-006"
+      ],
+      "screens": [
+        "SCR-006"
+      ]
+    },
+    "REQ-020": {
+      "stories": [
+        "US-006"
+      ],
+      "screens": [
+        "SCR-006"
+      ]
+    },
+    "REQ-021": {
+      "stories": [
+        "US-006"
+      ],
+      "screens": [
+        "SCR-006"
+      ]
+    },
+    "REQ-022": {
+      "stories": [
+        "US-006"
+      ],
+      "screens": [
+        "SCR-006"
+      ]
+    },
+    "REQ-023": {
+      "stories": [
+        "US-007"
+      ],
+      "screens": []
+    },
+    "REQ-024": {
+      "stories": [
+        "US-007"
+      ],
+      "screens": []
+    },
+    "REQ-025": {
+      "stories": [
+        "US-007"
+      ],
+      "screens": []
+    },
+    "REQ-026": {
+      "stories": [
+        "US-008"
+      ],
+      "screens": [
+        "SCR-007"
+      ]
+    },
+    "REQ-027": {
+      "stories": [
+        "US-008"
+      ],
+      "screens": [
+        "SCR-007"
+      ]
+    },
+    "NFR-001": {
+      "stories": [
+        "US-002"
+      ],
+      "screens": [
+        "SCR-002"
+      ]
+    },
+    "NFR-002": {
+      "stories": [
+        "US-002"
+      ],
+      "screens": [
+        "SCR-002"
+      ]
+    },
+    "NFR-003": {
+      "stories": [
+        "US-001"
+      ],
+      "screens": [
+        "SCR-001"
+      ]
+    },
+    "NFR-004": {
+      "stories": [
+        "US-001",
+        "US-002",
+        "US-003",
+        "US-004",
+        "US-005",
+        "US-006",
+        "US-008"
+      ],
+      "screens": [
+        "SCR-001",
+        "SCR-002",
+        "SCR-003",
+        "SCR-004",
+        "SCR-005",
+        "SCR-006",
+        "SCR-007"
+      ]
+    },
+    "NFR-005": {
+      "stories": [
+        "US-007"
+      ],
+      "screens": []
+    },
+    "NFR-006": {
+      "stories": [
+        "US-008"
+      ],
+      "screens": [
+        "SCR-007"
+      ]
+    }
   },
   "stories": {
     "US-001": {
       "artifact": "inception/stories/user-stories/US-001-sign-in.md",
-      "requirements": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "NFR-003", "NFR-004"],
-      "screens": ["SCR-001"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
-      "tests": [],
+      "requirements": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "NFR-003",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-001"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05"
+      ],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/SignInTests.cs"
+      ],
       "jira": "EDBS-38"
     },
     "US-002": {
       "artifact": "inception/stories/user-stories/US-002-book-desk.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-006", "REQ-007", "REQ-008", "NFR-001", "NFR-002", "NFR-004"],
-      "screens": ["SCR-002"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "NFR-001",
+        "NFR-002",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-002"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05",
+        "AC-06"
+      ],
       "tests": [],
       "jira": "EDBS-39"
     },
     "US-003": {
       "artifact": "inception/stories/user-stories/US-003-my-bookings.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-009", "REQ-010", "NFR-004"],
-      "screens": ["SCR-003"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-009",
+        "REQ-010",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-003"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04"
+      ],
       "tests": [],
       "jira": "EDBS-40"
     },
     "US-004": {
       "artifact": "inception/stories/user-stories/US-004-admin-bookings.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-011", "REQ-012", "REQ-013", "REQ-014", "NFR-004"],
-      "screens": ["SCR-004"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-004"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04"
+      ],
       "tests": [],
       "jira": "EDBS-41"
     },
     "US-005": {
       "artifact": "inception/stories/user-stories/US-005-manage-desks.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-015", "REQ-016", "REQ-017", "NFR-004"],
-      "screens": ["SCR-005"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-005"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05"
+      ],
       "tests": [],
       "jira": "EDBS-42"
     },
     "US-006": {
       "artifact": "inception/stories/user-stories/US-006-manage-users.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-005", "REQ-018", "REQ-019", "REQ-020", "REQ-021", "REQ-022", "NFR-004"],
-      "screens": ["SCR-006"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021",
+        "REQ-022",
+        "NFR-004"
+      ],
+      "screens": [
+        "SCR-006"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05",
+        "AC-06",
+        "AC-07"
+      ],
       "tests": [],
       "jira": "EDBS-43"
     },
     "US-007": {
       "artifact": "inception/stories/user-stories/US-007-booking-emails.md",
-      "requirements": ["REQ-023", "REQ-024", "REQ-025", "NFR-005"],
+      "requirements": [
+        "REQ-023",
+        "REQ-024",
+        "REQ-025",
+        "NFR-005"
+      ],
       "screens": [],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05"
+      ],
       "tests": [],
       "jira": "EDBS-44"
     },
     "US-008": {
       "artifact": "inception/stories/user-stories/US-008-push-notifications.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-026", "REQ-027", "NFR-004", "NFR-006"],
-      "screens": ["SCR-007"],
-      "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-026",
+        "REQ-027",
+        "NFR-004",
+        "NFR-006"
+      ],
+      "screens": [
+        "SCR-007"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03",
+        "AC-04",
+        "AC-05"
+      ],
       "tests": [],
       "jira": "EDBS-45"
     },
     "US-009": {
       "artifact": "inception/stories/user-stories/US-009-booking-completion.md",
-      "requirements": ["REQ-009", "REQ-011", "REQ-013"],
+      "requirements": [
+        "REQ-009",
+        "REQ-011",
+        "REQ-013"
+      ],
       "screens": [],
-      "acs": ["AC-01", "AC-02", "AC-03"],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-03"
+      ],
       "tests": [],
       "jira": "EDBS-46"
     }
@@ -112,52 +515,188 @@
   "screens": {
     "SCR-001": {
       "artifact": "inception/design/screens/SCR-001-sign-in.md",
-      "requirements": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "NFR-003", "NFR-004"],
-      "stories": ["US-001"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04"],
-      "components": ["sign-in"]
+      "requirements": [
+        "REQ-001",
+        "REQ-002",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "NFR-003",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-001"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04"
+      ],
+      "components": [
+        "sign-in"
+      ]
     },
     "SCR-002": {
       "artifact": "inception/design/screens/SCR-002-book-desk.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-006", "REQ-007", "REQ-008", "NFR-001", "NFR-002", "NFR-004"],
-      "stories": ["US-002"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06", "ST-07"],
-      "components": ["book-desk"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-006",
+        "REQ-007",
+        "REQ-008",
+        "NFR-001",
+        "NFR-002",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-002"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05",
+        "ST-06",
+        "ST-07"
+      ],
+      "components": [
+        "book-desk"
+      ]
     },
     "SCR-003": {
       "artifact": "inception/design/screens/SCR-003-my-bookings.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-009", "REQ-010", "NFR-004"],
-      "stories": ["US-003"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05"],
-      "components": ["my-bookings"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-009",
+        "REQ-010",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-003"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ],
+      "components": [
+        "my-bookings"
+      ]
     },
     "SCR-004": {
       "artifact": "inception/design/screens/SCR-004-admin-bookings.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-011", "REQ-012", "REQ-013", "REQ-014", "NFR-004"],
-      "stories": ["US-004"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06"],
-      "components": ["admin-bookings"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-011",
+        "REQ-012",
+        "REQ-013",
+        "REQ-014",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-004"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05",
+        "ST-06"
+      ],
+      "components": [
+        "admin-bookings"
+      ]
     },
     "SCR-005": {
       "artifact": "inception/design/screens/SCR-005-manage-desks.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-015", "REQ-016", "REQ-017", "NFR-004"],
-      "stories": ["US-005"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06", "ST-07", "ST-08"],
-      "components": ["manage-desks"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-015",
+        "REQ-016",
+        "REQ-017",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-005"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05",
+        "ST-06",
+        "ST-07",
+        "ST-08"
+      ],
+      "components": [
+        "manage-desks"
+      ]
     },
     "SCR-006": {
       "artifact": "inception/design/screens/SCR-006-manage-users.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-005", "REQ-018", "REQ-019", "REQ-020", "REQ-021", "REQ-022", "NFR-004"],
-      "stories": ["US-006"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05", "ST-06", "ST-07", "ST-08", "ST-09"],
-      "components": ["manage-users"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-004",
+        "REQ-005",
+        "REQ-018",
+        "REQ-019",
+        "REQ-020",
+        "REQ-021",
+        "REQ-022",
+        "NFR-004"
+      ],
+      "stories": [
+        "US-006"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05",
+        "ST-06",
+        "ST-07",
+        "ST-08",
+        "ST-09"
+      ],
+      "components": [
+        "manage-users"
+      ]
     },
     "SCR-007": {
       "artifact": "inception/design/screens/SCR-007-notification-settings.md",
-      "requirements": ["REQ-001", "REQ-003", "REQ-026", "REQ-027", "NFR-004", "NFR-006"],
-      "stories": ["US-008"],
-      "states": ["ST-01", "ST-02", "ST-03", "ST-04", "ST-05"],
-      "components": ["notification-settings"]
+      "requirements": [
+        "REQ-001",
+        "REQ-003",
+        "REQ-026",
+        "REQ-027",
+        "NFR-004",
+        "NFR-006"
+      ],
+      "stories": [
+        "US-008"
+      ],
+      "states": [
+        "ST-01",
+        "ST-02",
+        "ST-03",
+        "ST-04",
+        "ST-05"
+      ],
+      "components": [
+        "notification-settings"
+      ]
     }
   },
   "lessons": []
