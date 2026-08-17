@@ -7,6 +7,7 @@
 | **Traces to**    | BRD-001, SRS-001                                                                 |
 | **Goal**         | Hybrid employees book desks; admins oversee bookings, desks, and users           |
 | **Stories**      | US-001 … US-009                                                                  |
+| **Delivery plan**| `inception/stories/delivery-plan-EPIC-001.md` (locked 2026-08-17)                |
 
 ## Scope
 
@@ -16,9 +17,12 @@ Single-office web application: authentication, employee booking, admin operation
 
 Per BRD-001 §10 (SSO, self-service password reset, multi-office, weekend booking, etc.).
 
-## Delivery order (suggested)
+## Delivery order
 
-1. US-001 Sign in / sign out  
-2. US-002 Book a desk · US-003 My bookings · US-009 Booking completion job  
-3. US-004 Admin bookings · US-005 Manage desks · US-006 Manage users  
-4. US-007 Email notifications · US-008 Push preferences  
+See **`delivery-plan-EPIC-001.md`** for sprint grouping, hours, and risks. Summary:
+
+1. **Sprint 0** — Foundation (architecture, CI, decisions) — fixed  
+2. **Sprint 1** — US-001, US-002  
+3. **Sprint 2** — US-003, US-009  
+4. **Sprint 3** — US-004, US-005, US-006  
+5. **Sprint 4** — US-007, US-008 (MVP complete)
