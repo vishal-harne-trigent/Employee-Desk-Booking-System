@@ -47,5 +47,7 @@ PR. Tailor this README to your project; it is yours from here.
 
 | File | Status |
 | ---- | ------ |
-| [`db-design.md`](db-design.md) | Draft — Gate 1, 2026-08-17 |
-| [`app-architecture.md`](app-architecture.md) | Draft — Gate 1, 2026-08-17 |
+| [`db-design.md`](db-design.md) | Draft — EF Core / SQL Server, 2026-08-17 |
+| [`app-architecture.md`](app-architecture.md) | Draft — .NET 8 MVC + Web API, 2026-08-17 |
+
+**Stack:** .NET 8 · ASP.NET Core MVC (Razor) · Web API · EF Core 8.0.11 · SQL Server · MailKit · WebPush

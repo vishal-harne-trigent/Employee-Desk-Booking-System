@@ -1,257 +1,299 @@
 # App architecture — Employee Desk Booking System
 
-> Gate 1 architecture deliverable (advisory). Traces to **BRD-001**, **SRS-001**, **SCR-001 … SCR-007**, **US-001 … US-009**. Once OpenAPI and code exist, **`/api-docs-json` is the API source of truth**.
+> Gate 1 architecture deliverable (advisory). Traces to **BRD-001**, **SRS-001**, **SCR-001 … SCR-007**, **US-001 … US-009**. Once Swashbuckle is live, **`/swagger/v1/swagger.json` is the API contract**.
 
 |                  |                                                                                  |
 | ---------------- | -------------------------------------------------------------------------------- |
 | **Traces to**    | BRD-001, SRS-001, EPIC-001                                                       |
-| **Stack**        | Nx monorepo · NestJS API · Angular UI · PostgreSQL · TypeORM                     |
 | **Related**      | `inception/architecture/db-design.md`                                            |
+
+## Technology stack (project standard)
+
+| Layer | Technology | Version |
+| ----- | ---------- | ------- |
+| Runtime | .NET | 8.0 |
+| Web UI | ASP.NET Core MVC, Razor, Bootstrap 5 | 8.0 |
+| API | ASP.NET Core Web API, Swashbuckle (OpenAPI) | 8.0 |
+| ORM | Entity Framework Core | 8.0.11 |
+| Database | Microsoft SQL Server (LocalDB in dev) | — |
+| Password hashing | `IPasswordHasher<User>` (ASP.NET Identity Core) | 8.0 |
+| Email | MailKit | 4.16+ |
+| Push | WebPush (VAPID) | 1.0.12 |
+| Auth (Web) | Cookie authentication | — |
+| Auth (API) | JWT Bearer | — |
+
+---
 
 ## System context
 
-Browser clients (Employee, Admin) talk HTTPS to a single web application: an **Angular SPA** and a **NestJS REST API** backed by **PostgreSQL**. Outbound **SMTP** (or transactional email API) sends booking emails; **Web Push** (VAPID) delivers optional opt-in alerts. Scheduled jobs run inside the API process (NestJS `@nestjs/schedule`) for booking completion and reminder emails.
+Employees and Admins use a **server-rendered MVC app** (Razor + Bootstrap 5) aligned to SCR-001 … SCR-007. A companion **Web API** exposes the same domain over REST with **JWT Bearer** auth and **Swashbuckle** OpenAPI docs. Both hosts share **Application** and **Infrastructure** layers and one **SQL Server** database via **EF Core**.
+
+Outbound email uses **MailKit**; browser push uses **WebPush** with VAPID keys. Background jobs (`IHostedService`) complete past bookings and send day-before reminders.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        Browser (HTTPS)                          │
-│   Angular SPA (apps/ui) — SCR-001 … SCR-007                     │
-└────────────────────────────┬────────────────────────────────────┘
-                             │ JSON /api/*
-                             │ generated client (libs/api/client)
-┌────────────────────────────▼────────────────────────────────────┐
-│              NestJS API (apps/api)                              │
-│  ┌─────────┐ ┌──────────┐ ┌───────┐ ┌───────┐ ┌──────────────┐  │
-│  │  auth   │ │ bookings │ │ desks │ │ users │ │ notifications│  │
-│  └─────────┘ └──────────┘ └───────┘ └───────┘ └──────────────┘  │
-│  ┌─────────────────────────────────────────────────────────────┐│
-│  │ jobs (scheduler): completion + reminder emails              ││
-│  └─────────────────────────────────────────────────────────────┘│
-└────────────┬───────────────────────────────┬────────────────────┘
-             │ TypeORM                        │ SMTP / Web Push
-             ▼                                ▼
-      PostgreSQL                      Email provider / Push endpoints
+┌──────────────────────────────────────────────────────────────────┐
+│                     Browser (HTTPS)                              │
+│  ASP.NET Core MVC (Razor views) — SCR-001 … SCR-007              │
+│  Cookie authentication                                           │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │ form posts + optional fetch → API
+┌────────────────────────────▼─────────────────────────────────────┐
+│              ASP.NET Core Web API                                │
+│              JWT Bearer · Swashbuckle OpenAPI                    │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │
+┌────────────────────────────▼─────────────────────────────────────┐
+│  Application (services, DTOs, validation, domain rules)          │
+│  Infrastructure (EF Core, MailKit, WebPush, password hasher)     │
+└────────────────────────────┬─────────────────────────────────────┘
+                             │ EF Core 8
+                             ▼
+                    SQL Server (LocalDB dev)
+                             │
+                    MailKit SMTP · Web Push endpoints
 ```
 
 ---
 
-## Repository layout (Nx)
+## Solution layout
 
-| Path | Responsibility |
-| ---- | -------------- |
-| `apps/api` | NestJS HTTP API, TypeORM entities, migrations, scheduled jobs |
-| `apps/ui` | Angular standalone SPA, lazy feature routes per screen group |
-| `libs/api/client` | OpenAPI-generated TypeScript client (never hand-edited) |
-| `tools/` | aidlc-check, aidlc-jira, seed scripts |
+```
+EmployeeDeskBooking.sln
+src/
+  EmployeeDeskBooking.Domain/           Entities, enums, domain exceptions
+  EmployeeDeskBooking.Application/      Services, interfaces, DTOs, validators
+  EmployeeDeskBooking.Infrastructure/   DbContext, EF configs, migrations, MailKit, WebPush
+  EmployeeDeskBooking.Web/              MVC (Razor), Cookie auth, area/controllers per feature
+  EmployeeDeskBooking.Api/              Web API controllers, JWT, Swashbuckle
+tests/
+  EmployeeDeskBooking.Tests/            Unit + integration tests
+tools/                                  aidlc-check, aidlc-jira, seed utilities
+```
 
-First story (US-001) scaffolds `apps/api` and `apps/ui` if not present. Update `ai/standards/task-surfaces.md` when the stack is real.
+**US-001** scaffolds the solution and first migration. Update `ai/standards/task-surfaces.md` and coding standards to replace the AI-DLC NestJS/Angular seed with this .NET layout.
 
 ---
 
-## API modules
+## Layer responsibilities
 
-One NestJS module per business capability. Controllers stay thin; services own rules from BR-001.*.
+| Layer | Owns |
+| ----- | ---- |
+| **Domain** | `User`, `Desk`, `Booking`, enums, no framework references |
+| **Application** | `IBookingService`, `IAuthService`, business rules BR-001.*, `OfficeClock` |
+| **Infrastructure** | `AppDbContext`, EF migrations, `EmailSender` (MailKit), `PushNotificationService` (WebPush), `PasswordHasher` adapter |
+| **Web** | MVC controllers + Razor views; `[Authorize]` + role policies; anti-forgery on forms |
+| **Api** | REST controllers returning JSON; `[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]` |
 
-### `AuthModule` (US-001)
+Web and Api **both call Application services** — no duplicated business logic.
+
+---
+
+## Authentication and authorization
+
+### Web (US-001) — Cookie
 
 | Concern | Design |
 | ------- | ------ |
-| Sign-in | `POST /api/auth/login` — email + password → session (REQ-002) |
-| Sign-out | `POST /api/auth/logout` — invalidate session (REQ-003) |
-| Session | **HTTP-only secure cookie** carrying a signed JWT (or server-side session store). Avoid localStorage for tokens (NFR-003). |
-| Current user | `GET /api/auth/me` — role, name, email for routing (Employee → SCR-002, Admin → SCR-004) |
-| Errors | Generic message for bad credentials / deactivated account (V-01, SCR-001 ST-03/ST-04) |
+| Sign-in | `AccountController.Login` POST — validate email/password via `IAuthService` (REQ-002) |
+| Sign-out | `AccountController.Logout` POST — clear auth cookie (REQ-003) |
+| Cookie | ASP.NET Core Cookie Authentication middleware; `HttpOnly`, `Secure`, `SameSite=Strict` in prod (NFR-003) |
+| Password verify | `IPasswordHasher<User>.VerifyHashedPassword` |
+| Routing after login | Employee → `Book/Index` (SCR-002); Admin → `AdminBookings/Index` (SCR-004) — US-001 AC-01/02 |
+| Deactivated user | Reject at login (SCR-001 ST-04, REQ-005) |
+| Generic error | Invalid credentials + deactivated use same message (V-01) |
 
-**Guards:** `AuthGuard` on all routes except login. `RolesGuard` with `@Roles('admin')` on admin modules.
+**Authorization:** `[Authorize(Roles = "Admin")]` on admin controllers/areas.
 
-> Note: Framework seed `api-standards.md` mentions `x-admin-key` for admin routes — **this project uses role-based JWT/cookie auth**, not a static admin key. Update project standards when US-001 lands.
-
----
-
-### `BookingsModule` (US-002, US-003, US-004, US-009)
-
-| Endpoint group | Role | Stories |
-| -------------- | ---- | ------- |
-| `GET /api/bookings/availability?date=` | Employee | US-002 — active desks + booked flag for date |
-| `POST /api/bookings` | Employee | US-002 — create confirmed booking |
-| `GET /api/bookings/mine` | Employee | US-003 — own history |
-| `DELETE /api/bookings/:id` or `POST …/cancel` | Employee | US-003 — cancel own |
-| `GET /api/admin/bookings?date=&status=` | Admin | US-004 — list + filters |
-| `POST /api/admin/bookings/:id/cancel` | Admin | US-004 — cancel on behalf |
-
-**Domain rules in `BookingsService`:** date window (V-02), Mon–Fri (V-03), one confirmed per user/desk (V-04, V-05), inactive desk rejection (BR-001.7), cancel eligibility (BR-001.6). Book inside a DB transaction; map unique violations to **409 Conflict** (RISK-004).
-
-**Events:** emit `BookingConfirmed` / `BookingCancelled` domain events consumed by `NotificationsModule` (US-007, US-008).
-
----
-
-### `DesksModule` (US-005)
-
-| Endpoint | Role | Notes |
-| -------- | ---- | ----- |
-| `GET /api/admin/desks` | Admin | List all desks |
-| `POST /api/admin/desks` | Admin | Add desk (V-08) |
-| `PATCH /api/admin/desks/:id` | Admin | Edit number, activate/deactivate |
-| `POST /api/admin/desks/:id/deactivate` | Admin | Optional dedicated flow for BR-001.9 cancel-in-same-flow |
-
----
-
-### `UsersModule` (US-006)
-
-| Endpoint | Role | Notes |
-| -------- | ---- | ----- |
-| `GET /api/admin/users` | Admin | List users |
-| `POST /api/admin/users` | Admin | Create with initial password (REQ-018) |
-| `PATCH /api/admin/users/:id` | Admin | Edit name/email (V-10) |
-| `POST /api/admin/users/:id/deactivate` | Admin | BR-001.11 last-admin check |
-| `POST /api/admin/users/:id/reset-password` | Admin | Returns one-time plaintext to Admin only (BR-001.12) — never log password |
-
----
-
-### `NotificationsModule` (US-007, US-008)
+### API — JWT Bearer
 
 | Concern | Design |
 | ------- | ------ |
-| Email | `EmailService` — SMTP via `@nestjs/config`; templates for confirm/cancel/reminder (REQ-023–025, V-13) |
-| Failure log | Write `email_delivery_logs` on failure (NFR-005) |
-| Push opt-in | `GET/PATCH /api/notifications/preferences` (SCR-007) |
-| Push subscribe | `POST /api/notifications/push-subscription` — store JSON in `notification_preferences` |
-| Push send | `PushService` using web-push + VAPID keys; only when `push_opt_in` (V-14, BR-001.15) |
-| Reminders | No push for reminders (BR-001.16) |
+| Token issue | `POST /api/auth/login` returns JWT (for API clients / AJAX if used) |
+| Validation | JWT Bearer middleware on all `/api/*` except login |
+| Claims | `sub`, `email`, `role` (`Employee` \| `Admin`) |
+| Admin endpoints | `[Authorize(Roles = "Admin")]` on `/api/admin/*` |
 
-Listens to booking events; email is mandatory on confirm/cancel (BR-001.13).
+MVC remains the primary UI; JWT supports OpenAPI consumers and progressive enhancement (e.g. push subscription POST from Razor page JavaScript).
 
 ---
 
-### `JobsModule` (US-009, US-007)
+## Application services (by feature)
 
-| Job | Schedule | Behaviour |
-| --- | -------- | --------- |
-| `CompletePastBookingsJob` | Daily ~00:05 office local | `confirmed` where `booking_date < today` → `completed` (SRS-F-070) |
-| `SendReminderEmailsJob` | Daily 08:00 office local (TBD) | For tomorrow's working-day `confirmed` bookings, send reminder if not in `booking_reminders` (BR-001.14) |
+### Auth — US-001
 
-Use `@nestjs/schedule` with timezone-aware cron (`OFFICE_TIMEZONE`). Jobs must be idempotent.
+- `IAuthService` — login, logout, current user
+- `IUserStore` / repository via EF
+
+### Bookings — US-002, US-003, US-004, US-009
+
+| Service method | Stories | Notes |
+| -------------- | ------- | ----- |
+| `GetAvailabilityAsync(date)` | US-002 | Active desks + booked flag |
+| `CreateBookingAsync(deskId, date)` | US-002 | Transaction; 409 on unique violation |
+| `GetMyBookingsAsync()` | US-003 | |
+| `CancelBookingAsync(id, cancelledBy)` | US-003, US-004 | BR-001.6 eligibility |
+| `GetAllBookingsAsync(filters)` | US-004 | Admin date/status filters |
+| `CompletePastBookingsAsync()` | US-009 | Called by hosted service |
+
+Raises domain events or calls `INotificationService` on confirm/cancel.
+
+### Desks — US-005
+
+- CRUD + activate/deactivate; BR-001.9 guard before deactivate
+
+### Users — US-006
+
+- CRUD, deactivate, reset password (return plaintext once to Admin — BR-001.12), last-admin check (BR-001.11)
+- Hash new passwords with `IPasswordHasher<User>`
+
+### Notifications — US-007, US-008
+
+| Component | Technology |
+| --------- | ---------- |
+| Transactional email | `IEmailSender` → MailKit SMTP |
+| Templates | Razor email templates or static HTML with desk + date (V-13) |
+| Failure logging | `EmailDeliveryLogs` table (NFR-005) |
+| Push preferences | MVC `NotificationSettingsController` (SCR-007) |
+| Push delivery | `WebPush` library; subscription JSON in DB |
+| Reminders | Hosted service; idempotent via `BookingReminders` |
 
 ---
 
-## UI architecture (Angular)
+## Web API surface (Swashbuckle)
 
-Feature-first lazy routes aligned to screens:
+Base path: `/api`. Document with Swashbuckle at `/swagger`.
 
-| Route prefix | Screen | User |
+| Area | Example routes | Auth |
+| ---- | -------------- | ---- |
+| Auth | `POST /api/auth/login` | Anonymous |
+| Bookings | `GET /api/bookings/availability`, `POST /api/bookings`, `GET /api/bookings/mine`, `POST /api/bookings/{id}/cancel` | JWT, Employee |
+| Admin bookings | `GET /api/admin/bookings`, `POST /api/admin/bookings/{id}/cancel` | JWT, Admin |
+| Admin desks | `GET/POST/PATCH /api/admin/desks` | JWT, Admin |
+| Admin users | `GET/POST/PATCH /api/admin/users`, `POST …/reset-password` | JWT, Admin |
+| Notifications | `GET/PATCH /api/notifications/preferences`, `POST /api/notifications/push-subscription` | JWT, Employee |
+
+HTTP status: `200/201` success, `400` validation, `401/403` auth, `409` booking conflict, `422` domain rejection.
+
+MVC actions may mirror these operations server-side without calling the HTTP API (direct Application layer) — keep Api in sync for contract tests.
+
+---
+
+## MVC UI (Razor + Bootstrap 5)
+
+Controllers and views map to approved screens. Apply navy/green tokens from `inception/design/tokens.css` via site CSS; use Desk Booking logo asset.
+
+| Area / route | Screen | Role |
 | ------------ | ------ | ---- |
-| `/sign-in` | SCR-001 | All (unauthenticated) |
-| `/book` | SCR-002 | Employee |
-| `/my-bookings` | SCR-003 | Employee |
-| `/admin/bookings` | SCR-004 | Admin |
-| `/admin/desks` | SCR-005 | Admin |
-| `/admin/users` | SCR-006 | Admin |
-| `/settings/notifications` | SCR-007 | Employee |
+| `/Account/Login` | SCR-001 | Anonymous |
+| `/Book` | SCR-002 | Employee |
+| `/MyBookings` | SCR-003 | Employee |
+| `/Admin/Bookings` | SCR-004 | Admin |
+| `/Admin/Desks` | SCR-005 | Admin |
+| `/Admin/Users` | SCR-006 | Admin |
+| `/Settings/Notifications` | SCR-007 | Employee |
 
-- **`core/`** — auth facade, session state (signals), HTTP interceptors (cookie credentials)
-- **`shared/`** — layout shell, nav, design tokens from `inception/design/tokens.css`
-- **`features/*/`** — one folder per route; components match SCR states (ST-01 …)
-- API access only through **generated client** + thin facade services (coding standards)
+Shared `_Layout.cshtml`: role-based nav (Employee vs Admin per wireframes). View models per ST-## states (loading, empty, error).
 
-Post-login routing: Employee → `/book`; Admin → `/admin/bookings` (US-001 AC-01/AC-02).
-
-Responsive vs desktop-only: **TBD (NFR-004)** — default to responsive layout using existing tokens.
+Responsive vs desktop-only: **TBD (NFR-004)** — Bootstrap 5 grid defaults to responsive.
 
 ---
 
-## Cross-cutting concerns
+## Background jobs (`IHostedService`)
+
+| Service | Schedule | Story |
+| ------- | -------- | ----- |
+| `CompletePastBookingsHostedService` | Daily ~00:05 office local | US-009 |
+| `ReminderEmailHostedService` | Daily 08:00 office local (TBD) | US-007 |
+
+Use `TimeZoneInfo` with configured `Office:TimeZone`. Jobs idempotent and logged.
+
+---
+
+## Cross-cutting
 
 | Topic | Approach |
 | ----- | -------- |
-| **Validation** | class-validator DTOs at API edge; whitelist + forbid unknown fields |
-| **Errors** | Global exception filter → `{ statusCode, message, error }`; domain rejections → 422/409 |
-| **AuthZ** | Role guard on admin paths; employees cannot call `/api/admin/*` |
-| **Time** | `OfficeClock` service — all “today” and date parsing use `OFFICE_TIMEZONE` (NFR-001) |
-| **Logging** | nestjs-pino structured logs; no passwords or reset tokens in logs (RISK-005) |
-| **Config** | `@nestjs/config` + Joi validation schema in `apps/api` |
-| **OpenAPI** | Swagger plugin on DTOs; CI regenerates `libs/api/client` on API changes |
-| **Security** | HTTPS in prod; bcrypt passwords; CSRF consideration if cookie session (same-site strict) |
+| Validation | Data annotations + FluentValidation in Application |
+| Errors | Problem Details (`RFC 7807`) on API; ModelState on MVC |
+| Time | `IOfficeClock` — all “today” logic uses office timezone (NFR-001) |
+| Logging | `ILogger<T>`; never log passwords or reset tokens (RISK-005) |
+| Config | `appsettings.json` + environment; secrets in user secrets / Key Vault |
+| CSRF | Anti-forgery tokens on MVC forms |
+| HTTPS | Required in non-dev (NFR-003) |
 
 ---
 
 ## Key flows
 
-### F1 — Employee books a desk (US-002)
+### Employee books (US-002)
 
-1. UI: pick date → `GET /api/bookings/availability?date=`
-2. UI: pick desk → `POST /api/bookings { deskId, date }`
-3. API: validate date/desk/user rules → transaction insert → partial unique indexes guard races
-4. On success: emit `BookingConfirmed` → email + optional push
-5. UI: success state SCR-002 ST-05
+1. MVC: `BookController` GET — date picker → `GetAvailabilityAsync`
+2. POST selected desk → `CreateBookingAsync` inside transaction
+3. On success → MailKit confirmation + optional WebPush
+4. Redirect to success view (SCR-002 ST-05)
 
-### F2 — Admin cancels on behalf (US-004)
+### Day-before reminder (US-007)
 
-1. `POST /api/admin/bookings/:id/cancel`
-2. Set `status=cancelled`, `cancelled_by_id=admin`
-3. Emit `BookingCancelled` → email + optional push to booking owner
-
-### F3 — Day-before reminder (US-007)
-
-1. Cron at 08:00 office local
-2. Find `confirmed` bookings where `booking_date = tomorrow` and tomorrow is Mon–Fri
-3. Skip if `booking_reminders` row exists
-4. Send email; record success in `booking_reminders` + log
+1. `ReminderEmailHostedService` fires at configured local time
+2. Query confirmed bookings for tomorrow (Mon–Fri target day)
+3. Skip if `BookingReminders` exists; else MailKit send + insert row
 
 ---
 
-## Deployment shape (high level)
+## Deployment (high level)
 
 | Environment | Components |
 | ----------- | ---------- |
-| Dev | Docker Compose: PostgreSQL + API + UI dev server |
-| Prod | TBD by DevOps (Gate 3) — API + UI static host + managed PostgreSQL; SMTP from IT (open Q #7) |
+| Dev | LocalDB + IIS Express / Kestrel; `dotnet run` on Web + Api |
+| Prod | TBD (Gate 3) — Azure App Service or IIS + SQL Server; SMTP from IT (open Q #7) |
 
 ---
 
-## Story → module map (delivery order)
+## Story → delivery map
 
-| Sprint | Stories | Primary modules |
-| ------ | ------- | --------------- |
-| 1 | US-001, US-002 | auth, bookings (partial), scaffold |
-| 2 | US-003, US-009 | bookings, jobs |
-| 3 | US-004, US-005, US-006 | bookings (admin), desks, users |
-| 4 | US-007, US-008 | notifications, jobs (reminders) |
-
----
-
-## Decisions recorded here (no separate ADR)
-
-| Decision | Choice | Rationale |
-| -------- | ------ | --------- |
-| Stack | NestJS + Angular + PostgreSQL | Matches AI-DLC reference standards; team scaffolds in US-001 |
-| Admin auth | Role in JWT/cookie, not `x-admin-key` | REQ-004 role model; admins sign in like employees |
-| Session transport | HTTP-only cookie | SPA-friendly, NFR-003 |
-| Double-booking | DB partial unique indexes + transaction | RISK-004; fail fast with 409 |
-| Scheduler | In-process NestJS cron | Single-office scale; no separate worker needed for MVP |
-| First Admin | Seed script (recommended) | BRD open Q #1 — repeatable deploys |
+| Sprint | Stories | Primary work |
+| ------ | ------- | ------------ |
+| 1 | US-001, US-002 | Solution scaffold, cookie auth, booking create |
+| 2 | US-003, US-009 | My bookings, completion job |
+| 3 | US-004, US-005, US-006 | Admin areas |
+| 4 | US-007, US-008 | MailKit + WebPush + reminder job |
 
 ---
 
-## Open questions (unchanged from BRD)
+## Decisions (no separate ADR)
+
+| Decision | Choice |
+| -------- | ------ |
+| Stack | .NET 8, MVC + Web API, EF Core, SQL Server — **project standard** |
+| UI | Server-rendered Razor (not SPA) — matches SCR wireframes and team stack |
+| Dual auth | Cookies for MVC; JWT for API/OpenAPI |
+| Passwords | `IPasswordHasher<User>` — do not custom-hash |
+| Email / push | MailKit + WebPush as specified |
+| Concurrency | SQL Server filtered unique indexes + EF transactions (RISK-004) |
+| First Admin | EF seed / DbInitializer on migrate |
+
+---
+
+## Open questions (from BRD)
 
 | # | Question | Owner |
 | - | -------- | ----- |
-| 1 | Confirm first-Admin bootstrap (seed vs manual) | PO/Architect |
+| 1 | Confirm first-Admin seed | PO/Architect |
 | 2 | Holiday calendar | PO/client |
-| 3 | Reminder send time (default 08:00 local) | PO/client |
-| 4 | Mobile-responsive vs desktop-only UI | PO/client |
+| 3 | Reminder time (default 08:00) | PO/client |
+| 4 | Mobile vs desktop | PO/client |
 | 5 | Password policy | PO/security |
-| 6 | Desk deactivate UX (block vs cancel-in-flow) | PO/client |
-| 7 | SMTP provider and sender domain | PO/IT |
+| 6 | Desk deactivate flow | PO/client |
+| 7 | SMTP / sender | PO/IT |
 
 ---
 
-## What happens when code exists
+## When code exists
 
 | Inception doc | Superseded by |
 | ------------- | ------------- |
-| Entity columns | TypeORM migrations in `apps/api` |
-| REST endpoints | OpenAPI at `/api-docs-json` |
-| UI routes | `apps/ui` route config |
+| Tables/columns | EF Core migrations in `Infrastructure` |
+| REST shapes | Swashbuckle OpenAPI JSON |
+| UI | Razor views + routes in `Web` |
 
-Keep this document as history; do not duplicate changes in prose after Gate 2 starts.
+Keep this document as history after Gate 2; do not maintain two sources of truth.

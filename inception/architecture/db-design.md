@@ -1,12 +1,13 @@
 # DB design — Employee Desk Booking System
 
-> Gate 1 architecture deliverable (advisory). Traces to **BRD-001**, **SRS-001 §6**. Once TypeORM migrations exist, **migrations are the source of truth** — this document is the starting shape.
+> Gate 1 architecture deliverable (advisory). Traces to **BRD-001**, **SRS-001 §6**. Once **EF Core migrations** exist, **migrations are the source of truth** — this document is the starting shape.
 
 |                  |                                                                                  |
 | ---------------- | -------------------------------------------------------------------------------- |
 | **Traces to**    | BRD-001, SRS-001, REQ-001 … REQ-027, NFR-001 … NFR-006, BR-001.1 … BR-001.16   |
-| **Engine**       | PostgreSQL 16+ (recommended default for TypeORM + concurrent booking)          |
-| **Office TZ**    | Configured once per deployment (`OFFICE_TIMEZONE`, NFR-001)                     |
+| **Engine**       | **Microsoft SQL Server** (LocalDB in dev)                                        |
+| **ORM**          | Entity Framework Core 8.0.11                                                     |
+| **Office TZ**    | Configured once per deployment (`Office:TimeZone`, NFR-001)                      |
 
 ## Overview
 
@@ -23,196 +24,192 @@ Booking 0──0..1 BookingReminder (idempotency for day-before email)
 
 ## Entities
 
-### `users`
+### `Users`
 
 Represents an Employee or Admin who can sign in. (REQ-002, REQ-004, REQ-005, REQ-018–REQ-022)
 
-| Column           | Type            | Null | Notes |
-| ---------------- | --------------- | ---- | ----- |
-| `id`             | UUID            | NO   | Primary key |
-| `email`          | VARCHAR(320)    | NO   | Unique, case-insensitive sign-in identifier (BR-001.10) |
-| `name`           | VARCHAR(200)    | NO   | Display name |
-| `password_hash`  | VARCHAR(255)    | NO   | bcrypt (or argon2) — never store plaintext (REQ-002, V-12 TBD) |
-| `role`           | ENUM            | NO   | `employee` \| `admin` (REQ-004) |
-| `is_active`      | BOOLEAN         | NO   | Default `true`; `false` = deactivated, cannot sign in (REQ-005, REQ-020) |
-| `created_at`     | TIMESTAMPTZ     | NO   | Audit |
-| `updated_at`     | TIMESTAMPTZ     | NO   | Audit |
+| Column           | SQL Server type   | Null | Notes |
+| ---------------- | ----------------- | ---- | ----- |
+| `Id`             | `uniqueidentifier`| NO   | PK, `NEWSEQUENTIALID()` or app-generated GUID |
+| `Email`          | `nvarchar(320)`   | NO   | Unique, case-insensitive (BR-001.10) |
+| `Name`           | `nvarchar(200)`   | NO   | Display name |
+| `PasswordHash`   | `nvarchar(500)`   | NO   | `IPasswordHasher<User>` (ASP.NET Identity Core) — never plaintext |
+| `Role`           | `tinyint` / enum  | NO   | `Employee` = 0, `Admin` = 1 (REQ-004) |
+| `IsActive`       | `bit`             | NO   | Default `1`; `0` = deactivated (REQ-005, REQ-020) |
+| `CreatedAt`      | `datetimeoffset`  | NO   | Audit |
+| `UpdatedAt`      | `datetimeoffset`  | NO   | Audit |
 
 **Indexes / constraints**
 
-- `UNIQUE (lower(email))` — BR-001.10
-- Check: at least one active admin must remain (enforced in service layer, BR-001.11 — not a DB check)
+- Unique index on `Email` with case-insensitive collation (`SQL_Latin1_General_CP1_CI_AS`) **or** persisted computed column `EmailNormalized` + unique index — BR-001.10
+- Last active Admin rule enforced in application service (BR-001.11)
 
-**Lifecycle:** Soft operational deactivation via `is_active`; rows are never hard-deleted (booking history integrity).
+**Lifecycle:** Deactivate via `IsActive = 0`; no hard deletes (booking history).
 
 ---
 
-### `desks`
+### `Desks`
 
 Bookable workspace identified by a unique desk number. (REQ-007, REQ-015–REQ-017)
 
-| Column        | Type         | Null | Notes |
-| ------------- | ------------ | ---- | ----- |
-| `id`          | UUID         | NO   | Primary key |
-| `desk_number` | VARCHAR(32)  | NO   | e.g. `A-01`; unique case-insensitively (BR-001.4, BR-001.8) |
-| `status`      | ENUM         | NO   | `active` \| `inactive` (REQ-017) |
-| `created_at`  | TIMESTAMPTZ  | NO   | Audit |
-| `updated_at`  | TIMESTAMPTZ  | NO   | Audit |
+| Column        | SQL Server type   | Null | Notes |
+| ------------- | ----------------- | ---- | ----- |
+| `Id`          | `uniqueidentifier`| NO   | PK |
+| `DeskNumber`  | `nvarchar(32)`    | NO   | e.g. `A-01`; unique case-insensitively (BR-001.4, BR-001.8) |
+| `Status`      | `tinyint` / enum  | NO   | `Active` = 0, `Inactive` = 1 (REQ-017) |
+| `CreatedAt`   | `datetimeoffset`  | NO   | Audit |
+| `UpdatedAt`   | `datetimeoffset`  | NO   | Audit |
 
 **Indexes / constraints**
 
-- `UNIQUE (lower(desk_number))` — BR-001.8
+- Unique index on normalized desk number (same CI pattern as email) — BR-001.8
 
-**Lifecycle:** Deactivate via `status = inactive` (BR-001.7); do not delete desks referenced by bookings.
+**Lifecycle:** Deactivate via `Status = Inactive` (BR-001.7); no deletes when bookings exist.
 
 ---
 
-### `bookings`
+### `Bookings`
 
 One employee, one desk, one calendar date, one status. (REQ-008, REQ-009, BR-001.5)
 
-| Column              | Type        | Null | Notes |
-| ------------------- | ----------- | ---- | ----- |
-| `id`                | UUID        | NO   | Primary key |
-| `user_id`           | UUID        | NO   | FK → `users.id` (booking owner) |
-| `desk_id`           | UUID        | NO   | FK → `desks.id` |
-| `booking_date`      | DATE        | NO   | Office-local calendar date (NFR-001); not UTC midnight ambiguity |
-| `status`            | ENUM        | NO   | `confirmed` \| `cancelled` \| `completed` (BR-001.5) |
-| `cancelled_at`      | TIMESTAMPTZ | YES  | Set when status → `cancelled` |
-| `cancelled_by_id`   | UUID        | YES  | FK → `users.id`; who cancelled (employee self or admin on behalf) |
-| `completed_at`      | TIMESTAMPTZ | YES  | Set when status → `completed` |
-| `created_at`        | TIMESTAMPTZ | NO   | Audit |
-| `updated_at`        | TIMESTAMPTZ | NO   | Audit |
+| Column            | SQL Server type   | Null | Notes |
+| ----------------- | ----------------- | ---- | ----- |
+| `Id`              | `uniqueidentifier`| NO   | PK |
+| `UserId`          | `uniqueidentifier`| NO   | FK → `Users.Id` |
+| `DeskId`          | `uniqueidentifier`| NO   | FK → `Desks.Id` |
+| `BookingDate`     | `date`            | NO   | Office-local calendar date (NFR-001) |
+| `Status`          | `tinyint` / enum  | NO   | `Confirmed`, `Cancelled`, `Completed` |
+| `CancelledAt`     | `datetimeoffset`  | YES  | When cancelled |
+| `CancelledById`   | `uniqueidentifier`| YES  | FK → `Users.Id` (self or admin) |
+| `CompletedAt`     | `datetimeoffset`  | YES  | When completed |
+| `CreatedAt`       | `datetimeoffset`  | NO   | Audit |
+| `UpdatedAt`       | `datetimeoffset`  | NO   | Audit |
 
-**Indexes / constraints (critical for RISK-004)**
+**Filtered unique indexes (critical for RISK-004)**
 
-- **Partial unique:** `(user_id, booking_date) WHERE status = 'confirmed'` — BR-001.1 (one confirmed booking per employee per date)
-- **Partial unique:** `(desk_id, booking_date) WHERE status = 'confirmed'` — V-04 (one confirmed booking per desk per date)
-- Index: `(booking_date, status)` — admin filters (REQ-012, REQ-013)
-- Index: `(user_id, booking_date DESC)` — my bookings (REQ-009)
+```sql
+-- BR-001.1: one confirmed booking per employee per date
+CREATE UNIQUE INDEX IX_Bookings_UserId_BookingDate_Confirmed
+ON Bookings (UserId, BookingDate)
+WHERE Status = 0;  -- Confirmed
+
+-- V-04: one confirmed booking per desk per date
+CREATE UNIQUE INDEX IX_Bookings_DeskId_BookingDate_Confirmed
+ON Bookings (DeskId, BookingDate)
+WHERE Status = 0;
+```
+
+Additional indexes: `(BookingDate, Status)` for admin filters; `(UserId, BookingDate DESC)` for my bookings.
 
 **Lifecycle**
 
 ```
-confirmed ──cancel──► cancelled
+Confirmed ──cancel──► Cancelled
      │
-     └── (booking_date < today, office local) ──► completed
+     └── (BookingDate < today, office local) ──► Completed
 ```
-
-- Cancellation only while `status = confirmed` and `booking_date >= today` (office local) — BR-001.6
-- `completed` is terminal; no transition out
-- Past `confirmed` rows are moved to `completed` by scheduled job (US-009, SRS-F-070)
 
 ---
 
-### `notification_preferences`
+### `NotificationPreferences`
 
 Browser push opt-in per user. (REQ-026, REQ-027, NFR-006)
 
-| Column                 | Type        | Null | Notes |
-| ---------------------- | ----------- | ---- | ----- |
-| `user_id`              | UUID        | NO   | PK + FK → `users.id` (one row per user) |
-| `push_opt_in`          | BOOLEAN     | NO   | Default `false` (BR-001.15) |
-| `push_subscription`    | JSONB       | YES  | Web Push subscription object when opted in; NULL when opted out |
-| `updated_at`           | TIMESTAMPTZ | NO   | Audit |
-
-Employees only in practice; Admins may have a row but push is not required for admin workflows.
+| Column              | SQL Server type   | Null | Notes |
+| ------------------- | ----------------- | ---- | ----- |
+| `UserId`            | `uniqueidentifier`| NO   | PK + FK → `Users.Id` |
+| `PushOptIn`         | `bit`             | NO   | Default `0` (BR-001.15) |
+| `PushSubscription`  | `nvarchar(max)`   | YES  | JSON Web Push subscription; NULL when opted out |
+| `UpdatedAt`         | `datetimeoffset`  | NO   | Audit |
 
 ---
 
-### `booking_reminders`
+### `BookingReminders`
 
 Idempotency for day-before reminder emails. (REQ-025, BR-001.14)
 
-| Column        | Type        | Null | Notes |
-| ------------- | ----------- | ---- | ----- |
-| `booking_id`  | UUID        | NO   | PK + FK → `bookings.id` |
-| `sent_at`     | TIMESTAMPTZ | NO   | When reminder was successfully sent |
-| `created_at`  | TIMESTAMPTZ | NO   | Audit |
-
-Prevents duplicate reminders if the scheduler runs more than once. Only created on successful send.
+| Column       | SQL Server type   | Null | Notes |
+| ------------ | ----------------- | ---- | ----- |
+| `BookingId`  | `uniqueidentifier`| NO   | PK + FK → `Bookings.Id` |
+| `SentAt`     | `datetimeoffset`  | NO   | Successful send timestamp |
+| `CreatedAt`  | `datetimeoffset`  | NO   | Audit |
 
 ---
 
-### `email_delivery_logs`
+### `EmailDeliveryLogs`
 
-Operational log for failed (and optionally successful) transactional emails. (NFR-005)
+Operational log for transactional email attempts. (NFR-005)
 
-| Column           | Type         | Null | Notes |
-| ---------------- | ------------ | ---- | ----- |
-| `id`             | UUID         | NO   | Primary key |
-| `booking_id`     | UUID         | YES  | FK → `bookings.id` when email relates to a booking |
-| `user_id`        | UUID         | YES  | FK → `users.id` (recipient) |
-| `email_type`     | ENUM         | NO   | `confirmation` \| `cancellation` \| `reminder` |
-| `recipient`      | VARCHAR(320) | NO   | Email address attempted |
-| `status`         | ENUM         | NO   | `sent` \| `failed` |
-| `error_message`  | TEXT         | YES  | Provider error (no secrets) |
-| `created_at`     | TIMESTAMPTZ  | NO   | Audit |
-
----
-
-## Relationships (plain language)
-
-- One **user** owns many **bookings**; each booking belongs to exactly one user.
-- One **desk** appears in many **bookings** over time; each booking references exactly one desk.
-- A **booking** is uniquely identified for active reservations by `(user, date)` and `(desk, date)` while `confirmed`.
-- One **user** has at most one **notification_preferences** row.
-- **booking_reminders** and **email_delivery_logs** hang off bookings for audit and scheduler idempotency.
+| Column          | SQL Server type   | Null | Notes |
+| --------------- | ----------------- | ---- | ----- |
+| `Id`            | `uniqueidentifier`| NO   | PK |
+| `BookingId`     | `uniqueidentifier`| YES  | FK → `Bookings.Id` |
+| `UserId`        | `uniqueidentifier`| YES  | FK → `Users.Id` |
+| `EmailType`     | `tinyint` / enum  | NO   | Confirmation, Cancellation, Reminder |
+| `Recipient`     | `nvarchar(320)`   | NO   | Address attempted |
+| `Status`        | `tinyint` / enum  | NO   | Sent, Failed |
+| `ErrorMessage`  | `nvarchar(max)`   | YES  | Provider error (no secrets) |
+| `CreatedAt`     | `datetimeoffset`  | NO   | Audit |
 
 ---
 
-## Keys and business rules enforced in the database
+## EF Core mapping notes
+
+- Fluent API configures filtered unique indexes (`HasIndex(...).HasFilter(...)`) in `BookingConfiguration`.
+- Enums stored as `tinyint` or mapped with `.HasConversion<int>()`.
+- `PushSubscription` validated as JSON in application layer before persist.
+- Connection string: `Server=(localdb)\mssqllocaldb;Database=EmployeeDeskBooking;...` in dev.
+
+---
+
+## Keys and business rules
 
 | Rule | Enforcement |
 | ---- | ----------- |
-| BR-001.1 One desk per employee per day | Partial unique index on `(user_id, booking_date)` where `confirmed` |
-| V-04 Desk not double-booked | Partial unique index on `(desk_id, booking_date)` where `confirmed` |
-| BR-001.8 Desk number unique | Unique on `lower(desk_number)` |
-| BR-001.10 Email unique | Unique on `lower(email)` |
-| BR-001.5 Single status | ENUM column + application transitions |
-| BR-001.6 Cancel eligibility | Application layer (date + status check) |
-| BR-001.9 Deactivate desk with future bookings | Application layer (query before update) |
-| BR-001.11 Last admin safeguard | Application layer (count active admins) |
+| BR-001.1 One booking per employee per day | Filtered unique index on `(UserId, BookingDate)` |
+| V-04 Desk not double-booked | Filtered unique index on `(DeskId, BookingDate)` |
+| BR-001.8 / BR-001.10 Uniqueness | CI collation or normalized computed columns |
+| BR-001.6, BR-001.9, BR-001.11 | Application services + EF transactions |
 
-Concurrent create (RISK-004): wrap book in a transaction; rely on partial unique indexes to reject races with `409 Conflict`. Optional `SELECT … FOR UPDATE` on desk row for clearer error messages.
+Concurrent book (RISK-004): `IDbContextTransaction` + catch `DbUpdateException` on unique violation → HTTP 409.
 
 ---
 
-## Configuration (not stored in DB)
+## Configuration (not in DB)
 
 | Setting | Purpose |
 | ------- | ------- |
-| `OFFICE_TIMEZONE` | IANA zone, e.g. `Asia/Kolkata` (NFR-001) |
-| `REMINDER_SEND_TIME` | Local time for day-before job; default `08:00` (BRD open Q #3) |
-
-Single-office scope: no `office_id` column in this release (NFR-002). Holiday calendar deferred (BRD open Q #2).
+| `Office:TimeZone` | IANA zone e.g. `Asia/Kolkata` (NFR-001) |
+| `Reminders:SendTimeLocal` | Default `08:00` (BRD open Q #3) |
 
 ---
 
 ## Bootstrap and seed data
 
-**First Admin account** (BRD open Q #1): recommend a **one-time seed script** (`tools/seed-admin.mjs` or TypeORM seed) run during deployment that creates the first active Admin if none exists. Alternative: manual SQL insert — rejected for repeatability.
+**First Admin** (BRD open Q #1): EF Core seed or `DbInitializer` run on startup/migrate — creates first Admin when no users exist, using `IPasswordHasher<User>`.
 
-Initial desk inventory: empty; Admin adds desks via US-005 (REQ-015).
-
----
-
-## Open questions (not invented here)
-
-| # | Question | Owner | Impact on DB |
-| - | -------- | ----- | ------------ |
-| 1 | First Admin bootstrap mechanism | PO/Architect | Seed script recommended above — confirm in Gate 2 US-001 |
-| 2 | Public holiday calendar | PO/client | Future `holidays` table or config; until then Mon–Fri only in app layer |
-| 5 | Password complexity (V-12) | PO/security | Validation rules only; column size unchanged |
-| 6 | Desk deactivate with future bookings | PO/client | BR-001.9 default: block or cancel-in-same-flow — no schema change either way |
+Initial desks: empty until US-005.
 
 ---
 
-## Migration order (suggested)
+## Migration order (EF Core)
 
-1. `users`
-2. `desks`
-3. `bookings`
-4. `notification_preferences`
-5. `booking_reminders`
-6. `email_delivery_logs`
+1. Users  
+2. Desks  
+3. Bookings (+ filtered unique indexes)  
+4. NotificationPreferences  
+5. BookingReminders  
+6. EmailDeliveryLogs  
+
+Command: `dotnet ef migrations add InitialCreate --project src/EmployeeDeskBooking.Infrastructure --startup-project src/EmployeeDeskBooking.Web`
+
+---
+
+## Open questions
+
+| # | Question | Owner |
+| - | -------- | ----- |
+| 1 | Confirm seed vs manual first Admin | PO/Architect |
+| 2 | Holiday calendar | PO/client |
+| 5 | Password complexity (V-12) | PO/security |
+| 6 | Desk deactivate UX | PO/client |
