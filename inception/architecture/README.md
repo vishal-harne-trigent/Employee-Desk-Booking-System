@@ -42,3 +42,14 @@ once requirements are frozen and before any code exists. Two documents:
 
 Written by the Architect persona (`/architect`), landed through its own reviewed
 PR. Tailor this README to your project; it is yours from here.
+
+## Documents (EPIC-001)
+
+| File | Status |
+| ---- | ------ |
+| [`db-design.md`](db-design.md) | Draft — EF Core / SQL Server, 2026-08-17 |
+| [`app-architecture.md`](app-architecture.md) | Draft — .NET 8 MVC + Web API, 2026-08-17 |
+
+**Style:** Layered Architecture (N-tier) — Presentation · Application · Domain · Infrastructure · Data
+
+**Stack:** .NET 8 · ASP.NET Core MVC (Razor) · Web API · EF Core 8.0.11 · SQL Server · MailKit · WebPush
