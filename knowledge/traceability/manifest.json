@@ -41,63 +41,72 @@
       "requirements": ["REQ-001", "REQ-002", "REQ-003", "REQ-004", "REQ-005", "NFR-003", "NFR-004"],
       "screens": ["SCR-001"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-38"
     },
     "US-002": {
       "artifact": "inception/stories/user-stories/US-002-book-desk.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-006", "REQ-007", "REQ-008", "NFR-001", "NFR-002", "NFR-004"],
       "screens": ["SCR-002"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-39"
     },
     "US-003": {
       "artifact": "inception/stories/user-stories/US-003-my-bookings.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-009", "REQ-010", "NFR-004"],
       "screens": ["SCR-003"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-40"
     },
     "US-004": {
       "artifact": "inception/stories/user-stories/US-004-admin-bookings.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-011", "REQ-012", "REQ-013", "REQ-014", "NFR-004"],
       "screens": ["SCR-004"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-41"
     },
     "US-005": {
       "artifact": "inception/stories/user-stories/US-005-manage-desks.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-015", "REQ-016", "REQ-017", "NFR-004"],
       "screens": ["SCR-005"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-42"
     },
     "US-006": {
       "artifact": "inception/stories/user-stories/US-006-manage-users.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-004", "REQ-005", "REQ-018", "REQ-019", "REQ-020", "REQ-021", "REQ-022", "NFR-004"],
       "screens": ["SCR-006"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05", "AC-06", "AC-07"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-43"
     },
     "US-007": {
       "artifact": "inception/stories/user-stories/US-007-booking-emails.md",
       "requirements": ["REQ-023", "REQ-024", "REQ-025", "NFR-005"],
       "screens": [],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-44"
     },
     "US-008": {
       "artifact": "inception/stories/user-stories/US-008-push-notifications.md",
       "requirements": ["REQ-001", "REQ-003", "REQ-026", "REQ-027", "NFR-004", "NFR-006"],
       "screens": ["SCR-007"],
       "acs": ["AC-01", "AC-02", "AC-03", "AC-04", "AC-05"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-45"
     },
     "US-009": {
       "artifact": "inception/stories/user-stories/US-009-booking-completion.md",
       "requirements": ["REQ-009", "REQ-011", "REQ-013"],
       "screens": [],
       "acs": ["AC-01", "AC-02", "AC-03"],
-      "tests": []
+      "tests": [],
+      "jira": "EDBS-46"
     }
   },
   "screens": {
