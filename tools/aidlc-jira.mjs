@@ -27,6 +27,38 @@ function read(p) {
 }
 
 const REPO = process.cwd();
+
+// Load repo-root .env when present (never committed). JIRA_* keys in .env
+// always win over shell env so a stale $env:JIRA_PROJECT_KEY cannot override .env.
+const JIRA_ENV_KEYS = new Set([
+  'JIRA_BASE_URL',
+  'JIRA_PROJECT_KEY',
+  'JIRA_EMAIL',
+  'JIRA_API_TOKEN',
+]);
+
+function loadDotEnv() {
+  const p = join(REPO, '.env');
+  if (!existsSync(p)) return;
+  for (const line of read(p).split('\n')) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq === -1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(key)) continue;
+    if (!JIRA_ENV_KEYS.has(key) && process.env[key]) continue;
+    let val = trimmed.slice(eq + 1).trim();
+    if (
+      (val.startsWith('"') && val.endsWith('"')) ||
+      (val.startsWith("'") && val.endsWith("'"))
+    )
+      val = val.slice(1, -1);
+    process.env[key] = val;
+  }
+}
+loadDotEnv();
+
 const TPL = join(REPO, 'ai', 'templates', 'jira');
 const MANIFEST = join(REPO, 'knowledge', 'traceability', 'manifest.json');
 const args = process.argv.slice(2);
@@ -230,6 +262,7 @@ const USAGE = `aidlc-jira — the only writer to Jira (rules: ai/context/jira-sy
   --epic EPIC-001
   --bug 12                  from a GitHub issue labelled bug
   --change-request 12
+  --verify                  test credentials, list projects, check CREATE_ISSUES
   --api v2|v3               wire format: v2 wiki markup, v3 ADF (default v3)
   --apply                   actually create or update
 
@@ -838,16 +871,37 @@ async function jira(method, path, body) {
   const text = await res.text();
   if (!res.ok) {
     // Never echo the token, even on failure.
-    die(`Jira ${method} ${path} → ${res.status}\n${text.slice(0, 800)}`);
+    let hint = '';
+    if (
+      res.status === 400 &&
+      text.includes("target project doesn't exist") &&
+      process.env.JIRA_PROJECT_KEY
+    ) {
+      hint =
+        '\nHint: run `node tools/aidlc-jira.mjs --verify` to list projects you can access and check CREATE_ISSUES permission.';
+    }
+    die(`Jira ${method} ${path} → ${res.status}\n${text.slice(0, 800)}${hint}`);
   }
   return text ? JSON.parse(text) : {};
 }
 
-async function findExisting(summaryId) {
-  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "${summaryId}" ORDER BY created DESC`;
+async function findExisting(summaryId, issuetype = null) {
+  // "US-003 — …" must not match "US-003/AC-01 — …"; issuetype narrows further.
+  const needle = `${summaryId} —`;
+  let jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "${needle.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  if (issuetype) jql += ` AND issuetype = "${issuetype.replace(/"/g, '\\"')}"`;
+  jql += ' ORDER BY created DESC';
+  if (API === 'v3') {
+    const r = await jira('POST', '/rest/api/3/search/jql', {
+      jql,
+      maxResults: 1,
+      fields: ['key'],
+    });
+    return r.issues?.[0]?.key ?? null;
+  }
   const r = await jira(
     'GET',
-    `/rest/api/${API === 'v3' ? 3 : 2}/search?maxResults=1&jql=${encodeURIComponent(jql)}`,
+    `/rest/api/2/search?maxResults=1&jql=${encodeURIComponent(jql)}`,
   );
   return r.issues?.[0]?.key ?? null;
 }
@@ -855,10 +909,13 @@ async function findExisting(summaryId) {
 async function upsert(ticket) {
   const payload = payloadFor(ticket.fields);
   const idToken = ticket.fields.summary.split('—')[0].trim();
-  const existing = await findExisting(idToken);
+  const existing = await findExisting(idToken, ticket.fields.issuetype);
   if (existing) {
+    const updateFields = { ...payload.fields };
+    delete updateFields.issuetype;
+    delete updateFields.parent;
     await jira('PUT', `/rest/api/${API === 'v3' ? 3 : 2}/issue/${existing}`, {
-      fields: payload.fields,
+      fields: updateFields,
     });
     console.log(`updated ${existing}  ${ticket.fields.summary}`);
     return existing;
@@ -870,6 +927,95 @@ async function upsert(ticket) {
   );
   console.log(`created ${created.key}  ${ticket.fields.summary}`);
   return created.key;
+}
+
+function maskEmail(email) {
+  const [local, domain] = email.split('@');
+  if (!domain) return '(invalid email in JIRA_EMAIL)';
+  return `${local.slice(0, Math.min(4, local.length))}***@${domain}`;
+}
+
+async function verifyJira() {
+  const missing = [
+    'JIRA_BASE_URL',
+    'JIRA_PROJECT_KEY',
+    'JIRA_EMAIL',
+    'JIRA_API_TOKEN',
+  ].filter((k) => !process.env[k]);
+  if (missing.length) {
+    die(
+      `Missing ${missing.join(', ')}. Copy .env.example to .env, fill in values, then re-run --verify.`,
+    );
+  }
+  if (process.env.JIRA_EMAIL?.includes('example.com')) {
+    die(
+      'JIRA_EMAIL is still the .env.example placeholder — set your real Atlassian account email in .env',
+    );
+  }
+  if (!process.env.JIRA_API_TOKEN?.trim()) {
+    die('JIRA_API_TOKEN is empty in .env — paste your API token from id.atlassian.com');
+  }
+
+  console.log('Configuration loaded (.env overrides shell for JIRA_* keys):');
+  console.log(`  JIRA_BASE_URL:    ${process.env.JIRA_BASE_URL}`);
+  console.log(`  JIRA_PROJECT_KEY: ${process.env.JIRA_PROJECT_KEY}`);
+  console.log(`  JIRA_EMAIL:       ${maskEmail(process.env.JIRA_EMAIL)}`);
+  console.log(
+    `  JIRA_API_TOKEN:   set (${process.env.JIRA_API_TOKEN.length} characters)`,
+  );
+
+  const me = await jira('GET', '/rest/api/3/myself');
+  console.log(
+    `\nAuthenticated as: ${me.displayName} <${me.emailAddress ?? me.accountId}>`,
+  );
+
+  const projects = await jira('GET', '/rest/api/3/project');
+  console.log(`\nProjects you can access (${projects.length}):`);
+  for (const p of projects.sort((a, b) => a.key.localeCompare(b.key))) {
+    console.log(`  ${p.key.padEnd(8)} ${p.name}`);
+  }
+
+  const key = process.env.JIRA_PROJECT_KEY;
+  const hit = projects.find((p) => p.key === key);
+  if (!hit) {
+    die(
+      `JIRA_PROJECT_KEY "${key}" is not in the list above — update .env with an exact key from that list.`,
+    );
+  }
+  console.log(`\nTarget project: ${hit.key} — ${hit.name}`);
+
+  const perms = await jira(
+    'GET',
+    `/rest/api/3/mypermissions?projectKey=${encodeURIComponent(key)}&permissions=CREATE_ISSUES`,
+  );
+  const canCreate = perms.permissions?.CREATE_ISSUES?.havePermission === true;
+  console.log(`CREATE_ISSUES permission: ${canCreate ? 'yes' : 'NO'}`);
+  if (!canCreate) {
+    die(
+      `Your account cannot create issues in ${key}. In Jira: Project settings → People → add yourself with a role that includes Create issues, or ask your Jira admin.`,
+    );
+  }
+
+  try {
+    const meta = await jira(
+      'GET',
+      `/rest/api/3/issue/createmeta?projectKeys=${encodeURIComponent(key)}&expand=projects.issuetypes`,
+    );
+    const types =
+      meta.projects?.[0]?.issuetypes?.map((t) => t.name).sort() ?? [];
+    console.log(`Issue types in ${key}: ${types.join(', ') || '(none listed)'}`);
+    if (types.length && !types.includes('Epic')) {
+      console.log(
+        '\nWARN: issue type "Epic" is not available in this project. Epic sync may fail — enable Epics in project settings or tell the team which issue type to use.',
+      );
+    }
+  } catch {
+    console.log(
+      '\n(createmeta not available — skipping issue-type check; CREATE_ISSUES is OK)',
+    );
+  }
+
+  console.log('\nJira connection OK. Re-run: node tools/aidlc-jira.mjs --epic EPIC-001 --apply');
 }
 
 // The key is a convenience edge for humans, not a governance edge — nothing in
@@ -887,6 +1033,11 @@ function recordKey(kind, id, key) {
 
 // ---- main ------------------------------------------------------------------
 async function main() {
+  if (args.includes('--verify')) {
+    await verifyJira();
+    return;
+  }
+
   const problems = validateTemplates();
   if (problems.length) die(problems.join('\n'));
 
