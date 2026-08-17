@@ -7,6 +7,7 @@
 | **Traces to**    | BRD-001, SRS-001, REQ-001 … REQ-027, NFR-001 … NFR-006, BR-001.1 … BR-001.16   |
 | **Engine**       | **Microsoft SQL Server** (LocalDB in dev)                                        |
 | **ORM**          | Entity Framework Core 8.0.11                                                     |
+| **Access layer** | **Infrastructure tier** — `AppDbContext` and repositories; Presentation never queries SQL directly |
 | **Office TZ**    | Configured once per deployment (`Office:TimeZone`, NFR-001)                      |
 
 ## Overview

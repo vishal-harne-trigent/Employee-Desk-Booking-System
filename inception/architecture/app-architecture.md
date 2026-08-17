@@ -24,67 +24,109 @@
 
 ---
 
+## Architectural style: Layered (N-tier)
+
+The system uses **Layered Architecture** (also called **N-tier architecture**): responsibilities are split into horizontal layers, each layer depends only on the layer **directly below** it, and business rules live in the middle tiers — not in controllers or the database.
+
+| Tier | Project(s) | Responsibility |
+| ---- | ---------- | -------------- |
+| **Presentation** | `EmployeeDeskBooking.Web`, `EmployeeDeskBooking.Api` | HTTP, routing, auth middleware, Razor views, JSON responses, input binding |
+| **Application** | `EmployeeDeskBooking.Application` | Use cases, orchestration, DTOs, validation, business rules (BR-001.*) |
+| **Domain** | `EmployeeDeskBooking.Domain` | Entities, enums, domain exceptions — no framework references |
+| **Infrastructure** | `EmployeeDeskBooking.Infrastructure` | EF Core `DbContext`, repositories, MailKit, WebPush, password hasher, hosted jobs |
+| **Data** | SQL Server (LocalDB in dev) | Persistent storage |
+
+### Dependency rules
+
+```
+Presentation  →  Application  →  Domain
+                      ↑
+               Infrastructure  →  Domain
+                      ↓
+                    Data (SQL Server)
+```
+
+| Rule | Enforcement |
+| ---- | ----------- |
+| Presentation calls **Application** only | Controllers inject `IBookingService`, not `AppDbContext` |
+| Application defines **interfaces**; Infrastructure implements them | `IUserRepository`, `IEmailSender` in Application; implementations in Infrastructure |
+| **Domain** has zero upward dependencies | No references to Application, Infrastructure, Web, or Api |
+| Infrastructure references Domain + Application contracts | EF entity configs map to Domain types |
+| No **layer skipping** | Web/Api must not query EF or SQL directly |
+| Shared logic stays in Application | Web and Api are thin adapters over the same services |
+
+Background jobs (`IHostedService`) live in **Infrastructure** but invoke **Application** services — they do not bypass the Application tier.
+
+---
+
 ## System context
 
-Employees and Admins use a **server-rendered MVC app** (Razor + Bootstrap 5) aligned to SCR-001 … SCR-007. A companion **Web API** exposes the same domain over REST with **JWT Bearer** auth and **Swashbuckle** OpenAPI docs. Both hosts share **Application** and **Infrastructure** layers and one **SQL Server** database via **EF Core**.
+Employees and Admins use a **server-rendered MVC app** (Razor + Bootstrap 5) aligned to SCR-001 … SCR-007. A companion **Web API** exposes the same domain over REST with **JWT Bearer** auth and **Swashbuckle** OpenAPI docs. Both presentation hosts sit on the same **Application** and **Infrastructure** layers and one **SQL Server** database via **EF Core**.
 
-Outbound email uses **MailKit**; browser push uses **WebPush** with VAPID keys. Background jobs (`IHostedService`) complete past bookings and send day-before reminders.
+Outbound email uses **MailKit**; browser push uses **WebPush** with VAPID keys. Background jobs complete past bookings and send day-before reminders.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│                     Browser (HTTPS)                              │
-│  ASP.NET Core MVC (Razor views) — SCR-001 … SCR-007              │
-│  Cookie authentication                                           │
+│  PRESENTATION TIER                                               │
+│  ┌─────────────────────────┐  ┌─────────────────────────────┐   │
+│  │ EmployeeDeskBooking.Web │  │ EmployeeDeskBooking.Api     │   │
+│  │ MVC · Razor · Cookies   │  │ REST · JWT · Swashbuckle    │   │
+│  │ SCR-001 … SCR-007       │  │ /api/*                      │   │
+│  └───────────┬─────────────┘  └──────────────┬──────────────┘   │
+└──────────────┼───────────────────────────────┼──────────────────┘
+               │                               │
+               └───────────────┬───────────────┘
+                               ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  APPLICATION TIER — services, DTOs, validators, BR-001.* rules   │
 └────────────────────────────┬─────────────────────────────────────┘
-                             │ form posts + optional fetch → API
-┌────────────────────────────▼─────────────────────────────────────┐
-│              ASP.NET Core Web API                                │
-│              JWT Bearer · Swashbuckle OpenAPI                    │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │
-┌────────────────────────────▼─────────────────────────────────────┐
-│  Application (services, DTOs, validation, domain rules)          │
-│  Infrastructure (EF Core, MailKit, WebPush, password hasher)     │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ EF Core 8
                              ▼
-                    SQL Server (LocalDB dev)
+┌──────────────────────────────────────────────────────────────────┐
+│  DOMAIN TIER — User, Desk, Booking, enums (pure .NET)            │
+└────────────────────────────▲─────────────────────────────────────┘
                              │
-                    MailKit SMTP · Web Push endpoints
+┌────────────────────────────┴─────────────────────────────────────┐
+│  INFRASTRUCTURE TIER — EF Core, MailKit, WebPush, hosted jobs    │
+└────────────────────────────┬─────────────────────────────────────┘
+                             ▼
+┌──────────────────────────────────────────────────────────────────┐
+│  DATA TIER — SQL Server (LocalDB dev)                            │
+└──────────────────────────────────────────────────────────────────┘
+         MailKit SMTP · Web Push endpoints (external, via Infrastructure)
 ```
 
 ---
 
-## Solution layout
+## Solution layout (N-tier mapping)
 
 ```
 EmployeeDeskBooking.sln
 src/
-  EmployeeDeskBooking.Domain/           Entities, enums, domain exceptions
-  EmployeeDeskBooking.Application/      Services, interfaces, DTOs, validators
-  EmployeeDeskBooking.Infrastructure/   DbContext, EF configs, migrations, MailKit, WebPush
-  EmployeeDeskBooking.Web/              MVC (Razor), Cookie auth, area/controllers per feature
-  EmployeeDeskBooking.Api/              Web API controllers, JWT, Swashbuckle
+  EmployeeDeskBooking.Domain/           ← Domain tier
+  EmployeeDeskBooking.Application/      ← Application tier
+  EmployeeDeskBooking.Infrastructure/   ← Infrastructure tier (+ DI registration)
+  EmployeeDeskBooking.Web/              ← Presentation tier (MVC)
+  EmployeeDeskBooking.Api/              ← Presentation tier (REST)
 tests/
   EmployeeDeskBooking.Tests/            Unit + integration tests
 tools/                                  aidlc-check, aidlc-jira, seed utilities
 ```
 
-**US-001** scaffolds the solution and first migration. Update `ai/standards/task-surfaces.md` and coding standards to replace the AI-DLC NestJS/Angular seed with this .NET layout.
+**US-001** scaffolds the solution, enforces project references per the dependency rules above, and adds the first EF Core migration. Update `ai/standards/task-surfaces.md` and coding standards to replace the AI-DLC NestJS/Angular seed with this .NET N-tier layout.
 
 ---
 
 ## Layer responsibilities
 
-| Layer | Owns |
-| ----- | ---- |
-| **Domain** | `User`, `Desk`, `Booking`, enums, no framework references |
-| **Application** | `IBookingService`, `IAuthService`, business rules BR-001.*, `OfficeClock` |
-| **Infrastructure** | `AppDbContext`, EF migrations, `EmailSender` (MailKit), `PushNotificationService` (WebPush), `PasswordHasher` adapter |
-| **Web** | MVC controllers + Razor views; `[Authorize]` + role policies; anti-forgery on forms |
-| **Api** | REST controllers returning JSON; `[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]` |
+| Tier | Project | Owns | Must not |
+| ---- | ------- | ---- | -------- |
+| **Presentation** | `Web` | MVC controllers, Razor views, cookie auth, `[Authorize]`, anti-forgery | Call `DbContext`, embed BR-001.* rules |
+| **Presentation** | `Api` | REST controllers, JWT, Swashbuckle, Problem Details | Call `DbContext`, embed BR-001.* rules |
+| **Application** | `Application` | `IBookingService`, `IAuthService`, DTOs, validators, `IOfficeClock`, BR-001.* | Reference EF, MailKit, or ASP.NET |
+| **Domain** | `Domain` | `User`, `Desk`, `Booking`, enums, domain exceptions | Reference any other project |
+| **Infrastructure** | `Infrastructure` | `AppDbContext`, EF migrations, repository implementations, MailKit, WebPush, `IHostedService` jobs | Expose data access to Presentation |
 
-Web and Api **both call Application services** — no duplicated business logic.
+Web and Api are **thin presentation adapters** — both delegate to the same Application services; no duplicated business logic.
 
 ---
 
@@ -264,6 +306,7 @@ Use `TimeZoneInfo` with configured `Office:TimeZone`. Jobs idempotent and logged
 
 | Decision | Choice |
 | -------- | ------ |
+| Architecture | **Layered (N-tier)** — Presentation → Application → Domain; Infrastructure implements Application contracts |
 | Stack | .NET 8, MVC + Web API, EF Core, SQL Server — **project standard** |
 | UI | Server-rendered Razor (not SPA) — matches SCR wireframes and team stack |
 | Dual auth | Cookies for MVC; JWT for API/OpenAPI |
