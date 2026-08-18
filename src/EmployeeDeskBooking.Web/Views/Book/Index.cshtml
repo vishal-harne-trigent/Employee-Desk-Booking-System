@@ -1,14 +1,100 @@
+@model EmployeeDeskBooking.Web.Models.BookIndexViewModel
 @{
-    ViewData["Title"] = "Book Desk";
+    ViewData["Title"] = "Desk Availability";
     Layout = "_Layout";
 }
 
-<div class="page-card">
-    <h1>Book Desk</h1>
-    <p class="text-muted">Desk booking will be available in US-002.</p>
+<div class="page-header">
+    <h1>Desk Availability</h1>
+    <p class="text-muted">Pick a working day and book one available desk.</p>
 </div>
 
-<form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
-    @Html.AntiForgeryToken()
-    <button type="submit" class="btn btn-link">Sign out</button>
-</form>
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success" role="status">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.DateError))
+{
+    <div class="alert alert-error" role="alert">@Model.DateError</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.BookingError))
+{
+    <div class="alert alert-error" role="alert">@Model.BookingError</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ExistingBookingDeskNumber))
+{
+    <div class="alert alert-info" role="status">
+        You already have desk <strong>@Model.ExistingBookingDeskNumber</strong> booked for this date.
+        Cancel it from My Bookings before booking another desk.
+    </div>
+}
+
+<div class="page-card">
+    <form asp-action="CheckAvailability" method="post" class="date-filter-form">
+        @Html.AntiForgeryToken()
+        <div class="field inline-field">
+            <label for="selectedDate">Office date</label>
+            <input id="selectedDate" name="selectedDate" type="date"
+                   value="@Model.SelectedDate.ToString("yyyy-MM-dd")" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Check availability</button>
+    </form>
+</div>
+
+@if (Model.AvailabilityRequested && string.IsNullOrEmpty(Model.DateError))
+{
+    <div class="page-card desk-table-card">
+        @if (Model.Desks.Count == 0)
+        {
+            <p class="empty-state">All desks are booked for this date. Try another working day.</p>
+        }
+        else if (Model.ExistingBookingDeskNumber is not null)
+        {
+            <p class="text-muted">Desk list is hidden while you have a booking on this date.</p>
+        }
+        else
+        {
+            <table class="desk-table">
+                <thead>
+                    <tr>
+                        <th>Desk</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var desk in Model.Desks)
+                {
+                    <tr>
+                        <td class="desk-number">@desk.DeskNumber</td>
+                        <td>
+                            @if (desk.IsAvailable)
+                            {
+                                <span class="pill pill-available">Available</span>
+                            }
+                            else
+                            {
+                                <span class="pill pill-booked">Booked</span>
+                            }
+                        </td>
+                        <td>
+                            @if (desk.IsAvailable)
+                            {
+                                <form asp-action="BookDesk" method="post" class="inline-form">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="deskId" value="@desk.DeskId" />
+                                    <input type="hidden" name="selectedDate" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" />
+                                    <button type="submit" class="btn btn-primary btn-sm">Book desk</button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+}
