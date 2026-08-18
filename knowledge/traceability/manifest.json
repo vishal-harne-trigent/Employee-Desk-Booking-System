@@ -326,7 +326,8 @@
         "AC-05"
       ],
       "tests": [
-        "tests/EmployeeDeskBooking.Tests/SignInTests.cs"
+        "tests/EmployeeDeskBooking.Tests/SignInTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiAuthTests.cs"
       ],
       "jira": "EDBS-38"
     },
@@ -353,7 +354,10 @@
         "AC-05",
         "AC-06"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/BookDeskTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiBookingTests.cs"
+      ],
       "jira": "EDBS-39"
     },
     "US-003": {

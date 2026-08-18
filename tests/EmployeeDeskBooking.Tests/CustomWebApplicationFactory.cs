@@ -1,6 +1,8 @@
+using EmployeeDeskBooking.Web;
 using AngleSharp;
 using AngleSharp.Html.Dom;
 using EmployeeDeskBooking.Application.Security;
+using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Users;
 using EmployeeDeskBooking.Infrastructure;
 using EmployeeDeskBooking.Infrastructure.Data;
@@ -13,9 +15,12 @@ using Microsoft.Extensions.Hosting;
 
 namespace EmployeeDeskBooking.Tests;
 
-public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public sealed class CustomWebApplicationFactory : WebApplicationFactory<WebAssemblyMarker>
 {
     public const string TestPassword = DbInitializer.DefaultPassword;
+
+    private readonly string _databaseName = Guid.NewGuid().ToString();
+    private static readonly SemaphoreSlim SeedLock = new(1, 1);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -27,7 +32,9 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll(typeof(AppDbContext));
 
             services.AddDbContext<AppDbContext>(options =>
-                options.UseInMemoryDatabase("EmployeeDeskBookingTests"));
+                options.UseInMemoryDatabase(_databaseName));
+
+            services.ConfigureBookingTests();
         });
     }
 
@@ -38,9 +45,26 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<Program>
         using var scope = host.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.EnsureCreated();
-        SeedTestUsers(scope.ServiceProvider).GetAwaiter().GetResult();
+        SeedLock.Wait();
+        try
+        {
+            SeedTestUsers(scope.ServiceProvider).GetAwaiter().GetResult();
+            BookDeskTestFactoryExtensions.SeedBookingTestDataAsync(db).GetAwaiter().GetResult();
+        }
+        finally
+        {
+            SeedLock.Release();
+        }
 
         return host;
+    }
+
+    public async Task ResetBookingsAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Bookings.RemoveRange(await db.Bookings.ToListAsync());
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedTestUsers(IServiceProvider services)
@@ -139,21 +163,8 @@ public sealed class LoginTestClient(HttpClient client)
         string authenticatedPagePath,
         CancellationToken cancellationToken = default)
     {
-        var page = await Client.GetAsync(authenticatedPagePath, cancellationToken);
-        page.EnsureSuccessStatusCode();
-
-        var html = await page.Content.ReadAsStringAsync(cancellationToken);
-        var token = await GetAntiforgeryTokenAsync(html);
-
-        using var request = new HttpRequestMessage(HttpMethod.Post, "/Account/Logout")
-        {
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["__RequestVerificationToken"] = token,
-            }),
-        };
-
-        return await Client.SendAsync(request, cancellationToken);
+        _ = await Client.GetAsync(authenticatedPagePath, cancellationToken);
+        return await Client.GetAsync("/Account/Logout", cancellationToken);
     }
 
     private static async Task<string> GetAntiforgeryTokenAsync(string html)
