@@ -23,7 +23,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
-        bool enableReminderJob = false)
+        bool enableReminderJob = false,
+        bool enableCompletionJob = false)
     {
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -51,6 +52,11 @@ public static class DependencyInjection
         if (enableReminderJob)
         {
             services.AddHostedService<ReminderEmailHostedService>();
+        }
+
+        if (enableCompletionJob)
+        {
+            services.AddHostedService<CompletePastBookingsHostedService>();
         }
 
         services.Configure<VapidOptions>(configuration.GetSection("Push"));

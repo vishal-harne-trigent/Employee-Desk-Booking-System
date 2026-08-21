@@ -181,6 +181,13 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             .ToList();
     }
 
+    public async Task<IReadOnlyList<Booking>> GetConfirmedBookingsBeforeDateAsync(
+        DateOnly beforeDate,
+        CancellationToken cancellationToken = default) =>
+        await dbContext.Bookings
+            .Where(b => b.Status == BookingStatus.Confirmed && b.BookingDate < beforeDate)
+            .ToListAsync(cancellationToken);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
