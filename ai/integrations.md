@@ -1,6 +1,6 @@
 # Integrations
 
-Every external system this framework touches, with a **recorded position**. An integration with no position is how a governance model quietly acquires a bypass — so "declined" and "deferred" are recorded here as deliberately as "adopted".
+Every external system this framework touches, with a **recorded position**. An integration with no position is how a governance model quietly acquires a bypass, so "declined" and "deferred" are recorded here as deliberately as "adopted".
 
 ## Governance-critical vs convenience
 
@@ -13,7 +13,8 @@ The distinction matters more than the list. Exactly one integration is load-bear
 | Jira                                          | Convenience      | Tracking and the client's view go dark; **no gate is affected and the build stays green**    |
 | Design tools (Figma, Penpot, …)               | Convenience      | Nothing in the graph changes — the repo holds the spec and tokens; a tool holds pixels       |
 | Claude Design                                 | Convenience      | The design system stays repo-local and reviewable in the PR — nothing is lost from the graph |
-| MCP servers                                   | Convenience      | Personas lose reference lookups; gates unaffected                                            |
+| MCP servers (reference)                       | Convenience      | Personas lose reference lookups; gates unaffected                                            |
+| Playwright + Playwright MCP                   | Convenience      | Browser tests stop running. No gate is affected: cross-repo e2e evidence is validated only when present, and same-repo e2e specs are ordinary tests |
 | Cursor / opencode / GitHub Copilot            | Convenience      | Those entry points go dark; the Claude surfaces, charters and gates are untouched            |
 | mattpocock/skills                             | Convenience      | Personas lose sub-techniques; charters unaffected                                            |
 
@@ -39,7 +40,7 @@ The source methodology's phases 2–3 produced wireframes and Figma frames as th
 | `tokens.css` (canonical) + generated `tokens.json` in **W3C DTCG** format     | The imported token set, applied to frames          |
 | Component previews — real HTML, real tokens, all states marked                | Exploration, variants, annotation, comment threads |
 
-`tokens.json` imports into **Figma (Tokens Studio), Penpot, Style Dictionary**, or anything else reading DTCG. Because it is generated from `tokens.css` and CI fails on drift, the palette a designer draws with cannot diverge from the palette the product ships — which is the one guarantee a Figma-first workflow could never give.
+`tokens.json` imports into **Figma (Tokens Studio), Penpot, Style Dictionary**, or anything else reading DTCG. Because it is generated from `tokens.css` and CI fails on drift, the palette a designer draws with cannot diverge from the palette the product ships, which is the one guarantee a Figma-first workflow could never give.
 
 **What this deliberately does not do:** it does not replace the designer's canvas, and it does not try to. Frames stay in their tool. It also does not capture Figma's collaboration surface — comment threads, handoff annotations, version history of a visual. That remains the honest gap recorded in ADR-001, and it is now a smaller one: the collaboration that _matters to a gate_ (which states exist, which conflicts are unresolved, who owns them) has moved into reviewable files, and the rest stays where designers already do it well.
 
@@ -63,9 +64,9 @@ Adopted 2026-07-31, reversing ADR-001's decline on the exact terms that decline 
 
 **The boundary, and it is the whole point:** **approval never travels, in either direction.** No Jira field, transition, or comment opens or closes a gate. Gate approval is a GitHub pull-request review bound to a commit SHA — because that authenticates who approved exactly which bytes, and a ticket field authenticates nothing once it has crossed an integration boundary. Jira also keeps sprints, assignees and estimates outright; mirroring those into the repository would recreate the status-file anti-pattern.
 
-**Enforcement, not just prose.** One writer — `tools/aidlc-jira.mjs`, dry-run by default so client-visible text is reviewable in the PR before it reaches a live board. It refuses approval-bearing and Jira-owned fields, and `aidlc-check` (check 12) rejects any template that declares one, any unknown placeholder, and any malformed ticket key. A **missing** key is only ever a warning: Jira going away must not break the build, which is the test of whether this stayed in its lane.
+**Enforcement, not prose alone.** One writer, `tools/aidlc-jira.mjs`, dry-run by default so client-visible text is reviewable in the PR before it reaches a live board. It refuses approval-bearing and Jira-owned fields, and `aidlc-check` (check 12) rejects any template that declares one, any unknown placeholder, and any malformed ticket key. A **missing** key is only ever a warning: Jira going away must not break the build, which is the test of whether this stayed in its lane.
 
-Not tool-enforced, and said plainly: `/architect` must not write to Jira. Its read-only guarantee is `disallowedTools: Write, Edit`, which covers files, not external systems — so that limit is a charter rule.
+Not tool-enforced, and said plainly: `/architect` must not write to Jira. Its read-only guarantee is `disallowedTools: Write, Edit`, which covers files, not external systems, so that limit is a charter rule.
 
 ### Nx — task orchestration
 
@@ -73,7 +74,7 @@ All tasks run through Nx (`npm run nx -- <target> <project>`), never the underly
 
 ### mattpocock/skills — companion techniques
 
-Enabled via `.claude/settings.json` from the published marketplace, so nothing is vendored. Personas may invoke these as sub-techniques while **staying bound by their charters and gates** — those skills do not know our manifest, approvals, or interaction rules. Two techniques are woven in directly and need no install: the BA's grill pass and DEV's test-first rhythm.
+Enabled via `.claude/settings.json` from the published marketplace, so nothing is vendored. Personas may invoke these as sub-techniques while **staying bound by their charters and gates**. Those skills do not know our manifest, approvals, or interaction rules. Two techniques are built in directly and need no install: the BA's grill pass and DEV's test-first rhythm.
 
 ## Adopted with a boundary
 
@@ -81,15 +82,17 @@ Enabled via `.claude/settings.json` from the published marketplace, so nothing i
 
 Adopted 2026-08-03 ([ADR-005](../knowledge/decisions/ADR-005-multi-tool-persona-surfaces.md)), scoping ADR-001's Anthropic-only position to the framework's own tooling. The persona charters are tool-agnostic by design, so each tool gets generated wrappers — skills (the shared Agent Skills format), typed commands (`/ba`, `/ux`, …) and delegatable agents — built by `tools/aidlc-build-surfaces.mjs` from the `.claude/` sources. `aidlc-check` (check 13) fails on drift; the generated files are never hand-edited.
 
-**The boundary:** the gates do not move with the editor. Approval is a GitHub PR review and `aidlc-check` is the required status regardless of which assistant drafted the work. Enforcement parity is uneven and recorded rather than pretended: the Architect/Manager read-only guarantee is tool-enforced on Claude Code (`disallowedTools`) and opencode (`tools: write/edit: false`), and charter-enforced with an explicit injected notice on Cursor and Copilot, which have no per-agent tool restriction. Accepted cost: work drafted in another tool runs on that tool's model, so "one model vendor" describes the framework's tooling, not every drafting session — the enforcement spine is model-independent, which is the guarantee that matters.
+**The boundary:** the gates do not move with the editor. Approval is a GitHub PR review and `aidlc-check` is the required status regardless of which assistant drafted the work. Enforcement parity is uneven and recorded rather than pretended: the Architect/Manager read-only guarantee is tool-enforced on Claude Code (`disallowedTools`) and opencode (`tools: write/edit: false`), and charter-enforced with an explicit injected notice on Cursor and Copilot, which have no per-agent tool restriction. Accepted cost: work drafted in another tool runs on that tool's model, so "one model vendor" describes the framework's tooling, not every drafting session. The enforcement spine is model-independent, which is the guarantee that matters.
 
 ### MCP servers — read-only context only
 
-Personas may use MCP servers for **reference and context**: library documentation, workspace queries, reading external state. Currently configured: Nx (workspace/task queries) and Context7 (library documentation).
+Personas may use MCP servers for **reference and context**: library documentation, workspace queries, reading external state. Currently configured: Nx (workspace/task queries), Context7 (library documentation), and — where the e2e layer is installed — Playwright (browser automation).
+
+**Playwright MCP is the one exception to "read-only", and it is scoped rather than waved through.** It drives a browser, so it writes to a running application: that is the point, since a locator verified against the real DOM is the difference between a generated test and a guessed one. What keeps it inside the boundary below is *what* it may touch — a test environment, never a gate. It may not act against production, and nothing it does approves, merges, deploys, or edits an approved artifact. The trade-off is recorded in [ADR-006](../knowledge/decisions/ADR-006-e2e-testing-layer.md).
 
 **The boundary:** a persona must not use a write-capable MCP tool to do anything a gate governs. Nothing that merges a PR, approves a review, deploys, edits an approved artifact outside a reviewed PR, or writes project status. If an MCP server offers such a capability, using it is a gate bypass regardless of how convenient it is.
 
-This boundary is **documented, not tool-enforced** — MCP tool availability is a client-side setting, and the framework says so rather than pretending otherwise. Adding a write-capable MCP server to this repo is a decision that belongs in an ADR.
+This boundary is **documented, not tool-enforced**. MCP tool availability is a client-side setting, and the framework says so rather than pretending otherwise. Adding a write-capable MCP server to this repo is a decision that belongs in an ADR.
 
 ## Declined
 
@@ -115,4 +118,4 @@ Declined for this project — see [ADR-001](../knowledge/decisions/ADR-001-frame
 
 ### Azure DevOps
 
-Declined. Code, review, status and CI stay in one system with one identity model. Revisit only if the organisation mandates it, on the same terms Jira was adopted under: GitHub remains the approval surface and the other system mirrors it — never the reverse.
+Declined. Code, review, status and CI stay in one system with one identity model. Revisit only if the organisation mandates it, on the same terms Jira was adopted under: GitHub remains the approval surface and the other system mirrors it, never the reverse.
