@@ -43,6 +43,11 @@ public interface IBookingRepository
         BookingStatus? status,
         CancellationToken cancellationToken = default);
 
+    Task<bool> HasConfirmedBookingsForDeskOnOrAfterAsync(
+        Guid deskId,
+        DateOnly fromDate,
+        CancellationToken cancellationToken = default);
+
     Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);

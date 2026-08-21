@@ -1,9 +1,11 @@
 using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Application.Desks;
 using EmployeeDeskBooking.Application.Security;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Application.Users;
 using EmployeeDeskBooking.Infrastructure.Bookings;
 using EmployeeDeskBooking.Infrastructure.Data;
+using EmployeeDeskBooking.Infrastructure.Desks;
 using EmployeeDeskBooking.Infrastructure.Security;
 using EmployeeDeskBooking.Infrastructure.Time;
 using EmployeeDeskBooking.Infrastructure.Users;
@@ -24,6 +26,7 @@ public static class DependencyInjection
 
         services.AddScoped<IUserRepository, EfUserRepository>();
         services.AddScoped<IBookingRepository, EfBookingRepository>();
+        services.AddScoped<IDeskRepository, EfDeskRepository>();
         services.AddSingleton<IPasswordVerifier, AspNetPasswordVerifier>();
         services.AddSingleton<IOfficeClock, OfficeClock>();
 
