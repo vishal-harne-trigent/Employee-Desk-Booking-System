@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using EmployeeDeskBooking.Api.Contracts.Auth;
 using EmployeeDeskBooking.Api.Contracts.Bookings;
+using EmployeeDeskBooking.Api.Contracts.Notifications;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -132,6 +133,15 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
 
     public Task<HttpResponseMessage> CancelBookingAsync(Guid bookingId) =>
         Client.PostAsync($"/api/bookings/{bookingId}/cancel", null);
+
+    public Task<HttpResponseMessage> GetNotificationPreferencesAsync() =>
+        Client.GetAsync("/api/notifications/preferences");
+
+    public Task<HttpResponseMessage> UpdateNotificationPreferencesAsync(UpdateNotificationPreferencesRequest request) =>
+        Client.PatchAsJsonAsync("/api/notifications/preferences", request);
+
+    public Task<HttpResponseMessage> SavePushSubscriptionAsync(SavePushSubscriptionRequest request) =>
+        Client.PostAsJsonAsync("/api/notifications/push-subscription", request);
 
     public Guid GetDeskIdByNumber(string deskNumber)
     {

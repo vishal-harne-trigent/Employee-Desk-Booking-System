@@ -66,9 +66,14 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<WebAssem
         db.Bookings.RemoveRange(await db.Bookings.ToListAsync());
         db.EmailDeliveryLogs.RemoveRange(await db.EmailDeliveryLogs.ToListAsync());
         db.BookingReminders.RemoveRange(await db.BookingReminders.ToListAsync());
+        db.NotificationPreferences.RemoveRange(await db.NotificationPreferences.ToListAsync());
         await db.SaveChangesAsync();
         scope.ServiceProvider.GetRequiredService<InMemoryEmailSender>().Reset();
+        scope.ServiceProvider.GetRequiredService<InMemoryPushNotificationSender>().Reset();
     }
+
+    public InMemoryPushNotificationSender GetPushSender() =>
+        Services.GetRequiredService<InMemoryPushNotificationSender>();
 
     public InMemoryEmailSender GetEmailSender() =>
         Services.GetRequiredService<InMemoryEmailSender>();

@@ -25,6 +25,9 @@
     <div class="page-card empty-state">
         <p>You do not have any desk bookings yet.</p>
         <a asp-controller="Book" asp-action="Index" class="btn btn-primary">Book a desk</a>
+        <p class="settings-link">
+            <a asp-controller="NotificationSettings" asp-action="Index">Notification settings</a>
+        </p>
     </div>
 }
 else
@@ -71,4 +74,8 @@ else
             </tbody>
         </table>
     </div>
+
+    <p class="settings-link">
+        <a asp-controller="NotificationSettings" asp-action="Index">Notification settings</a>
+    </p>
 }

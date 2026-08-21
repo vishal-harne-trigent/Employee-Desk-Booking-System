@@ -525,7 +525,14 @@
         "AC-04",
         "AC-05"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/PushNotificationTests.cs",
+        "tests/EmployeeDeskBooking.Tests/PushNotificationTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/NotificationSettingsTests.cs",
+        "tests/EmployeeDeskBooking.Tests/NotificationSettingsTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/ApiNotificationTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiNotificationTests.ac.test.js"
+      ],
       "jira": "EDBS-45"
     },
     "US-009": {

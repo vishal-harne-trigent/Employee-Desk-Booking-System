@@ -28,3 +28,15 @@ public class BookingReminderConfiguration : IEntityTypeConfiguration<BookingRemi
         builder.Property(reminder => reminder.CreatedAt).IsRequired();
     }
 }
+
+public class NotificationPreferenceConfiguration : IEntityTypeConfiguration<NotificationPreference>
+{
+    public void Configure(EntityTypeBuilder<NotificationPreference> builder)
+    {
+        builder.ToTable("NotificationPreferences");
+        builder.HasKey(preference => preference.UserId);
+        builder.Property(preference => preference.PushOptIn).HasDefaultValue(false);
+        builder.Property(preference => preference.PushSubscription);
+        builder.Property(preference => preference.UpdatedAt).IsRequired();
+    }
+}

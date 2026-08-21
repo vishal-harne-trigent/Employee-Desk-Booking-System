@@ -88,6 +88,7 @@ public sealed class CustomApiApplicationFactory : WebApplicationFactory<ApiAssem
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Bookings.RemoveRange(await db.Bookings.ToListAsync());
+        db.NotificationPreferences.RemoveRange(await db.NotificationPreferences.ToListAsync());
         await db.SaveChangesAsync();
     }
 

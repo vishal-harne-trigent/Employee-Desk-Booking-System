@@ -10,7 +10,8 @@ Every development spec package in this repo. **Check here before creating a new 
 | US-004 | Admin view and cancel all bookings | Medium | implemented | [`US-004-admin-bookings/`](US-004-admin-bookings/) |
 | US-005 | Admin manage desks | Medium | implemented | [`US-005-manage-desks/`](US-005-manage-desks/) |
 | US-006 | Admin manage users | Medium | implemented | [`US-006-manage-users/`](US-006-manage-users/) |
-| US-007 | Send booking email notifications | Complex | in delivery | [`US-007-booking-emails/`](US-007-booking-emails/) |
+| US-007 | Send booking email notifications | Complex | implemented | [`US-007-booking-emails/`](US-007-booking-emails/) |
+| US-008 | Browser push notification preferences | Complex | in delivery | [`US-008-push-notifications/`](US-008-push-notifications/) |
 
 ## How to update
 

@@ -4,6 +4,7 @@ using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
+using EmployeeDeskBooking.Domain.Notifications;
 using EmployeeDeskBooking.Infrastructure;
 using EmployeeDeskBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -88,6 +89,28 @@ public static class BookDeskTestFactoryExtensions
         var emailSender = new InMemoryEmailSender();
         services.AddSingleton(emailSender);
         services.AddSingleton<IEmailSender>(emailSender);
+
+        services.RemoveAll<IPushNotificationSender>();
+        services.RemoveAll<InMemoryPushNotificationSender>();
+        var pushSender = new InMemoryPushNotificationSender();
+        services.AddSingleton(pushSender);
+        services.AddSingleton<IPushNotificationSender>(pushSender);
+    }
+
+    public static async Task SeedPushOptInAsync(
+        AppDbContext db,
+        Guid userId,
+        string subscriptionJson = PushTestData.SampleSubscriptionJson)
+    {
+        var now = DateTimeOffset.UtcNow;
+        db.NotificationPreferences.Add(new Domain.Notifications.NotificationPreference
+        {
+            UserId = userId,
+            PushOptIn = true,
+            PushSubscription = subscriptionJson,
+            UpdatedAt = now,
+        });
+        await db.SaveChangesAsync();
     }
 
     public static async Task SeedBookingTestDataAsync(AppDbContext db)
