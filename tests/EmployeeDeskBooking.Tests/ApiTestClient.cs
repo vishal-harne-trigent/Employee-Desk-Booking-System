@@ -79,6 +79,21 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
     public Task<HttpResponseMessage> AdminCancelBookingAsync(Guid bookingId) =>
         Client.PostAsync($"/api/admin/bookings/{bookingId}/cancel", null);
 
+    public Task<HttpResponseMessage> GetAdminDesksAsync() =>
+        Client.GetAsync("/api/admin/desks");
+
+    public Task<HttpResponseMessage> CreateAdminDeskAsync(string deskNumber) =>
+        Client.PostAsJsonAsync("/api/admin/desks", new { deskNumber });
+
+    public Task<HttpResponseMessage> UpdateAdminDeskAsync(Guid deskId, string deskNumber) =>
+        Client.PutAsJsonAsync($"/api/admin/desks/{deskId}", new { deskNumber });
+
+    public Task<HttpResponseMessage> DeactivateAdminDeskAsync(Guid deskId) =>
+        Client.PostAsync($"/api/admin/desks/{deskId}/deactivate", null);
+
+    public Task<HttpResponseMessage> ActivateAdminDeskAsync(Guid deskId) =>
+        Client.PostAsync($"/api/admin/desks/{deskId}/activate", null);
+
     public Task<HttpResponseMessage> GetAvailabilityAsync(DateOnly date) =>
         Client.GetAsync($"/api/bookings/availability?date={date:yyyy-MM-dd}");
 

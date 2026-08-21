@@ -119,6 +119,16 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             .ToList();
     }
 
+    public Task<bool> HasConfirmedBookingsForDeskOnOrAfterAsync(
+        Guid deskId,
+        DateOnly fromDate,
+        CancellationToken cancellationToken = default) =>
+        dbContext.Bookings.AsNoTracking().AnyAsync(
+            b => b.DeskId == deskId
+                && b.Status == BookingStatus.Confirmed
+                && b.BookingDate >= fromDate,
+            cancellationToken);
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }

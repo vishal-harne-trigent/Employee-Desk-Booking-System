@@ -439,7 +439,12 @@
         "AC-04",
         "AC-05"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/AdminDesksTests.cs",
+        "tests/EmployeeDeskBooking.Tests/AdminDesksTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminDesksTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminDesksTests.ac.test.js"
+      ],
       "jira": "EDBS-42"
     },
     "US-006": {
