@@ -473,7 +473,12 @@
         "AC-06",
         "AC-07"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/AdminUsersTests.cs",
+        "tests/EmployeeDeskBooking.Tests/AdminUsersTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminUsersTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminUsersTests.ac.test.js"
+      ],
       "jira": "EDBS-43"
     },
     "US-007": {
