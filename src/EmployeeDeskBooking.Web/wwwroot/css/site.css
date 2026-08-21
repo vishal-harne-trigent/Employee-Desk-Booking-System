@@ -364,6 +364,17 @@ body {
   color: #475569;
 }
 
-.bookings-table .btn-sm {
-  min-width: 5rem;
+.admin-filter-form {
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.admin-bookings-table .employee-email {
+  display: block;
+  font-size: 0.875rem;
+}
+
+.admin-bookings-table .employee-name {
+  display: block;
+  font-weight: 600;
 }
