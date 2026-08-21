@@ -310,22 +310,27 @@ Use `TimeZoneInfo` with configured `Office:TimeZone`. Jobs idempotent and logged
 | Stack | .NET 8, MVC + Web API, EF Core, SQL Server — **project standard** |
 | UI | Server-rendered Razor (not SPA) — matches SCR wireframes and team stack |
 | Dual auth | Cookies for MVC; JWT for API/OpenAPI |
-| Passwords | `IPasswordHasher<User>` — do not custom-hash |
+| Passwords | `IPasswordHasher<User>` — do not custom-hash; **V-12:** min 8 chars, upper + lower + digit + special (PO/security approved 2026-08-21) |
 | Email / push | MailKit + WebPush as specified |
 | Concurrency | SQL Server filtered unique indexes + EF transactions (RISK-004) |
-| First Admin | EF seed / DbInitializer on migrate |
+| First Admin | **`DbInitializer`** seeds Admin (+ dev Employee) when no users exist (PO/Architect approved 2026-08-21) |
 
 ---
+
+## Resolved decisions (from BRD open questions)
+
+| # | Decision | Resolution |
+| - | -------- | ---------- |
+| 1 | First Admin bootstrap | **`DbInitializer`** on startup/migrate when no users — PO/Architect, 2026-08-21 |
+| 5 | Password policy (V-12) | Min 8 chars; upper, lower, digit, special required — PO/security, 2026-08-21 |
 
 ## Open questions (from BRD)
 
 | # | Question | Owner |
 | - | -------- | ----- |
-| 1 | Confirm first-Admin seed | PO/Architect |
 | 2 | Holiday calendar | PO/client |
 | 3 | Reminder time (default 08:00) | PO/client |
 | 4 | Mobile vs desktop | PO/client |
-| 5 | Password policy | PO/security |
 | 6 | Desk deactivate flow | PO/client |
 | 7 | SMTP / sender | PO/IT |
 

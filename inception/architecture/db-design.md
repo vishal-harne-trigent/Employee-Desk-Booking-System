@@ -187,7 +187,7 @@ Concurrent book (RISK-004): `IDbContextTransaction` + catch `DbUpdateException` 
 
 ## Bootstrap and seed data
 
-**First Admin** (BRD open Q #1): EF Core seed or `DbInitializer` run on startup/migrate — creates first Admin when no users exist, using `IPasswordHasher<User>`.
+**First Admin** (BRD Q #1 — **resolved**): `DbInitializer` on app startup/migrate creates the first Admin (and dev Employee accounts) when no users exist, using `IPasswordHasher<User>`. No manual DB step in dev; production bootstrap TBD at Gate 3.
 
 Initial desks: empty until US-005.
 
@@ -206,11 +206,16 @@ Command: `dotnet ef migrations add InitialCreate --project src/EmployeeDeskBooki
 
 ---
 
+## Resolved decisions (from open questions)
+
+| # | Decision | Resolution |
+| - | -------- | ---------- |
+| 1 | First Admin bootstrap | **`DbInitializer`** seeds Admin (+ dev Employee) when the database has no users — approved PO/Architect, 2026-08-21 |
+| 5 | Password complexity (V-12) | **Min 8 chars**, at least one uppercase, lowercase, digit, and special character — approved PO/security, 2026-08-21 |
+
 ## Open questions
 
 | # | Question | Owner |
 | - | -------- | ----- |
-| 1 | Confirm seed vs manual first Admin | PO/Architect |
 | 2 | Holiday calendar | PO/client |
-| 5 | Password complexity (V-12) | PO/security |
 | 6 | Desk deactivate UX | PO/client |

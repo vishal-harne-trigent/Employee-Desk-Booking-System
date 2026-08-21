@@ -206,7 +206,7 @@ Provide a web application so employees at a single hybrid office can reserve a s
 | V-09 | Cannot deactivate desk with unresolved future **Confirmed** bookings | REQ-017, BR-001.9 |
 | V-10 | User email must be unique on create/edit | REQ-018, REQ-019, BR-001.10 |
 | V-11 | Cannot remove the last active **Admin** | REQ-020, REQ-022, BR-001.11 |
-| V-12 | Password reset must meet minimum length/complexity policy | REQ-021, `TBD (owner: PO/security)` |
+| V-12 | Password reset must meet minimum length/complexity policy | REQ-021 — **min 8 chars; upper, lower, digit, special** (PO/security, 2026-08-21) |
 | V-13 | Email notifications include desk number and booking date | REQ-023, REQ-024, REQ-025 |
 | V-14 | Push notifications only when user opt-in flag is true | REQ-026, REQ-027, BR-001.15 |
 
@@ -214,7 +214,7 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 - Single office location only (no multi-site routing or selection).
 - Email/password authentication only; no SSO or social login in this release.
-- Desk inventory and user accounts are maintained in-app by Admins (REQ-015–REQ-022); initial bootstrap of the first Admin account: `TBD (owner: PO/Architect — seed script vs manual DB)`.
+- Desk inventory and user accounts are maintained in-app by Admins (REQ-015–REQ-022); initial bootstrap of the first Admin account: **`DbInitializer` seed when no users exist** (PO/Architect, 2026-08-21).
 - Company public holidays are not yet defined in scope — until resolved, only weekend exclusion (BR-001.3) is guaranteed.
 
 ## 9. Risks
@@ -246,10 +246,10 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 | #   | Question | Owner | Status |
 | --- | -------- | ----- | ------ |
-| 1   | How is the first Admin account created before any Admin exists in the app (seed script, installer, manual database)? | PO/Architect | Open |
+| 1   | How is the first Admin account created before any Admin exists in the app (seed script, installer, manual database)? | PO/Architect | **Resolved** — `DbInitializer` seeds Admin when no users (2026-08-21) |
 | 2   | How is the company holiday calendar defined and maintained so working-day rules exclude public holidays? | PO/client | Open |
 | 3   | What time of day should the day-before reminder email be sent (office local timezone)? | PO/client | Open — default: 08:00 office local |
 | 4   | Must the web UI support mobile browsers in this release, or desktop-only? | PO/client | Open |
-| 5   | Minimum password length/complexity for create and reset (V-12)? | PO/security | Open |
+| 5   | Minimum password length/complexity for create and reset (V-12)? | PO/security | **Resolved** — min 8 chars; upper, lower, digit, special (2026-08-21) |
 | 6   | When deactivating a desk with future bookings, must the Admin cancel all affected bookings in one step, or block until manually cleared? | PO/client | Open — default BR-001.9: block or cancel-in-same-flow |
 | 7   | Approved sender address / email domain and SMTP service for transactional mail? | PO/IT | Open |
