@@ -23,4 +23,13 @@ public interface IBookingService
         Guid bookingId,
         Guid cancelledById,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<AdminBookingItem>> GetAllBookingsAsync(
+        AdminBookingFilters? filters = null,
+        CancellationToken cancellationToken = default);
+
+    Task<CancelBookingResult> AdminCancelBookingAsync(
+        Guid bookingId,
+        Guid adminId,
+        CancellationToken cancellationToken = default);
 }

@@ -6,7 +6,8 @@ Every development spec package in this repo. **Check here before creating a new 
 | ----- | ------- | ---- | ------ | ------ |
 | US-001 | Sign in and sign out | Medium | implemented | [`US-001-sign-in/`](US-001-sign-in/) |
 | US-002 | Book a desk | Medium | implemented | [`US-002-book-desk/`](US-002-book-desk/) |
-| US-003 | View and cancel my bookings | Medium | in delivery | [`US-003-my-bookings/`](US-003-my-bookings/) |
+| US-003 | View and cancel my bookings | Medium | implemented | [`US-003-my-bookings/`](US-003-my-bookings/) |
+| US-004 | Admin view and cancel all bookings | Medium | in delivery | [`US-004-admin-bookings/`](US-004-admin-bookings/) |
 
 ## How to update
 

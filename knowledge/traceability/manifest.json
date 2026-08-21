@@ -410,7 +410,12 @@
         "AC-03",
         "AC-04"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/AdminBookingsTests.cs",
+        "tests/EmployeeDeskBooking.Tests/AdminBookingsTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminBookingsTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ApiAdminBookingsTests.ac.test.js"
+      ],
       "jira": "EDBS-41"
     },
     "US-005": {

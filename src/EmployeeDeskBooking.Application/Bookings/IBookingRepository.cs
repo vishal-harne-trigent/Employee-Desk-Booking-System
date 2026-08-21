@@ -34,6 +34,15 @@ public interface IBookingRepository
         Guid bookingId,
         CancellationToken cancellationToken = default);
 
+    Task<Booking?> GetBookingByIdAsync(
+        Guid bookingId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<(Booking Booking, string DeskNumber, string EmployeeEmail, string EmployeeName)>> GetAllBookingsAsync(
+        DateOnly? date,
+        BookingStatus? status,
+        CancellationToken cancellationToken = default);
+
     Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
