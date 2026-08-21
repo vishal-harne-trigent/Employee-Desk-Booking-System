@@ -1,4 +1,4 @@
-using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
 
@@ -46,6 +46,14 @@ public interface IBookingRepository
     Task<bool> HasConfirmedBookingsForDeskOnOrAfterAsync(
         Guid deskId,
         DateOnly fromDate,
+        CancellationToken cancellationToken = default);
+
+    Task<BookingEmailDetails?> GetBookingEmailDetailsAsync(
+        Guid bookingId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<BookingEmailDetails>> GetConfirmedBookingEmailDetailsForDateAsync(
+        DateOnly bookingDate,
         CancellationToken cancellationToken = default);
 
     Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default);

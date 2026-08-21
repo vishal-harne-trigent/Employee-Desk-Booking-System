@@ -1,5 +1,6 @@
 using AngleSharp;
 using AngleSharp.Html.Dom;
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
@@ -81,6 +82,12 @@ public static class BookDeskTestFactoryExtensions
     {
         services.RemoveAll<IOfficeClock>();
         services.AddSingleton<IOfficeClock>(new TestOfficeClock(BookDeskTestClient.FixedToday));
+
+        services.RemoveAll<IEmailSender>();
+        services.RemoveAll<InMemoryEmailSender>();
+        var emailSender = new InMemoryEmailSender();
+        services.AddSingleton(emailSender);
+        services.AddSingleton<IEmailSender>(emailSender);
     }
 
     public static async Task SeedBookingTestDataAsync(AppDbContext db)

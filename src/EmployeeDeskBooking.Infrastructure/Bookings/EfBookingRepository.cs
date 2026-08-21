@@ -1,4 +1,5 @@
 using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
 using EmployeeDeskBooking.Infrastructure.Data;
@@ -128,6 +129,57 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
                 && b.Status == BookingStatus.Confirmed
                 && b.BookingDate >= fromDate,
             cancellationToken);
+
+    public async Task<BookingEmailDetails?> GetBookingEmailDetailsAsync(
+        Guid bookingId,
+        CancellationToken cancellationToken = default)
+    {
+        var row = await (
+            from booking in dbContext.Bookings.AsNoTracking()
+            join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
+            join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
+            where booking.Id == bookingId
+            select new { booking.Id, booking.UserId, user.Email, desk.DeskNumber, booking.BookingDate })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (row is null)
+        {
+            return null;
+        }
+
+        return new BookingEmailDetails
+        {
+            BookingId = row.Id,
+            UserId = row.UserId,
+            RecipientEmail = row.Email,
+            DeskNumber = row.DeskNumber,
+            BookingDate = row.BookingDate,
+        };
+    }
+
+    public async Task<IReadOnlyList<BookingEmailDetails>> GetConfirmedBookingEmailDetailsForDateAsync(
+        DateOnly bookingDate,
+        CancellationToken cancellationToken = default)
+    {
+        var rows = await (
+            from booking in dbContext.Bookings.AsNoTracking()
+            join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
+            join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
+            where booking.BookingDate == bookingDate && booking.Status == BookingStatus.Confirmed
+            select new { booking.Id, booking.UserId, user.Email, desk.DeskNumber, booking.BookingDate })
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(row => new BookingEmailDetails
+            {
+                BookingId = row.Id,
+                UserId = row.UserId,
+                RecipientEmail = row.Email,
+                DeskNumber = row.DeskNumber,
+                BookingDate = row.BookingDate,
+            })
+            .ToList();
+    }
 
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);

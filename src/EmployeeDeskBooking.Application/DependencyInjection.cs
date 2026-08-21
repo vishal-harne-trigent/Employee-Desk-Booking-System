@@ -1,6 +1,7 @@
 using EmployeeDeskBooking.Application.Auth;
 using EmployeeDeskBooking.Application.Bookings;
 using EmployeeDeskBooking.Application.Desks;
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Users;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,8 @@ public static class DependencyInjection
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IDeskService, DeskService>();
         services.AddScoped<IUserAdminService, UserAdminService>();
+        services.AddScoped<IBookingEmailService, BookingEmailService>();
+        services.AddScoped<IReminderEmailService, ReminderEmailService>();
         return services;
     }
 }

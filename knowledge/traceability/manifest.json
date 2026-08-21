@@ -497,7 +497,12 @@
         "AC-04",
         "AC-05"
       ],
-      "tests": [],
+      "tests": [
+        "tests/EmployeeDeskBooking.Tests/BookingEmailTests.cs",
+        "tests/EmployeeDeskBooking.Tests/BookingEmailTests.ac.test.js",
+        "tests/EmployeeDeskBooking.Tests/ReminderEmailTests.cs",
+        "tests/EmployeeDeskBooking.Tests/ReminderEmailTests.ac.test.js"
+      ],
       "jira": "EDBS-44"
     },
     "US-008": {
