@@ -68,7 +68,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    await Infra.InitializeDatabaseAsync(app.Services);
+    await Infra.InitializeDatabaseAsync(app.Services, app.Environment.IsDevelopment());
 }
 
 if (app.Environment.IsDevelopment())

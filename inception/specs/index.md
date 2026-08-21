@@ -12,7 +12,7 @@ Every development spec package in this repo. **Check here before creating a new 
 | US-006 | Admin manage users | Medium | implemented | [`US-006-manage-users/`](US-006-manage-users/) |
 | US-007 | Send booking email notifications | Complex | implemented | [`US-007-booking-emails/`](US-007-booking-emails/) |
 | US-008 | Browser push notification preferences | Complex | implemented | [`US-008-push-notifications/`](US-008-push-notifications/) |
-| US-009 | Complete past bookings automatically | Medium | in delivery | [`US-009-booking-completion/`](US-009-booking-completion/) |
+| US-009 | Complete past bookings automatically | Medium | implemented | [`US-009-booking-completion/`](US-009-booking-completion/) |
 
 ## How to update
 

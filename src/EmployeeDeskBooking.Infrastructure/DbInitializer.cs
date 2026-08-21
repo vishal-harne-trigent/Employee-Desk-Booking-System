@@ -15,7 +15,10 @@ public static class DbInitializer
     public const string DefaultAdminName = "Super Admin";
     public const string DefaultPassword = "Password1!";
 
-    public static async Task SeedAsync(IServiceProvider services, bool resetDefaultPasswordsInDevelopment = false)
+    public static Task SeedAsync(IServiceProvider services) =>
+        SeedAsync(services, resetDefaultPasswordsInDevelopment: false);
+
+    public static async Task SeedAsync(IServiceProvider services, bool resetDefaultPasswordsInDevelopment)
     {
         var dbContext = services.GetRequiredService<AppDbContext>();
         var passwordVerifier = services.GetRequiredService<IPasswordVerifier>();

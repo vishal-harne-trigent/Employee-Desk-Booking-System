@@ -23,7 +23,7 @@ public sealed class MailKitEmailSender(IOptions<EmailOptions> options, ILogger<M
 
         if (!string.IsNullOrWhiteSpace(settings.Username))
         {
-            await client.AuthenticateAsync(settings.Username, settings.Password, cancellationToken);
+            await client.AuthenticateAsync(settings.Username, settings.Password ?? string.Empty, cancellationToken);
         }
 
         await client.SendAsync(mime, cancellationToken);
