@@ -94,6 +94,29 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
     public Task<HttpResponseMessage> ActivateAdminDeskAsync(Guid deskId) =>
         Client.PostAsync($"/api/admin/desks/{deskId}/activate", null);
 
+    public Task<HttpResponseMessage> GetAdminUsersAsync() =>
+        Client.GetAsync("/api/admin/users");
+
+    public Task<HttpResponseMessage> CreateAdminUserAsync(
+        string email,
+        string name,
+        string role,
+        string password) =>
+        Client.PostAsJsonAsync("/api/admin/users", new { email, name, role, password });
+
+    public Task<HttpResponseMessage> UpdateAdminUserAsync(
+        Guid userId,
+        string email,
+        string name,
+        string role) =>
+        Client.PutAsJsonAsync($"/api/admin/users/{userId}", new { email, name, role });
+
+    public Task<HttpResponseMessage> DeactivateAdminUserAsync(Guid userId) =>
+        Client.PostAsync($"/api/admin/users/{userId}/deactivate", null);
+
+    public Task<HttpResponseMessage> ResetAdminUserPasswordAsync(Guid userId) =>
+        Client.PostAsync($"/api/admin/users/{userId}/reset-password", null);
+
     public Task<HttpResponseMessage> GetAvailabilityAsync(DateOnly date) =>
         Client.GetAsync($"/api/bookings/availability?date={date:yyyy-MM-dd}");
 

@@ -8,7 +8,8 @@ Every development spec package in this repo. **Check here before creating a new 
 | US-002 | Book a desk | Medium | implemented | [`US-002-book-desk/`](US-002-book-desk/) |
 | US-003 | View and cancel my bookings | Medium | implemented | [`US-003-my-bookings/`](US-003-my-bookings/) |
 | US-004 | Admin view and cancel all bookings | Medium | implemented | [`US-004-admin-bookings/`](US-004-admin-bookings/) |
-| US-005 | Admin manage desks | Medium | in delivery | [`US-005-manage-desks/`](US-005-manage-desks/) |
+| US-005 | Admin manage desks | Medium | implemented | [`US-005-manage-desks/`](US-005-manage-desks/) |
+| US-006 | Admin manage users | Medium | in delivery | [`US-006-manage-users/`](US-006-manage-users/) |
 
 ## How to update
 

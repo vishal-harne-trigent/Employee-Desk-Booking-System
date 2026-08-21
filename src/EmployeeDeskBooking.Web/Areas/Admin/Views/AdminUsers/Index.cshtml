@@ -1,0 +1,128 @@
+@model EmployeeDeskBooking.Web.Areas.Admin.Models.AdminUsersViewModel
+@using EmployeeDeskBooking.Domain.Users
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1>Manage users</h1>
+    <p class="text-muted">Create and maintain user accounts, roles, and access.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success" role="status" aria-live="polite">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-error" role="alert">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.TemporaryPassword))
+{
+    <div class="page-card password-reset-panel" role="alert">
+        <h2 class="section-title">Temporary password for @Model.ResetPasswordForEmail</h2>
+        <p>Copy this password now. It will not be shown again.</p>
+        <code class="temporary-password">@Model.TemporaryPassword</code>
+    </div>
+}
+
+<div class="page-card">
+    <h2 class="section-title">Add user</h2>
+    <form asp-action="Create" method="post" class="user-add-form">
+        @Html.AntiForgeryToken()
+        <div class="field inline-field">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" maxlength="128" required />
+        </div>
+        <div class="field inline-field">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" maxlength="320" required />
+        </div>
+        <div class="field inline-field">
+            <label for="role">Role</label>
+            <select id="role" name="role" required>
+                <option value="@UserRole.Employee">Employee</option>
+                <option value="@UserRole.Admin">Admin</option>
+            </select>
+        </div>
+        <div class="field inline-field">
+            <label for="password">Initial password</label>
+            <input id="password" name="password" type="password" required />
+        </div>
+        <button type="submit" class="btn btn-primary">Create user</button>
+    </form>
+</div>
+
+<div class="page-card desk-table-card">
+    <table class="desk-table admin-users-table">
+        <thead>
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Email</th>
+                <th scope="col">Role</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr>
+                    <td colspan="5" class="user-edit-row">
+                        <form asp-action="Edit" method="post" class="user-edit-form">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.UserId" />
+                            <div class="field inline-field">
+                                <label class="sr-only" for="name-@user.UserId">Name</label>
+                                <input id="name-@user.UserId" name="name" type="text" value="@user.Name" maxlength="128" required />
+                            </div>
+                            <div class="field inline-field">
+                                <label class="sr-only" for="email-@user.UserId">Email</label>
+                                <input id="email-@user.UserId" name="email" type="email" value="@user.Email" maxlength="320" required />
+                            </div>
+                            <div class="field inline-field">
+                                <label class="sr-only" for="role-@user.UserId">Role</label>
+                                <select id="role-@user.UserId" name="role">
+                                    <option value="@UserRole.Employee" selected="@(user.Role == UserRole.Employee ? "selected" : null)">Employee</option>
+                                    <option value="@UserRole.Admin" selected="@(user.Role == UserRole.Admin ? "selected" : null)">Admin</option>
+                                </select>
+                            </div>
+                            <span class="status-pill status-@user.StatusLabel.ToLowerInvariant()">
+                                <span class="status-icon" aria-hidden="true">●</span>
+                                @user.StatusLabel
+                            </span>
+                            <button type="submit" class="btn btn-secondary btn-sm">Save</button>
+                        </form>
+                        <div class="user-row-actions">
+                            @if (user.IsActive)
+                            {
+                                <form asp-action="ResetPassword" method="post" class="inline-form"
+                                      onsubmit="return confirm('Reset password for @user.Email?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="userId" value="@user.UserId" />
+                                    <button type="submit" class="btn btn-secondary btn-sm">Reset password</button>
+                                </form>
+                                if (user.CanDeactivate)
+                                {
+                                    <form asp-action="Deactivate" method="post" class="inline-form"
+                                          onsubmit="return confirm('Deactivate @user.Email?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <button type="submit" class="btn btn-secondary btn-sm">Deactivate</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="text-muted user-blocked-hint">Last admin protected</span>
+                                }
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
