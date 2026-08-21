@@ -338,3 +338,32 @@ body {
   color: var(--color-text-muted);
   margin: 0;
 }
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-confirmed {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.status-completed {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.bookings-table .btn-sm {
+  min-width: 5rem;
+}

@@ -1,3 +1,5 @@
+using EmployeeDeskBooking.Domain.Bookings;
+
 namespace EmployeeDeskBooking.Application.Bookings;
 
 public interface IBookingService
@@ -10,5 +12,15 @@ public interface IBookingService
         Guid userId,
         Guid deskId,
         DateOnly date,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<MyBookingItem>> GetMyBookingsAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    Task<CancelBookingResult> CancelBookingAsync(
+        Guid userId,
+        Guid bookingId,
+        Guid cancelledById,
         CancellationToken cancellationToken = default);
 }

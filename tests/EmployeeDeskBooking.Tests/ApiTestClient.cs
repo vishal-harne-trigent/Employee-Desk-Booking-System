@@ -61,6 +61,12 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
             Date = date,
         });
 
+    public Task<HttpResponseMessage> GetMyBookingsAsync() =>
+        Client.GetAsync("/api/bookings/mine");
+
+    public Task<HttpResponseMessage> CancelBookingAsync(Guid bookingId) =>
+        Client.PostAsync($"/api/bookings/{bookingId}/cancel", null);
+
     public Guid GetDeskIdByNumber(string deskNumber)
     {
         using var scope = factory.Services.CreateScope();

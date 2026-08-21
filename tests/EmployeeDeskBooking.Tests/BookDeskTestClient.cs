@@ -102,6 +102,16 @@ public static class BookDeskTestFactoryExtensions
         string deskNumber,
         DateOnly date)
     {
+        await SeedBookingAsync(db, userId, deskNumber, date, BookingStatus.Confirmed);
+    }
+
+    public static async Task SeedBookingAsync(
+        AppDbContext db,
+        Guid userId,
+        string deskNumber,
+        DateOnly date,
+        BookingStatus status)
+    {
         var desk = db.Desks.Single(d => d.DeskNumber == deskNumber);
         var now = DateTimeOffset.UtcNow;
         db.Bookings.Add(new Booking
@@ -110,7 +120,9 @@ public static class BookDeskTestFactoryExtensions
             UserId = userId,
             DeskId = desk.Id,
             BookingDate = date,
-            Status = BookingStatus.Confirmed,
+            Status = status,
+            CancelledAt = status == BookingStatus.Cancelled ? now : null,
+            CompletedAt = status == BookingStatus.Completed ? now : null,
             CreatedAt = now,
             UpdatedAt = now,
         });

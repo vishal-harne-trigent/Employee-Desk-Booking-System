@@ -71,6 +71,55 @@ public sealed class BookingsController(IBookingService bookingService) : Control
         return MapCreateFailure(result.FailureReason!.Value);
     }
 
+    [HttpGet("mine")]
+    [ProducesResponseType(typeof(MyBookingsResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMyBookings(CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        var items = await bookingService.GetMyBookingsAsync(userId, cancellationToken);
+
+        return Ok(new MyBookingsResponse
+        {
+            Bookings = items
+                .Select(b => new MyBookingResponse
+                {
+                    BookingId = b.BookingId,
+                    BookingDate = b.BookingDate,
+                    DeskNumber = b.DeskNumber,
+                    Status = b.Status.ToString(),
+                    CanCancel = b.CanCancel,
+                })
+                .ToList(),
+        });
+    }
+
+    [HttpPost("{id:guid}/cancel")]
+    [ProducesResponseType(typeof(CancelBookingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> CancelBooking(Guid id, CancellationToken cancellationToken)
+    {
+        var userId = GetUserId();
+        var result = await bookingService.CancelBookingAsync(userId, id, userId, cancellationToken);
+
+        if (result.Succeeded)
+        {
+            return Ok(new CancelBookingResponse { BookingId = id, Status = "Cancelled" });
+        }
+
+        return result.FailureReason switch
+        {
+            CancelBookingFailureReason.NotFound => Problem(
+                detail: BookingApiMessages.CancelFailure(CancelBookingFailureReason.NotFound),
+                statusCode: StatusCodes.Status404NotFound,
+                title: "Booking not found"),
+            _ => Problem(
+                detail: BookingApiMessages.CancelFailure(CancelBookingFailureReason.NotCancellable),
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Cannot cancel booking"),
+        };
+    }
+
     private IActionResult MapCreateFailure(CreateBookingFailureReason reason) =>
         reason switch
         {
