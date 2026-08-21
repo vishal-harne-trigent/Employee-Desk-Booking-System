@@ -6,9 +6,11 @@ using Infra = EmployeeDeskBooking.Infrastructure.DependencyInjection;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
+var isTesting = builder.Environment.IsEnvironment("Testing");
 builder.Services.AddInfrastructure(
     builder.Configuration,
-    enableReminderJob: !builder.Environment.IsEnvironment("Testing"));
+    enableReminderJob: !isTesting,
+    enableCompletionJob: !isTesting);
 
 builder.Services
     .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -29,7 +31,7 @@ var app = builder.Build();
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
-    await Infra.InitializeDatabaseAsync(app.Services);
+    await Infra.InitializeDatabaseAsync(app.Services, app.Environment.IsDevelopment());
 }
 
 if (!app.Environment.IsDevelopment() && !app.Environment.IsEnvironment("Testing"))

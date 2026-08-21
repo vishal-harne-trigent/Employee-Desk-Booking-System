@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<IReminderEmailService, ReminderEmailService>();
         services.AddScoped<INotificationPreferenceService, NotificationPreferenceService>();
         services.AddScoped<IBookingPushService, BookingPushService>();
+        services.AddScoped<IBookingCompletionService, BookingCompletionService>();
         return services;
     }
 }

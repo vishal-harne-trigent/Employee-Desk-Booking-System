@@ -56,6 +56,10 @@ public interface IBookingRepository
         DateOnly bookingDate,
         CancellationToken cancellationToken = default);
 
+    Task<IReadOnlyList<Booking>> GetConfirmedBookingsBeforeDateAsync(
+        DateOnly beforeDate,
+        CancellationToken cancellationToken = default);
+
     Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);

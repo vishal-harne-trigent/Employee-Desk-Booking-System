@@ -12,11 +12,11 @@
 | REQ-006 | US-002 | 6/6 | delivered |
 | REQ-007 | US-002 | 6/6 | delivered |
 | REQ-008 | US-002 | 6/6 | delivered |
-| REQ-009 | US-003, US-009 | 4/7 | in progress |
+| REQ-009 | US-003, US-009 | 7/7 | delivered |
 | REQ-010 | US-003 | 4/4 | delivered |
-| REQ-011 | US-004, US-009 | 4/7 | in progress |
+| REQ-011 | US-004, US-009 | 7/7 | delivered |
 | REQ-012 | US-004 | 4/4 | delivered |
-| REQ-013 | US-004, US-009 | 4/7 | in progress |
+| REQ-013 | US-004, US-009 | 7/7 | delivered |
 | REQ-014 | US-004 | 4/4 | delivered |
 | REQ-015 | US-005 | 5/5 | delivered |
 | REQ-016 | US-005 | 5/5 | delivered |
