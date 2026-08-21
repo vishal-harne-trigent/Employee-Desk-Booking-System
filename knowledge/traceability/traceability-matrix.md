@@ -26,14 +26,14 @@
 | REQ-020 | US-006 | 7/7 | delivered |
 | REQ-021 | US-006 | 7/7 | delivered |
 | REQ-022 | US-006 | 7/7 | delivered |
-| REQ-023 | US-007 | 0/5 | planned |
-| REQ-024 | US-007 | 0/5 | planned |
-| REQ-025 | US-007 | 0/5 | planned |
+| REQ-023 | US-007 | 5/5 | delivered |
+| REQ-024 | US-007 | 5/5 | delivered |
+| REQ-025 | US-007 | 5/5 | delivered |
 | REQ-026 | US-008 | 0/5 | planned |
 | REQ-027 | US-008 | 0/5 | planned |
 | NFR-001 | US-002 | 6/6 | delivered |
 | NFR-002 | US-002 | 6/6 | delivered |
 | NFR-003 | US-001 | 5/5 | delivered |
 | NFR-004 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 31/36 | in progress |
-| NFR-005 | US-007 | 0/5 | planned |
+| NFR-005 | US-007 | 5/5 | delivered |
 | NFR-006 | US-008 | 0/5 | planned |

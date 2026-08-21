@@ -1,9 +1,13 @@
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Bookings;
 
 namespace EmployeeDeskBooking.Application.Bookings;
 
-public sealed class BookingService(IBookingRepository bookings, IOfficeClock officeClock) : IBookingService
+public sealed class BookingService(
+    IBookingRepository bookings,
+    IOfficeClock officeClock,
+    IBookingEmailService bookingEmails) : IBookingService
 {
     public BookingDateValidationError? ValidateBookingDate(DateOnly date)
     {
@@ -109,6 +113,7 @@ public sealed class BookingService(IBookingRepository bookings, IOfficeClock off
         {
             await bookings.AddBookingAsync(booking, cancellationToken);
             await bookings.SaveChangesAsync(cancellationToken);
+            await bookingEmails.SendConfirmationAsync(booking.Id, cancellationToken);
             return CreateBookingResult.Success(booking.Id);
         }
         catch (Exception ex) when (IsUniqueConstraintViolation(ex))
@@ -210,6 +215,7 @@ public sealed class BookingService(IBookingRepository bookings, IOfficeClock off
         booking.UpdatedAt = now;
 
         await bookings.SaveChangesAsync(cancellationToken);
+        await bookingEmails.SendCancellationAsync(booking.Id, cancellationToken);
         return CancelBookingResult.Success();
     }
 

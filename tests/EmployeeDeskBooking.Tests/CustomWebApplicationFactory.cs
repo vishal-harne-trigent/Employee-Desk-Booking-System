@@ -1,5 +1,6 @@
 using AngleSharp;
 using AngleSharp.Html.Dom;
+using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Security;
 using EmployeeDeskBooking.Domain.Users;
 using EmployeeDeskBooking.Infrastructure;
@@ -63,8 +64,14 @@ public sealed class CustomWebApplicationFactory : WebApplicationFactory<WebAssem
         using var scope = Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Bookings.RemoveRange(await db.Bookings.ToListAsync());
+        db.EmailDeliveryLogs.RemoveRange(await db.EmailDeliveryLogs.ToListAsync());
+        db.BookingReminders.RemoveRange(await db.BookingReminders.ToListAsync());
         await db.SaveChangesAsync();
+        scope.ServiceProvider.GetRequiredService<InMemoryEmailSender>().Reset();
     }
+
+    public InMemoryEmailSender GetEmailSender() =>
+        Services.GetRequiredService<InMemoryEmailSender>();
 
     private static async Task SeedTestUsers(IServiceProvider services)
     {

@@ -1,5 +1,6 @@
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
+using EmployeeDeskBooking.Domain.Notifications;
 using EmployeeDeskBooking.Domain.Users;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Desk> Desks => Set<Desk>();
 
     public DbSet<Booking> Bookings => Set<Booking>();
+
+    public DbSet<EmailDeliveryLog> EmailDeliveryLogs => Set<EmailDeliveryLog>();
+
+    public DbSet<BookingReminder> BookingReminders => Set<BookingReminder>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
