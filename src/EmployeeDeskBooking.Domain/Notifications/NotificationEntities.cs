@@ -40,3 +40,14 @@ public class BookingReminder
 
     public DateTimeOffset CreatedAt { get; set; }
 }
+
+public class NotificationPreference
+{
+    public Guid UserId { get; set; }
+
+    public bool PushOptIn { get; set; }
+
+    public string? PushSubscription { get; set; }
+
+    public DateTimeOffset UpdatedAt { get; set; }
+}

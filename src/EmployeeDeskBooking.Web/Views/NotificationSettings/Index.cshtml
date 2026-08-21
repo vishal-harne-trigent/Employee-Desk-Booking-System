@@ -1,0 +1,69 @@
+@model EmployeeDeskBooking.Web.Models.NotificationSettingsViewModel
+@{
+    ViewData["Title"] = "Notification Settings";
+    Layout = "_Layout";
+    var pushStatus = Model.PushOptIn ? "Enabled" : "Disabled";
+}
+
+<div class="page-header">
+    <h1>Notification settings</h1>
+    <p class="text-muted">Booking emails are sent automatically. Browser push is optional.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success" role="status" aria-live="polite">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-error" role="alert">@Model.ErrorMessage</div>
+}
+
+<div class="page-card notification-section">
+    <h2>Email (automatic)</h2>
+    <p>Confirmation, cancellation, and day-before reminder emails are always sent when you book or cancel.</p>
+</div>
+
+<div class="page-card notification-section">
+    <h2>Browser push (optional)</h2>
+    <p>Status: <strong id="push-status-text">@pushStatus</strong></p>
+    <p class="text-muted" id="push-unsupported-message">
+        If your browser does not support push notifications or permission is denied, email alerts will still be sent.
+    </p>
+
+    <div id="push-supported-controls">
+        @if (Model.PushOptIn)
+        {
+            <form asp-action="Disable" method="post" class="inline-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-secondary" id="disable-push-btn">Disable push</button>
+            </form>
+        }
+        else
+        {
+            <form asp-action="SaveSubscription" method="post" class="inline-form" id="enable-push-form">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="subscriptionJson" id="subscription-json" />
+                <button type="button" class="btn btn-primary" id="enable-push-btn">Enable push</button>
+            </form>
+        }
+    </div>
+
+    <p class="text-muted push-permission-note" id="push-permission-denied" hidden>
+        Browser permission was denied. You can still receive email notifications.
+    </p>
+</div>
+
+<p>
+    <a asp-controller="MyBookings" asp-action="Index">← Back to My Bookings</a>
+</p>
+
+@section Scripts {
+    <script>
+        window.deskBookingPush = {
+            vapidPublicKey: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.VapidPublicKey))
+        };
+    </script>
+    <script src="~/js/push-settings.js" asp-append-version="true"></script>
+}

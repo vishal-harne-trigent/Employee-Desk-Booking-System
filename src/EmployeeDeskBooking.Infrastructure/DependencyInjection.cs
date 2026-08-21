@@ -33,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IDeskRepository, EfDeskRepository>();
         services.AddScoped<IEmailDeliveryLogRepository, EfEmailDeliveryLogRepository>();
         services.AddScoped<IBookingReminderRepository, EfBookingReminderRepository>();
+        services.AddScoped<INotificationPreferenceRepository, EfNotificationPreferenceRepository>();
         services.AddSingleton<IPasswordVerifier, AspNetPasswordVerifier>();
         services.AddSingleton<IOfficeClock, OfficeClock>();
 
@@ -50,6 +51,17 @@ public static class DependencyInjection
         if (enableReminderJob)
         {
             services.AddHostedService<ReminderEmailHostedService>();
+        }
+
+        services.Configure<VapidOptions>(configuration.GetSection("Push"));
+
+        if (configuration.GetValue("Push:Enabled", false))
+        {
+            services.AddScoped<IPushNotificationSender, WebPushNotificationSender>();
+        }
+        else
+        {
+            services.AddScoped<IPushNotificationSender, NoOpPushNotificationSender>();
         }
 
         return services;
