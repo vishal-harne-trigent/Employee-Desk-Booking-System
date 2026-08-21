@@ -150,8 +150,55 @@ public sealed class BookingService(IBookingRepository bookings, IOfficeClock off
             return CancelBookingResult.Failure(CancelBookingFailureReason.NotFound);
         }
 
+        return await CancelConfirmedBookingAsync(booking, cancelledById, cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<AdminBookingItem>> GetAllBookingsAsync(
+        AdminBookingFilters? filters = null,
+        CancellationToken cancellationToken = default)
+    {
+        var rows = await bookings.GetAllBookingsAsync(
+            filters?.Date,
+            filters?.Status,
+            cancellationToken);
+
         var today = officeClock.Today;
-        if (booking.Status != BookingStatus.Confirmed || booking.BookingDate < today)
+
+        return rows
+            .Select(row => new AdminBookingItem
+            {
+                BookingId = row.Booking.Id,
+                BookingDate = row.Booking.BookingDate,
+                DeskNumber = row.DeskNumber,
+                EmployeeEmail = row.EmployeeEmail,
+                EmployeeName = row.EmployeeName,
+                Status = row.Booking.Status,
+                CanCancel = CanCancel(row.Booking, today),
+            })
+            .OrderByDescending(b => b.BookingDate)
+            .ToList();
+    }
+
+    public async Task<CancelBookingResult> AdminCancelBookingAsync(
+        Guid bookingId,
+        Guid adminId,
+        CancellationToken cancellationToken = default)
+    {
+        var booking = await bookings.GetBookingByIdAsync(bookingId, cancellationToken);
+        if (booking is null)
+        {
+            return CancelBookingResult.Failure(CancelBookingFailureReason.NotFound);
+        }
+
+        return await CancelConfirmedBookingAsync(booking, adminId, cancellationToken);
+    }
+
+    private async Task<CancelBookingResult> CancelConfirmedBookingAsync(
+        Booking booking,
+        Guid cancelledById,
+        CancellationToken cancellationToken)
+    {
+        if (!CanCancel(booking, officeClock.Today))
         {
             return CancelBookingResult.Failure(CancelBookingFailureReason.NotCancellable);
         }
@@ -165,6 +212,9 @@ public sealed class BookingService(IBookingRepository bookings, IOfficeClock off
         await bookings.SaveChangesAsync(cancellationToken);
         return CancelBookingResult.Success();
     }
+
+    private static bool CanCancel(Booking booking, DateOnly today) =>
+        booking.Status == BookingStatus.Confirmed && booking.BookingDate >= today;
 
     private static bool IsUniqueConstraintViolation(Exception ex)
     {

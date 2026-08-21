@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using EmployeeDeskBooking.Api.Contracts.Auth;
 using EmployeeDeskBooking.Api.Contracts.Bookings;
+using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +51,33 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
         response.EnsureSuccessStatusCode();
         SetBearerToken(body!.AccessToken);
     }
+
+    public async Task AuthorizeAsAdminAsync()
+    {
+        var (response, body) = await LoginWithBodyAsync("admin@test.com", CustomApiApplicationFactory.TestPassword);
+        response.EnsureSuccessStatusCode();
+        SetBearerToken(body!.AccessToken);
+    }
+
+    public Task<HttpResponseMessage> GetAdminBookingsAsync(DateOnly? date = null, BookingStatus? status = null)
+    {
+        var query = new List<string>();
+        if (date.HasValue)
+        {
+            query.Add($"date={date.Value:yyyy-MM-dd}");
+        }
+
+        if (status.HasValue)
+        {
+            query.Add($"status={status.Value}");
+        }
+
+        var qs = query.Count > 0 ? "?" + string.Join("&", query) : string.Empty;
+        return Client.GetAsync($"/api/admin/bookings{qs}");
+    }
+
+    public Task<HttpResponseMessage> AdminCancelBookingAsync(Guid bookingId) =>
+        Client.PostAsync($"/api/admin/bookings/{bookingId}/cancel", null);
 
     public Task<HttpResponseMessage> GetAvailabilityAsync(DateOnly date) =>
         Client.GetAsync($"/api/bookings/availability?date={date:yyyy-MM-dd}");

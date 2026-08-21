@@ -84,6 +84,41 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             b => b.Id == bookingId && b.UserId == userId,
             cancellationToken);
 
+    public Task<Booking?> GetBookingByIdAsync(
+        Guid bookingId,
+        CancellationToken cancellationToken = default) =>
+        dbContext.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId, cancellationToken);
+
+    public async Task<IReadOnlyList<(Booking Booking, string DeskNumber, string EmployeeEmail, string EmployeeName)>> GetAllBookingsAsync(
+        DateOnly? date,
+        BookingStatus? status,
+        CancellationToken cancellationToken = default)
+    {
+        var query =
+            from booking in dbContext.Bookings.AsNoTracking()
+            join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
+            join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
+            select new { booking, desk.DeskNumber, user.Email, user.Name };
+
+        if (date.HasValue)
+        {
+            query = query.Where(x => x.booking.BookingDate == date.Value);
+        }
+
+        if (status.HasValue)
+        {
+            query = query.Where(x => x.booking.Status == status.Value);
+        }
+
+        var rows = await query
+            .OrderByDescending(x => x.booking.BookingDate)
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .Select(x => (x.booking, x.DeskNumber, x.Email, x.Name))
+            .ToList();
+    }
+
     public Task SaveChangesAsync(CancellationToken cancellationToken = default) =>
         dbContext.SaveChangesAsync(cancellationToken);
 }
