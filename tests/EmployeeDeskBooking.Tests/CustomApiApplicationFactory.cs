@@ -24,6 +24,7 @@ public sealed class CustomApiApplicationFactory : WebApplicationFactory<ApiAssem
     private const string TestAudience = "EmployeeDeskBooking.Tests";
 
     private readonly string _databaseName = Guid.NewGuid().ToString();
+    private static readonly SemaphoreSlim SeedLock = new(1, 1);
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -48,6 +49,8 @@ public sealed class CustomApiApplicationFactory : WebApplicationFactory<ApiAssem
             services.AddDbContext<AppDbContext>(options =>
                 options.UseInMemoryDatabase(_databaseName));
 
+            services.ConfigureBookingTests();
+
             services.PostConfigure<JwtBearerOptions>(JwtBearerDefaults.AuthenticationScheme, options =>
             {
                 options.MapInboundClaims = true;
@@ -66,9 +69,26 @@ public sealed class CustomApiApplicationFactory : WebApplicationFactory<ApiAssem
         using var scope = host.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.EnsureCreated();
-        SeedTestUsers(scope.ServiceProvider).GetAwaiter().GetResult();
+        SeedLock.Wait();
+        try
+        {
+            SeedTestUsers(scope.ServiceProvider).GetAwaiter().GetResult();
+            BookDeskTestFactoryExtensions.SeedBookingTestDataAsync(db).GetAwaiter().GetResult();
+        }
+        finally
+        {
+            SeedLock.Release();
+        }
 
         return host;
+    }
+
+    public async Task ResetBookingsAsync()
+    {
+        using var scope = Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Bookings.RemoveRange(await db.Bookings.ToListAsync());
+        await db.SaveChangesAsync();
     }
 
     private static async Task SeedTestUsers(IServiceProvider services)
