@@ -89,6 +89,9 @@ const citesAc = (contents, us, ac) =>
   new RegExp(
     '(?<![\\w.])(?:it|test)(?:\\.each\\([^)]*\\))?\\s*\\(\\s*[`\'"][^`\'"\\n]*' +
       `${us}/${ac}`,
+  ).test(contents) ||
+  new RegExp(
+    `\\[Fact\\([^\\)]*DisplayName\\s*=\\s*"[^"\\n]*${us}/${ac}`,
   ).test(contents);
 const SKIPPED_TEST =
   /\b(?:describe|it|test)\.skip\s*\(|\bx(?:it|test|describe)\s*\(/;
