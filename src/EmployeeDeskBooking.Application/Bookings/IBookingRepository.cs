@@ -1,3 +1,4 @@
+using EmployeeDeskBooking.Application.Bookings;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Domain.Desks;
 
@@ -22,6 +23,15 @@ public interface IBookingRepository
     Task<IReadOnlyDictionary<Guid, Booking>> GetConfirmedBookingsByDeskIdsAsync(
         IEnumerable<Guid> deskIds,
         DateOnly date,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<(Booking Booking, string DeskNumber)>> GetBookingsForUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default);
+
+    Task<Booking?> GetBookingByIdForUserAsync(
+        Guid userId,
+        Guid bookingId,
         CancellationToken cancellationToken = default);
 
     Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default);

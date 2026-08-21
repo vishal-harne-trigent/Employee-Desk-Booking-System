@@ -117,6 +117,55 @@ public sealed class BookingService(IBookingRepository bookings, IOfficeClock off
         }
     }
 
+    public async Task<IReadOnlyList<MyBookingItem>> GetMyBookingsAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var rows = await bookings.GetBookingsForUserAsync(userId, cancellationToken);
+        var today = officeClock.Today;
+
+        return rows
+            .Select(row => new MyBookingItem
+            {
+                BookingId = row.Booking.Id,
+                BookingDate = row.Booking.BookingDate,
+                DeskNumber = row.DeskNumber,
+                Status = row.Booking.Status,
+                CanCancel = row.Booking.Status == BookingStatus.Confirmed
+                    && row.Booking.BookingDate >= today,
+            })
+            .OrderByDescending(b => b.BookingDate)
+            .ToList();
+    }
+
+    public async Task<CancelBookingResult> CancelBookingAsync(
+        Guid userId,
+        Guid bookingId,
+        Guid cancelledById,
+        CancellationToken cancellationToken = default)
+    {
+        var booking = await bookings.GetBookingByIdForUserAsync(userId, bookingId, cancellationToken);
+        if (booking is null)
+        {
+            return CancelBookingResult.Failure(CancelBookingFailureReason.NotFound);
+        }
+
+        var today = officeClock.Today;
+        if (booking.Status != BookingStatus.Confirmed || booking.BookingDate < today)
+        {
+            return CancelBookingResult.Failure(CancelBookingFailureReason.NotCancellable);
+        }
+
+        var now = DateTimeOffset.UtcNow;
+        booking.Status = BookingStatus.Cancelled;
+        booking.CancelledAt = now;
+        booking.CancelledById = cancelledById;
+        booking.UpdatedAt = now;
+
+        await bookings.SaveChangesAsync(cancellationToken);
+        return CancelBookingResult.Success();
+    }
+
     private static bool IsUniqueConstraintViolation(Exception ex)
     {
         var message = ex.ToString();

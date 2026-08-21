@@ -25,4 +25,13 @@ public static class BookingApiMessages
                 "Someone else just booked that desk. Please choose another desk.",
             _ => "Unable to complete the booking. Please try again.",
         };
+
+    public static string CancelFailure(CancelBookingFailureReason reason) =>
+        reason switch
+        {
+            CancelBookingFailureReason.NotFound => "Booking was not found.",
+            CancelBookingFailureReason.NotCancellable =>
+                "This booking cannot be cancelled. Only confirmed bookings for today or future dates can be cancelled.",
+            _ => "Unable to cancel the booking.",
+        };
 }
