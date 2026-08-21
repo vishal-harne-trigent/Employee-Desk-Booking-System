@@ -68,8 +68,9 @@ public class AccountController(IAuthService authService) : Controller
         return RedirectToRoleHome(user.Role);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
     [Authorize]
-    [AcceptVerbs("GET", "POST")]
     public async Task<IActionResult> Logout()
     {
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);

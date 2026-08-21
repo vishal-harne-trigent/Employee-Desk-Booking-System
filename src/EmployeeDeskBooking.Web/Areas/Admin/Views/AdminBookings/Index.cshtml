@@ -7,3 +7,8 @@
     <h1>All Bookings</h1>
     <p class="text-muted">Admin booking management will be available in US-004.</p>
 </div>
+
+<form asp-controller="Account" asp-action="Logout" method="post" class="logout-form">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-link">Sign out</button>
+</form>

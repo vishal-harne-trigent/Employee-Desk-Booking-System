@@ -17,7 +17,7 @@ public class SignInTests(CustomWebApplicationFactory factory) : IClassFixture<Cu
 
         var bookPage = await login.Client.GetAsync(response.Headers.Location!);
         var html = await bookPage.Content.ReadAsStringAsync();
-        Assert.Contains("Desk Availability", html);
+        Assert.Contains("Book Desk", html);
     }
 
     [Fact(DisplayName = "Admin lands on All Bookings after sign-in (US-001/AC-02)")]
