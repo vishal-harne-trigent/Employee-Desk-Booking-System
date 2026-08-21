@@ -1,6 +1,0 @@
-@EmployeeDeskBooking.Api_HostAddress = http://localhost:5105
-
-GET {{EmployeeDeskBooking.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
