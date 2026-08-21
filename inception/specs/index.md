@@ -5,6 +5,7 @@ Every development spec package in this repo. **Check here before creating a new 
 | Story | Feature | Tier | Status | Folder |
 | ----- | ------- | ---- | ------ | ------ |
 | US-001 | Sign in and sign out | Medium | implemented | [`US-001-sign-in/`](US-001-sign-in/) |
+| US-002 | Book a desk | Medium | in delivery | [`US-002-book-desk/`](US-002-book-desk/) |
 
 ## How to update
 

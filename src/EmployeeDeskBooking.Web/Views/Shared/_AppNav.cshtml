@@ -1,0 +1,44 @@
+@using System.Security.Claims
+@using EmployeeDeskBooking.Web.Helpers
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var displayName = isAuthenticated ? User.FindFirstValue(ClaimTypes.Name) ?? "User" : null;
+    var role = isAuthenticated ? User.FindFirstValue(ClaimTypes.Role) : null;
+    var isAdmin = role == "Admin";
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var initials = displayName is not null ? UserNavHelper.GetInitials(displayName) : string.Empty;
+}
+
+<header class="app-nav">
+    <div class="brand">
+        <img class="brand-logo brand-logo-nav" src="~/images/desk-booking-logo.png" alt="Desk Booking" />
+    </div>
+
+    @if (isAuthenticated)
+    {
+        <nav class="app-nav-links" aria-label="Main">
+            @if (isAdmin)
+            {
+                <a asp-area="Admin" asp-controller="AdminDesks" asp-action="Index"
+                   class="@(controller == "AdminDesks" ? "active" : null)">Desks</a>
+                <a asp-area="Admin" asp-controller="AdminUsers" asp-action="Index"
+                   class="@(controller == "AdminUsers" ? "active" : null)">Users</a>
+                <a asp-area="Admin" asp-controller="AdminBookings" asp-action="Index"
+                   class="@(controller == "AdminBookings" ? "active" : null)">All Bookings</a>
+            }
+            else
+            {
+                <a asp-controller="Book" asp-action="Index"
+                   class="@(controller == "Book" ? "active" : null)">Desk Availability</a>
+                <a asp-controller="MyBookings" asp-action="Index"
+                   class="@(controller == "MyBookings" ? "active" : null)">My Bookings</a>
+            }
+        </nav>
+
+        <div class="app-nav-right">
+            <div class="avatar" aria-hidden="true">@initials</div>
+            <span class="user-label">@displayName</span>
+            <a asp-area="" asp-controller="Account" asp-action="Logout" class="signout">Sign out</a>
+        </div>
+    }
+</header>
