@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\EmployeeDeskBooking.Api\EmployeeDeskBooking.Api.csproj" />
     <ProjectReference Include="..\..\src\EmployeeDeskBooking.Web\EmployeeDeskBooking.Web.csproj" />
     <ProjectReference Include="..\..\src\EmployeeDeskBooking.Infrastructure\EmployeeDeskBooking.Infrastructure.csproj" />
   </ItemGroup>
