@@ -4,11 +4,15 @@ public interface IDeskService
 {
     Task<IReadOnlyList<DeskListItem>> GetAllDesksAsync(CancellationToken cancellationToken = default);
 
-    Task<DeskOperationResult> CreateDeskAsync(string deskNumber, CancellationToken cancellationToken = default);
+    Task<DeskOperationResult> CreateDeskAsync(
+        string deskNumber,
+        string? location = null,
+        CancellationToken cancellationToken = default);
 
-    Task<DeskOperationResult> UpdateDeskNumberAsync(
+    Task<DeskOperationResult> UpdateDeskAsync(
         Guid deskId,
         string deskNumber,
+        string? location = null,
         CancellationToken cancellationToken = default);
 
     Task<DeskOperationResult> DeactivateDeskAsync(Guid deskId, CancellationToken cancellationToken = default);

@@ -1,6 +1,7 @@
 using EmployeeDeskBooking.Application.Bookings;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Web.Areas.Admin.Models;
+using EmployeeDeskBooking.Web.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -9,7 +10,9 @@ namespace EmployeeDeskBooking.Web.Areas.Admin.Controllers;
 
 [Area("Admin")]
 [Authorize(Roles = "Admin")]
-public class AdminBookingsController(IBookingService bookingService) : Controller
+public class AdminBookingsController(
+    IBookingService bookingService,
+    IConfiguration configuration) : Controller
 {
     [HttpGet]
     public async Task<IActionResult> Index(DateOnly? filterDate, BookingStatus? filterStatus, CancellationToken cancellationToken)
@@ -64,6 +67,7 @@ public class AdminBookingsController(IBookingService bookingService) : Controlle
             : null;
 
         var bookings = await bookingService.GetAllBookingsAsync(filters, cancellationToken);
+        var officeTimeZone = AdminBookingDisplayHelper.GetOfficeTimeZone(configuration);
 
         return new AdminBookingsViewModel
         {
@@ -80,6 +84,11 @@ public class AdminBookingsController(IBookingService bookingService) : Controlle
                     EmployeeName = b.EmployeeName,
                     Status = b.Status,
                     CanCancel = b.CanCancel,
+                    OfficeDateDisplay = AdminBookingDisplayHelper.FormatOfficeDate(b.BookingDate),
+                    CreatedDisplay = AdminBookingDisplayHelper.FormatTimestamp(b.CreatedAt, officeTimeZone),
+                    CancelledOnDisplay = b.CancelledAt.HasValue
+                        ? AdminBookingDisplayHelper.FormatTimestamp(b.CancelledAt.Value, officeTimeZone)
+                        : "—",
                 })
                 .ToList(),
         };

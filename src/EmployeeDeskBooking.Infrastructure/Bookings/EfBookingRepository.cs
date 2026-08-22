@@ -60,7 +60,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
     public async Task AddBookingAsync(Booking booking, CancellationToken cancellationToken = default) =>
         await dbContext.Bookings.AddAsync(booking, cancellationToken);
 
-    public async Task<IReadOnlyList<(Booking Booking, string DeskNumber)>> GetBookingsForUserAsync(
+    public async Task<IReadOnlyList<(Booking Booking, string DeskNumber, string DeskLocation)>> GetBookingsForUserAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
@@ -70,11 +70,13 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
                 dbContext.Desks.AsNoTracking(),
                 b => b.DeskId,
                 d => d.Id,
-                (b, d) => new { Booking = b, d.DeskNumber })
+                (b, d) => new { Booking = b, d.DeskNumber, d.Location })
             .OrderByDescending(x => x.Booking.BookingDate)
             .ToListAsync(cancellationToken);
 
-        return rows.Select(x => (x.Booking, x.DeskNumber)).ToList();
+        return rows
+            .Select(x => (x.Booking, x.DeskNumber, x.Location))
+            .ToList();
     }
 
     public Task<Booking?> GetBookingByIdForUserAsync(
@@ -139,7 +141,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
             join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
             where booking.Id == bookingId
-            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, booking.BookingDate })
+            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, desk.Location, booking.BookingDate })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (row is null)
@@ -154,6 +156,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             RecipientEmail = row.Email,
             EmployeeName = row.Name,
             DeskNumber = row.DeskNumber,
+            DeskLocation = row.Location,
             BookingDate = row.BookingDate,
         };
     }
@@ -167,7 +170,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
             join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
             where booking.BookingDate == bookingDate && booking.Status == BookingStatus.Confirmed
-            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, booking.BookingDate })
+            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, desk.Location, booking.BookingDate })
             .ToListAsync(cancellationToken);
 
         return rows
@@ -178,6 +181,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
                 RecipientEmail = row.Email,
                 EmployeeName = row.Name,
                 DeskNumber = row.DeskNumber,
+                DeskLocation = row.Location,
                 BookingDate = row.BookingDate,
             })
             .ToList();

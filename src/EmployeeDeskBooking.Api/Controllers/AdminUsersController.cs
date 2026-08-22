@@ -110,20 +110,29 @@ public sealed class AdminUsersController(IUserAdminService userAdminService) : C
 
     [HttpPost("{id:guid}/reset-password")]
     [ProducesResponseType(typeof(AdminResetPasswordResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> ResetPassword(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> ResetPassword(
+        Guid id,
+        [FromBody] AdminResetPasswordRequest request,
+        CancellationToken cancellationToken)
     {
-        var result = await userAdminService.ResetPasswordAsync(id, cancellationToken);
+        var result = await userAdminService.ResetPasswordAsync(id, request.NewPassword, cancellationToken);
         if (result.Succeeded)
         {
             return Ok(new AdminResetPasswordResponse
             {
                 UserId = id,
-                TemporaryPassword = result.TemporaryPassword!,
+                Status = "Updated",
             });
         }
 
-        return NotFoundProblem(result.FailureReason!.Value);
+        return result.FailureReason switch
+        {
+            UserAdminFailureReason.InvalidPassword => BadRequestProblem("Password is required."),
+            UserAdminFailureReason.NotFound => NotFoundProblem(result.FailureReason.Value),
+            _ => ConflictProblem(result.FailureReason!.Value),
+        };
     }
 
     private static AdminUserResponse MapUser(AdminUserListItem item) =>

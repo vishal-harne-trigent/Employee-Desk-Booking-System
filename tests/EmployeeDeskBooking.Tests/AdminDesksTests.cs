@@ -26,6 +26,7 @@ public class AdminDesksTests(CustomWebApplicationFactory factory) : IClassFixtur
         response.EnsureSuccessStatusCode();
         Assert.Contains("C-01", body, StringComparison.Ordinal);
         Assert.Contains("Active", body, StringComparison.Ordinal);
+        Assert.Contains("Floor", body, StringComparison.Ordinal);
 
         using var scope = factory.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
@@ -130,6 +131,39 @@ public class AdminDesksTests(CustomWebApplicationFactory factory) : IClassFixtur
         var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
         var desk = await verifyDb.Desks.SingleAsync(d => d.Id == deskId);
         Assert.Equal(DeskStatus.Active, desk.Status);
+    }
+
+    [Fact(DisplayName = "Admin can set custom desk location on add and edit")]
+    public async Task Admin_sets_custom_desk_location()
+    {
+        var client = new AdminDesksTestClient(factory);
+        await client.LoginAsAdminAsync();
+
+        const string customLocation = "Building B, Floor 2";
+        var createResponse = await client.CreateDeskAsync("D-01", customLocation);
+        createResponse.EnsureSuccessStatusCode();
+        var createBody = await createResponse.Content.ReadAsStringAsync();
+        Assert.Contains(customLocation, createBody, StringComparison.Ordinal);
+
+        Guid deskId;
+        using (var scope = factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            var desk = await db.Desks.SingleAsync(d => d.DeskNumber == "D-01");
+            deskId = desk.Id;
+            Assert.Equal(customLocation, desk.Location);
+        }
+
+        const string updatedLocation = "Building C, Open plan";
+        var editResponse = await client.EditDeskAsync(deskId, "D-01", updatedLocation);
+        editResponse.EnsureSuccessStatusCode();
+        var editBody = await editResponse.Content.ReadAsStringAsync();
+        Assert.Contains(updatedLocation, editBody, StringComparison.Ordinal);
+
+        using var verifyScope = factory.Services.CreateScope();
+        var verifyDb = verifyScope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var updatedDesk = await verifyDb.Desks.SingleAsync(d => d.Id == deskId);
+        Assert.Equal(updatedLocation, updatedDesk.Location);
     }
 
     [Fact(DisplayName = "Employee cannot access manage desks page (US-005/V-07)")]

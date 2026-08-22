@@ -22,5 +22,10 @@ public interface IUserAdminService
 
     Task<UserAdminResult> DeactivateUserAsync(Guid userId, CancellationToken cancellationToken = default);
 
-    Task<UserAdminResult> ResetPasswordAsync(Guid userId, CancellationToken cancellationToken = default);
+    Task<UserAdminResult> ActivateUserAsync(Guid userId, CancellationToken cancellationToken = default);
+
+    Task<UserAdminResult> ResetPasswordAsync(
+        Guid userId,
+        string newPassword,
+        CancellationToken cancellationToken = default);
 }

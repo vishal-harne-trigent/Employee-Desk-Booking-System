@@ -1,3 +1,4 @@
+using EmployeeDeskBooking.Application.Desks;
 using EmployeeDeskBooking.Application.Notifications;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Bookings;
@@ -43,10 +44,14 @@ public sealed class BookingService(
 
         var existing = await bookings.GetConfirmedBookingForUserOnDateAsync(userId, date, cancellationToken);
         string? existingDeskNumber = null;
+        string? existingDeskLocation = null;
         if (existing is not null)
         {
             var bookedDesk = await bookings.GetDeskByIdAsync(existing.DeskId, cancellationToken);
             existingDeskNumber = bookedDesk?.DeskNumber;
+            existingDeskLocation = bookedDesk is null
+                ? null
+                : DeskLocationFormatter.ResolveLocation(bookedDesk.DeskNumber, bookedDesk.Location);
         }
 
         var activeDesks = await bookings.GetActiveDesksAsync(cancellationToken);
@@ -59,11 +64,12 @@ public sealed class BookingService(
             {
                 DeskId = desk.Id,
                 DeskNumber = desk.DeskNumber,
+                Location = DeskLocationFormatter.ResolveLocation(desk.DeskNumber, desk.Location),
                 IsAvailable = !confirmedByDesk.ContainsKey(desk.Id),
             })
             .ToList();
 
-        return AvailabilityResult.Success(items, existingDeskNumber);
+        return AvailabilityResult.Success(items, existingDeskNumber, existingDeskLocation);
     }
 
     public async Task<CreateBookingResult> CreateBookingAsync(
@@ -137,6 +143,7 @@ public sealed class BookingService(
                 BookingId = row.Booking.Id,
                 BookingDate = row.Booking.BookingDate,
                 DeskNumber = row.DeskNumber,
+                Location = DeskLocationFormatter.ResolveLocation(row.DeskNumber, row.DeskLocation),
                 Status = row.Booking.Status,
                 CanCancel = row.Booking.Status == BookingStatus.Confirmed
                     && row.Booking.BookingDate >= today,
@@ -181,6 +188,8 @@ public sealed class BookingService(
                 EmployeeName = row.EmployeeName,
                 Status = row.Booking.Status,
                 CanCancel = CanCancel(row.Booking, today),
+                CreatedAt = row.Booking.CreatedAt,
+                CancelledAt = row.Booking.CancelledAt,
             })
             .OrderByDescending(b => b.BookingDate)
             .ToList();

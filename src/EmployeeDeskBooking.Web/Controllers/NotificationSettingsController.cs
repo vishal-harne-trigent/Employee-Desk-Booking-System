@@ -8,7 +8,7 @@ using System.Security.Claims;
 
 namespace EmployeeDeskBooking.Web.Controllers;
 
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 [Route("Settings/Notifications")]
 public sealed class NotificationSettingsController(
     INotificationPreferenceService preferences,

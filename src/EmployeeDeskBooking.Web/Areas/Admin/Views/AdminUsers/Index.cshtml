@@ -1,13 +1,43 @@
 @model EmployeeDeskBooking.Web.Areas.Admin.Models.AdminUsersViewModel
 @using EmployeeDeskBooking.Domain.Users
 @{
-    ViewData["Title"] = "Manage Users";
+    ViewData["Title"] = "Manage users";
     Layout = "_Layout";
 }
 
-<div class="page-header">
-    <h1>Manage users</h1>
-    <p class="text-muted">Create and maintain user accounts, roles, and access.</p>
+<div class="page-header desk-page-header">
+    <div>
+        <h1>Manage users</h1>
+        <p class="text-muted">Create accounts and manage roles.</p>
+    </div>
+    <details class="desk-add-details user-add-details">
+        <summary class="btn btn-primary btn-add-desk">+ Add user</summary>
+        <div class="desk-add-panel user-add-panel">
+            <form asp-action="Create" method="post" class="user-add-form">
+                @Html.AntiForgeryToken()
+                <div class="field inline-field">
+                    <label for="name">Name</label>
+                    <input id="name" name="name" type="text" maxlength="128" required />
+                </div>
+                <div class="field inline-field">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" type="email" maxlength="320" required />
+                </div>
+                <div class="field inline-field">
+                    <label for="role">Role</label>
+                    <select id="role" name="role" required>
+                        <option value="@UserRole.Employee">Employee</option>
+                        <option value="@UserRole.Admin">Admin</option>
+                    </select>
+                </div>
+                <div class="field inline-field">
+                    <label for="password">Initial password</label>
+                    <input id="password" name="password" type="password" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Create user</button>
+            </form>
+        </div>
+    </details>
 </div>
 
 @if (!string.IsNullOrEmpty(Model.SuccessMessage))
@@ -20,109 +50,97 @@
     <div class="alert alert-error" role="alert">@Model.ErrorMessage</div>
 }
 
-@if (!string.IsNullOrEmpty(Model.TemporaryPassword))
+@if (Model.Users.Count == 0)
 {
-    <div class="page-card password-reset-panel" role="alert">
-        <h2 class="section-title">Temporary password for @Model.ResetPasswordForEmail</h2>
-        <p>Copy this password now. It will not be shown again.</p>
-        <code class="temporary-password">@Model.TemporaryPassword</code>
+    <div class="page-card empty-state">
+        <p>No users yet. Click <strong>+ Add user</strong> to create an account.</p>
     </div>
 }
-
-<div class="page-card">
-    <h2 class="section-title">Add user</h2>
-    <form asp-action="Create" method="post" class="user-add-form">
-        @Html.AntiForgeryToken()
-        <div class="field inline-field">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" maxlength="128" required />
-        </div>
-        <div class="field inline-field">
-            <label for="email">Email</label>
-            <input id="email" name="email" type="email" maxlength="320" required />
-        </div>
-        <div class="field inline-field">
-            <label for="role">Role</label>
-            <select id="role" name="role" required>
-                <option value="@UserRole.Employee">Employee</option>
-                <option value="@UserRole.Admin">Admin</option>
-            </select>
-        </div>
-        <div class="field inline-field">
-            <label for="password">Initial password</label>
-            <input id="password" name="password" type="password" required />
-        </div>
-        <button type="submit" class="btn btn-primary">Create user</button>
-    </form>
-</div>
-
-<div class="page-card desk-table-card">
-    <table class="desk-table admin-users-table">
-        <thead>
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Role</th>
-                <th scope="col">Status</th>
-                <th scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in Model.Users)
-            {
+else
+{
+    <div class="page-card desk-table-card">
+        <table class="desk-table admin-users-table">
+            <thead>
                 <tr>
-                    <td colspan="5" class="user-edit-row">
-                        <form asp-action="Edit" method="post" class="user-edit-form">
-                            @Html.AntiForgeryToken()
-                            <input type="hidden" name="userId" value="@user.UserId" />
-                            <div class="field inline-field">
-                                <label class="sr-only" for="name-@user.UserId">Name</label>
-                                <input id="name-@user.UserId" name="name" type="text" value="@user.Name" maxlength="128" required />
-                            </div>
-                            <div class="field inline-field">
-                                <label class="sr-only" for="email-@user.UserId">Email</label>
-                                <input id="email-@user.UserId" name="email" type="email" value="@user.Email" maxlength="320" required />
-                            </div>
-                            <div class="field inline-field">
-                                <label class="sr-only" for="role-@user.UserId">Role</label>
-                                <select id="role-@user.UserId" name="role">
-                                    <option value="@UserRole.Employee" selected="@(user.Role == UserRole.Employee ? "selected" : null)">Employee</option>
-                                    <option value="@UserRole.Admin" selected="@(user.Role == UserRole.Admin ? "selected" : null)">Admin</option>
-                                </select>
-                            </div>
+                    <th scope="col">Name</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Role</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td class="user-name">@user.Name</td>
+                        <td>@user.Email</td>
+                        <td>@user.RoleLabel</td>
+                        <td>
                             <span class="status-pill status-@user.StatusLabel.ToLowerInvariant()">
                                 <span class="status-icon" aria-hidden="true">●</span>
                                 @user.StatusLabel
                             </span>
-                            <button type="submit" class="btn btn-secondary btn-sm">Save</button>
-                        </form>
-                        <div class="user-row-actions">
-                            @if (user.IsActive)
-                            {
-                                <form asp-action="ResetPassword" method="post" class="inline-form"
-                                      onsubmit="return confirm('Reset password for @user.Email?');">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="userId" value="@user.UserId" />
-                                    <button type="submit" class="btn btn-secondary btn-sm">Reset password</button>
-                                </form>
-                                if (user.CanDeactivate)
-                                {
-                                    <form asp-action="Deactivate" method="post" class="inline-form"
-                                          onsubmit="return confirm('Deactivate @user.Email?');">
+                        </td>
+                        <td class="user-actions">
+                            <div class="desk-row-actions user-row-actions">
+                                <details class="desk-edit-details user-edit-details">
+                                    <summary class="desk-action-link">Edit</summary>
+                                    <form asp-action="Edit" method="post" class="user-edit-form">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="userId" value="@user.UserId" />
-                                        <button type="submit" class="btn btn-secondary btn-sm">Deactivate</button>
+                                        <div class="field inline-field">
+                                            <label class="sr-only" for="name-@user.UserId">Name</label>
+                                            <input id="name-@user.UserId" name="name" type="text" value="@user.Name" maxlength="128" required />
+                                        </div>
+                                        <div class="field inline-field">
+                                            <label class="sr-only" for="email-@user.UserId">Email</label>
+                                            <input id="email-@user.UserId" name="email" type="email" value="@user.Email" maxlength="320" required />
+                                        </div>
+                                        <div class="field inline-field">
+                                            <label class="sr-only" for="role-@user.UserId">Role</label>
+                                            <select id="role-@user.UserId" name="role">
+                                                <option value="@UserRole.Employee" selected="@(user.Role == UserRole.Employee ? "selected" : null)">Employee</option>
+                                                <option value="@UserRole.Admin" selected="@(user.Role == UserRole.Admin ? "selected" : null)">Admin</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary btn-sm">Save</button>
                                     </form>
+                                </details>
+                                @if (user.IsActive)
+                                {
+                                    <a asp-action="ResetPassword" asp-route-userId="@user.UserId" class="desk-action-link">
+                                        Reset password
+                                    </a>
+                                    if (user.CanDeactivate)
+                                    {
+                                        <form asp-action="Deactivate" method="post" class="inline-form"
+                                              onsubmit="return confirm('Deactivate @user.Email?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="userId" value="@user.UserId" />
+                                            <button type="submit" class="desk-action-link">Deactivate</button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <span class="desk-action-link desk-action-disabled" title="Assign another Admin before deactivating the last active Admin">
+                                            Deactivate
+                                        </span>
+                                    }
                                 }
                                 else
                                 {
-                                    <span class="text-muted user-blocked-hint">Last admin protected</span>
+                                    <form asp-action="Activate" method="post" class="inline-form">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="userId" value="@user.UserId" />
+                                        <button type="submit" class="desk-action-link">Activate</button>
+                                    </form>
                                 }
-                            }
-                        </div>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}

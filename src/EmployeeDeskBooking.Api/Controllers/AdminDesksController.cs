@@ -29,7 +29,7 @@ public sealed class AdminDesksController(IDeskService deskService) : ControllerB
         [FromBody] CreateAdminDeskRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await deskService.CreateDeskAsync(request.DeskNumber, cancellationToken);
+        var result = await deskService.CreateDeskAsync(request.DeskNumber, request.Location, cancellationToken);
         if (result.Succeeded)
         {
             return CreatedAtAction(
@@ -53,7 +53,7 @@ public sealed class AdminDesksController(IDeskService deskService) : ControllerB
         [FromBody] UpdateAdminDeskRequest request,
         CancellationToken cancellationToken)
     {
-        var result = await deskService.UpdateDeskNumberAsync(id, request.DeskNumber, cancellationToken);
+        var result = await deskService.UpdateDeskAsync(id, request.DeskNumber, request.Location, cancellationToken);
         if (result.Succeeded)
         {
             return Ok(new AdminDeskMutationResponse { DeskId = id, Status = "Updated" });
@@ -104,6 +104,7 @@ public sealed class AdminDesksController(IDeskService deskService) : ControllerB
         {
             DeskId = item.DeskId,
             DeskNumber = item.DeskNumber,
+            Location = item.Location,
             Status = item.Status.ToString(),
             CanDeactivate = item.CanDeactivate,
         };

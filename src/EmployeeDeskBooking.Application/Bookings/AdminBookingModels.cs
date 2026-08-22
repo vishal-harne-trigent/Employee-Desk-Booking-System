@@ -24,4 +24,8 @@ public sealed class AdminBookingItem
     public required BookingStatus Status { get; init; }
 
     public required bool CanCancel { get; init; }
+
+    public required DateTimeOffset CreatedAt { get; init; }
+
+    public DateTimeOffset? CancelledAt { get; init; }
 }

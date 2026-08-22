@@ -1,3 +1,4 @@
+using System.Globalization;
 using EmployeeDeskBooking.Domain.Bookings;
 using EmployeeDeskBooking.Infrastructure.Data;
 using Microsoft.AspNetCore.Http;
@@ -59,8 +60,8 @@ public class AdminBookingsTests(CustomWebApplicationFactory factory) : IClassFix
         var body = await response.Content.ReadAsStringAsync();
 
         response.EnsureSuccessStatusCode();
-        Assert.Contains(FutureDate.ToString("dd MMM yyyy"), body, StringComparison.Ordinal);
-        Assert.DoesNotContain(OtherDate.ToString("dd MMM yyyy"), body, StringComparison.Ordinal);
+        Assert.Contains(FutureDate.ToString("ddd, MMM d, yyyy", CultureInfo.InvariantCulture), body, StringComparison.Ordinal);
+        Assert.DoesNotContain(OtherDate.ToString("ddd, MMM d, yyyy", CultureInfo.InvariantCulture), body, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Admin filters bookings by status (US-004/AC-03)")]
@@ -125,6 +126,22 @@ public class AdminBookingsTests(CustomWebApplicationFactory factory) : IClassFix
 
         response.EnsureSuccessStatusCode();
         Assert.Contains("action=\"/Admin/AdminBookings/ApplyFilters\"", body, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact(DisplayName = "Admin nav links to root booking pages from admin area")]
+    public async Task Admin_nav_links_to_root_booking_pages()
+    {
+        var client = new AdminBookingsTestClient(factory);
+        await client.LoginAsAdminAsync();
+
+        var response = await client.GetAdminBookingsPageAsync();
+        var body = await response.Content.ReadAsStringAsync();
+
+        response.EnsureSuccessStatusCode();
+        Assert.Contains("/Desks/Availability", body, StringComparison.Ordinal);
+        Assert.Contains("/MyBookings", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("/Admin/Desks/Availability", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("/Admin/MyBookings", body, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Employee cannot access admin bookings page (US-004/V-07)")]

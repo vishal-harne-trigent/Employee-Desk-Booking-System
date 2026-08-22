@@ -4,6 +4,15 @@ namespace EmployeeDeskBooking.Tests;
 
 public class DeskLocationHelperTests
 {
+    [Theory(DisplayName = "Stored desk location overrides prefix-derived default")]
+    [InlineData("A-01", "Custom wing", "Custom wing")]
+    [InlineData("A-01", null, "Floor 1, Zone C")]
+    [InlineData("A-01", "   ", "Floor 1, Zone C")]
+    public void ResolveLocation_prefers_stored_value(string deskNumber, string? stored, string expected)
+    {
+        Assert.Equal(expected, DeskLocationHelper.ResolveLocation(deskNumber, stored));
+    }
+
     [Theory(DisplayName = "Desk location label is derived from desk number prefix")]
     [InlineData("A-01", "Floor 1, Zone C")]
     [InlineData("A-02", "Floor 1, Zone C")]

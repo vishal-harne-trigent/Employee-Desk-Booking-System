@@ -15,6 +15,8 @@ public sealed class DeskListItem
 
     public required string DeskNumber { get; init; }
 
+    public required string Location { get; init; }
+
     public required DeskStatus Status { get; init; }
 
     public required bool CanDeactivate { get; init; }

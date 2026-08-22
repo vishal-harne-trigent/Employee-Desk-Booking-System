@@ -83,10 +83,11 @@ public class ApiAdminUsersTests(CustomApiApplicationFactory factory) : IClassFix
         Assert.Equal(StatusCodes.Status403Forbidden, (int)login.StatusCode);
     }
 
-    [Fact(DisplayName = "API admin reset password returns temporary password (US-006/AC-05)")]
+    [Fact(DisplayName = "API admin reset password sets new password (US-006/AC-05)")]
     public async Task Api_admin_resets_password_US_006_AC_05()
     {
         var email = UniqueEmail("api-reset");
+        const string newPassword = "ApiReset9!";
         var client = new ApiTestClient(factory);
         await client.AuthorizeAsAdminAsync();
         await client.CreateAdminUserAsync(email, "Reset", "Employee", TestPassword);
@@ -98,13 +99,14 @@ public class ApiAdminUsersTests(CustomApiApplicationFactory factory) : IClassFix
             userId = db.Users.Single(u => u.Email == email).Id;
         }
 
-        var response = await client.ResetAdminUserPasswordAsync(userId);
+        var response = await client.ResetAdminUserPasswordAsync(userId, newPassword);
         var body = await response.Content.ReadFromJsonAsync<ResetPasswordApiResponse>();
+        Assert.Equal(StatusCodes.Status200OK, (int)response.StatusCode);
         Assert.NotNull(body);
-        Assert.False(string.IsNullOrWhiteSpace(body!.TemporaryPassword));
+        Assert.Equal("Updated", body!.Status);
 
         var loginClient = new ApiTestClient(factory);
-        var login = await loginClient.LoginAsync(email, body.TemporaryPassword);
+        var login = await loginClient.LoginAsync(email, newPassword);
         login.EnsureSuccessStatusCode();
     }
 
@@ -178,6 +180,8 @@ public class ApiAdminUsersTests(CustomApiApplicationFactory factory) : IClassFix
 
     private sealed class ResetPasswordApiResponse
     {
-        public string TemporaryPassword { get; set; } = string.Empty;
+        public Guid UserId { get; set; }
+
+        public string Status { get; set; } = string.Empty;
     }
 }

@@ -134,6 +134,41 @@ body {
   background: var(--color-primary-hover);
 }
 
+.btn-secondary {
+  width: auto;
+  padding: 0.65rem 1.25rem;
+  background: #fff;
+  color: var(--color-text);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+}
+
+.btn-secondary:hover {
+  background: var(--color-bg-muted);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8125rem;
+  width: auto;
+}
+
+.btn-danger {
+  width: auto;
+  padding: 0.4rem 0.85rem;
+  background: var(--color-error);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  box-shadow: none;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
 .btn-link {
   background: transparent;
   color: var(--color-nav);
@@ -460,19 +495,6 @@ body {
   white-space: nowrap;
 }
 
-.btn-secondary {
-  background: var(--color-bg-muted);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
-  width: auto;
-}
-
-.btn-sm {
-  width: auto;
-  padding: 0.4rem 0.85rem;
-  font-size: 0.8rem;
-}
-
 .push-permission-help {
   margin-top: 1rem;
 }
@@ -532,9 +554,34 @@ body {
   color: #475569;
 }
 
+.status-active {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.status-inactive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
 .admin-filter-form {
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+.admin-bookings-table thead th {
+  background: #fff;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-bookings-table .desk-id {
+  font-weight: 600;
 }
 
 .admin-bookings-table .employee-email {
@@ -555,8 +602,117 @@ body {
   gap: 0.75rem;
 }
 
+.desk-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.desk-add-details {
+  position: relative;
+}
+
+.desk-add-details > summary {
+  list-style: none;
+}
+
+.desk-add-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.btn-add-desk {
+  width: auto;
+  padding: 0.65rem 1.25rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+.desk-add-panel {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 10;
+  min-width: 320px;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-desks-table thead th {
+  background: #fff;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-desks-table .desk-id {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.admin-desks-table .desk-location {
+  font-size: 0.875rem;
+}
+
 .admin-desks-table .desk-actions {
   min-width: 10rem;
+}
+
+.admin-desks-table .desk-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.desk-action-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-nav);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.desk-action-link:hover {
+  text-decoration: underline;
+}
+
+.desk-action-disabled {
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.desk-edit-details > summary {
+  list-style: none;
+}
+
+.desk-edit-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.desk-edit-details[open] .desk-edit-form {
+  display: flex;
+  margin-top: 0.75rem;
+}
+
+.desk-edit-form input {
+  min-width: 140px;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
 }
 
 .admin-desks-table .desk-blocked-hint {
@@ -588,28 +744,107 @@ body {
   gap: 0.75rem;
 }
 
-.admin-users-table .user-edit-row {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+.user-add-form .field input,
+.user-add-form .field select,
+.user-edit-form .field input,
+.user-edit-form .field select {
+  min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: #fff;
+}
+
+.user-add-panel {
+  min-width: 420px;
+}
+
+.admin-users-table thead th {
+  background: #fff;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.admin-users-table .user-name {
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.admin-users-table .user-actions {
+  min-width: 14rem;
 }
 
 .admin-users-table .user-row-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.user-edit-details[open] .user-edit-form {
+  display: flex;
+  margin-top: 0.75rem;
 }
 
 .admin-users-table .user-blocked-hint {
   font-size: 0.875rem;
 }
 
-.password-reset-panel .temporary-password {
+.reset-password-header {
+  margin-bottom: 1.5rem;
+}
+
+.reset-password-card {
+  max-width: 640px;
+}
+
+.reset-password-form .field {
+  margin-bottom: 1.25rem;
+}
+
+.reset-password-form .field label {
   display: block;
-  margin-top: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #f1f5f9;
-  border-radius: 0.375rem;
-  font-size: 1.125rem;
-  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.reset-password-form .field input {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+}
+
+.reset-password-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.reset-password-back-link {
+  color: var(--color-text-muted);
+  text-decoration: none;
+  font-size: 0.9375rem;
+}
+
+.reset-password-back-link:hover {
+  color: var(--color-text);
+  text-decoration: underline;
+}
+
+.btn-reset-password {
+  width: auto;
+  min-width: 10rem;
+  padding: 0.75rem 1.5rem;
 }

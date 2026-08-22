@@ -12,6 +12,8 @@ public sealed class BookingEmailDetails
 
     public required string DeskNumber { get; init; }
 
+    public string? DeskLocation { get; init; }
+
     public required DateOnly BookingDate { get; init; }
 }
 

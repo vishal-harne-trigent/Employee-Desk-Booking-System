@@ -9,7 +9,7 @@ namespace EmployeeDeskBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/notifications")]
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 public sealed class NotificationsController(INotificationPreferenceService preferences) : ControllerBase
 {
     [HttpGet("preferences")]

@@ -72,12 +72,33 @@ public sealed class AdminUsersTestClient(CustomWebApplicationFactory factory)
         return await Login.Client.PostAsync("/Admin/AdminUsers/Deactivate", new FormUrlEncodedContent(form));
     }
 
-    public async Task<HttpResponseMessage> ResetPasswordAsync(Guid userId)
+    public async Task<HttpResponseMessage> ActivateUserAsync(Guid userId)
     {
         var token = await GetTokenFromPageAsync();
         var form = new Dictionary<string, string>
         {
             ["userId"] = userId.ToString(),
+            ["__RequestVerificationToken"] = token,
+        };
+        return await Login.Client.PostAsync("/Admin/AdminUsers/Activate", new FormUrlEncodedContent(form));
+    }
+
+    public Task<HttpResponseMessage> GetResetPasswordPageAsync(Guid userId) =>
+        Login.Client.GetAsync($"/Admin/AdminUsers/ResetPassword?userId={userId}");
+
+    public async Task<HttpResponseMessage> ResetPasswordAsync(
+        Guid userId,
+        string newPassword,
+        string confirmPassword)
+    {
+        var page = await GetResetPasswordPageAsync(userId);
+        page.EnsureSuccessStatusCode();
+        var token = await GetAntiforgeryTokenAsync(await page.Content.ReadAsStringAsync());
+        var form = new Dictionary<string, string>
+        {
+            ["userId"] = userId.ToString(),
+            ["newPassword"] = newPassword,
+            ["confirmPassword"] = confirmPassword,
             ["__RequestVerificationToken"] = token,
         };
         return await Login.Client.PostAsync("/Admin/AdminUsers/ResetPassword", new FormUrlEncodedContent(form));

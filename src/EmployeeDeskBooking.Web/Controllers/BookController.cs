@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeDeskBooking.Web.Controllers;
 
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 public class BookController : Controller
 {
     [HttpGet]

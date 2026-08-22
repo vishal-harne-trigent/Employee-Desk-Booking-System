@@ -10,6 +10,8 @@ public class Desk
 
     public DeskStatus Status { get; set; }
 
+    public string Location { get; set; } = string.Empty;
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public DateTimeOffset UpdatedAt { get; set; }

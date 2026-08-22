@@ -32,6 +32,22 @@ public class SignInTests(CustomWebApplicationFactory factory) : IClassFixture<Cu
         var adminPage = await login.Client.GetAsync(response.Headers.Location!);
         var html = await adminPage.Content.ReadAsStringAsync();
         Assert.Contains("All Bookings", html);
+        Assert.Contains("Desk Availability", html);
+        Assert.Contains("My Bookings", html);
+    }
+
+    [Fact(DisplayName = "Admin can open Desk Availability for personal booking")]
+    public async Task Admin_can_access_desk_availability()
+    {
+        var login = factory.CreateLoginTestClient();
+        var signIn = await login.LoginAsync("admin@test.com", CustomWebApplicationFactory.TestPassword);
+        Assert.Equal(StatusCodes.Status302Found, (int)signIn.StatusCode);
+
+        var response = await login.Client.GetAsync("/Desks/Availability");
+        response.EnsureSuccessStatusCode();
+
+        var html = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Desk Availability", html);
     }
 
     [Fact(DisplayName = "Invalid credentials rejected with generic error (US-001/AC-03)")]

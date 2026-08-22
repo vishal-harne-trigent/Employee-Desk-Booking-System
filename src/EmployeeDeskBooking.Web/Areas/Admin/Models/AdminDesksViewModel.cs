@@ -33,5 +33,7 @@ public sealed class AdminDeskRowViewModel
 
     public required bool CanDeactivate { get; init; }
 
+    public required string Location { get; init; }
+
     public string StatusLabel => Status.ToString();
 }

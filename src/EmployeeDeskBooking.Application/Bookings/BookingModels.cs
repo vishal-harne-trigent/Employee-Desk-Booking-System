@@ -6,6 +6,8 @@ public sealed class DeskAvailabilityItem
 
     public required string DeskNumber { get; init; }
 
+    public required string Location { get; init; }
+
     public required bool IsAvailable { get; init; }
 }
 
@@ -14,11 +16,13 @@ public sealed class AvailabilityResult
     private AvailabilityResult(
         IReadOnlyList<DeskAvailabilityItem>? desks,
         BookingDateValidationError? dateError,
-        string? existingBookingDeskNumber)
+        string? existingBookingDeskNumber,
+        string? existingBookingLocation)
     {
         Desks = desks ?? Array.Empty<DeskAvailabilityItem>();
         DateError = dateError;
         ExistingBookingDeskNumber = existingBookingDeskNumber;
+        ExistingBookingLocation = existingBookingLocation;
     }
 
     public IReadOnlyList<DeskAvailabilityItem> Desks { get; }
@@ -27,17 +31,20 @@ public sealed class AvailabilityResult
 
     public string? ExistingBookingDeskNumber { get; }
 
+    public string? ExistingBookingLocation { get; }
+
     public bool HasDateError => DateError is not null;
 
     public bool UserAlreadyBooked => ExistingBookingDeskNumber is not null;
 
     public static AvailabilityResult DateInvalid(BookingDateValidationError error) =>
-        new(null, error, null);
+        new(null, error, null, null);
 
     public static AvailabilityResult Success(
         IReadOnlyList<DeskAvailabilityItem> desks,
-        string? existingBookingDeskNumber = null) =>
-        new(desks, null, existingBookingDeskNumber);
+        string? existingBookingDeskNumber = null,
+        string? existingBookingLocation = null) =>
+        new(desks, null, existingBookingDeskNumber, existingBookingLocation);
 }
 
 public sealed class CreateBookingResult

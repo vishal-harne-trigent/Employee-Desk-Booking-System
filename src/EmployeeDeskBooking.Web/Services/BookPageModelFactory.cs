@@ -39,7 +39,8 @@ public sealed class BookPageModelFactory(IBookingService bookingService, IOffice
             : new ExistingBookingRowViewModel
             {
                 DeskNumber = availability.ExistingBookingDeskNumber,
-                Location = DeskLocationHelper.FormatLocation(availability.ExistingBookingDeskNumber),
+                Location = availability.ExistingBookingLocation
+                    ?? DeskLocationHelper.FormatLocation(availability.ExistingBookingDeskNumber),
                 BookingDate = date,
             };
         model.Desks = availability.Desks
@@ -47,7 +48,7 @@ public sealed class BookPageModelFactory(IBookingService bookingService, IOffice
             {
                 DeskId = d.DeskId,
                 DeskNumber = d.DeskNumber,
-                Location = DeskLocationHelper.FormatLocation(d.DeskNumber),
+                Location = d.Location,
                 IsAvailable = d.IsAvailable,
             })
             .ToList();

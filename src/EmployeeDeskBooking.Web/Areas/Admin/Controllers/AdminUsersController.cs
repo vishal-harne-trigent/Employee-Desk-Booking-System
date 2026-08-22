@@ -14,6 +14,11 @@ public class AdminUsersController(IUserAdminService userAdminService) : Controll
     public async Task<IActionResult> Index(CancellationToken cancellationToken)
     {
         var model = await BuildViewModelAsync(cancellationToken);
+        if (TempData["SuccessMessage"] is string successMessage)
+        {
+            model.SuccessMessage = successMessage;
+        }
+
         return View(model);
     }
 
@@ -80,9 +85,9 @@ public class AdminUsersController(IUserAdminService userAdminService) : Controll
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ResetPassword(Guid userId, CancellationToken cancellationToken)
+    public async Task<IActionResult> Activate(Guid userId, CancellationToken cancellationToken)
     {
-        var result = await userAdminService.ResetPasswordAsync(userId, cancellationToken);
+        var result = await userAdminService.ActivateUserAsync(userId, cancellationToken);
         if (!result.Succeeded)
         {
             var errorModel = await BuildViewModelAsync(cancellationToken);
@@ -90,13 +95,56 @@ public class AdminUsersController(IUserAdminService userAdminService) : Controll
             return View("Index", errorModel);
         }
 
-        var users = await userAdminService.GetAllUsersAsync(cancellationToken);
-        var user = users.Single(u => u.UserId == userId);
-        var model = await BuildViewModelAsync(cancellationToken);
-        model.ResetPasswordForEmail = user.Email;
-        model.TemporaryPassword = result.TemporaryPassword;
-        model.SuccessMessage = "Password reset. Copy the temporary password now — it will not be shown again.";
-        return View("Index", model);
+        var successModel = await BuildViewModelAsync(cancellationToken);
+        successModel.SuccessMessage = "User activated.";
+        return View("Index", successModel);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ResetPassword(Guid userId, CancellationToken cancellationToken)
+    {
+        var model = await BuildResetPasswordViewModelAsync(userId, cancellationToken);
+        if (model is null)
+        {
+            return NotFound();
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ResetPassword(
+        Guid userId,
+        string newPassword,
+        string confirmPassword,
+        CancellationToken cancellationToken)
+    {
+        var userModel = await BuildResetPasswordViewModelAsync(userId, cancellationToken);
+        if (userModel is null)
+        {
+            return NotFound();
+        }
+
+        if (!string.Equals(newPassword, confirmPassword, StringComparison.Ordinal))
+        {
+            userModel.ErrorMessage = AdminResetPasswordViewModel.PasswordMismatchMessage;
+            userModel.NewPassword = newPassword;
+            userModel.ConfirmPassword = confirmPassword;
+            return View(userModel);
+        }
+
+        var result = await userAdminService.ResetPasswordAsync(userId, newPassword, cancellationToken);
+        if (!result.Succeeded)
+        {
+            userModel.ErrorMessage = AdminUsersViewModel.ErrorMessageFor(result.FailureReason!.Value);
+            userModel.NewPassword = newPassword;
+            userModel.ConfirmPassword = confirmPassword;
+            return View(userModel);
+        }
+
+        TempData["SuccessMessage"] = $"Password updated for {userModel.Email}.";
+        return RedirectToAction(nameof(Index));
     }
 
     private async Task<AdminUsersViewModel> BuildViewModelAsync(CancellationToken cancellationToken)
@@ -116,6 +164,25 @@ public class AdminUsersController(IUserAdminService userAdminService) : Controll
                     CanDemote = u.CanDemote,
                 })
                 .ToList(),
+        };
+    }
+
+    private async Task<AdminResetPasswordViewModel?> BuildResetPasswordViewModelAsync(
+        Guid userId,
+        CancellationToken cancellationToken)
+    {
+        var users = await userAdminService.GetAllUsersAsync(cancellationToken);
+        var user = users.FirstOrDefault(u => u.UserId == userId);
+        if (user is null)
+        {
+            return null;
+        }
+
+        return new AdminResetPasswordViewModel
+        {
+            UserId = user.UserId,
+            Name = user.Name,
+            Email = user.Email,
         };
     }
 }

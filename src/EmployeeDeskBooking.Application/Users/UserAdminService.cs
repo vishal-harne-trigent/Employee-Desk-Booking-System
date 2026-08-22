@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using EmployeeDeskBooking.Application.Security;
 using EmployeeDeskBooking.Domain.Users;
 
@@ -127,7 +126,7 @@ public sealed class UserAdminService(IUserRepository users, IPasswordVerifier pa
         return UserAdminResult.Success(user.Id);
     }
 
-    public async Task<UserAdminResult> ResetPasswordAsync(
+    public async Task<UserAdminResult> ActivateUserAsync(
         Guid userId,
         CancellationToken cancellationToken = default)
     {
@@ -137,11 +136,37 @@ public sealed class UserAdminService(IUserRepository users, IPasswordVerifier pa
             return UserAdminResult.Failure(UserAdminFailureReason.NotFound);
         }
 
-        var temporaryPassword = GenerateTemporaryPassword();
-        user.PasswordHash = passwordVerifier.HashPassword(user, temporaryPassword);
+        if (user.IsActive)
+        {
+            return UserAdminResult.Success(user.Id);
+        }
+
+        user.IsActive = true;
         user.UpdatedAt = DateTimeOffset.UtcNow;
         await users.SaveChangesAsync(cancellationToken);
-        return UserAdminResult.Success(user.Id, temporaryPassword);
+        return UserAdminResult.Success(user.Id);
+    }
+
+    public async Task<UserAdminResult> ResetPasswordAsync(
+        Guid userId,
+        string newPassword,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(newPassword))
+        {
+            return UserAdminResult.Failure(UserAdminFailureReason.InvalidPassword);
+        }
+
+        var user = await users.GetUserByIdAsync(userId, cancellationToken);
+        if (user is null)
+        {
+            return UserAdminResult.Failure(UserAdminFailureReason.NotFound);
+        }
+
+        user.PasswordHash = passwordVerifier.HashPassword(user, newPassword);
+        user.UpdatedAt = DateTimeOffset.UtcNow;
+        await users.SaveChangesAsync(cancellationToken);
+        return UserAdminResult.Success(user.Id);
     }
 
     private static AdminUserListItem MapListItem(User user, int activeAdminCount)
@@ -157,13 +182,6 @@ public sealed class UserAdminService(IUserRepository users, IPasswordVerifier pa
             CanDeactivate = user.IsActive && !isLastActiveAdmin,
             CanDemote = user.IsActive && user.Role == UserRole.Admin && activeAdminCount > 1,
         };
-    }
-
-    private static string GenerateTemporaryPassword()
-    {
-        const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$";
-        var bytes = RandomNumberGenerator.GetBytes(12);
-        return new string(bytes.Select(b => chars[b % chars.Length]).ToArray());
     }
 
     private static bool IsUniqueConstraintViolation(Exception ex)

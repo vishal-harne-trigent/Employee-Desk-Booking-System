@@ -50,9 +50,12 @@ public class BookIndexViewModel
             _ => "Unable to complete the booking. Please try again.",
         };
 
-    public static string BookingConfirmedMessage(string deskNumber, DateOnly bookingDate)
+    public static string BookingConfirmedMessage(string deskNumber, DateOnly bookingDate) =>
+        BookingConfirmedMessage(deskNumber, location: null, bookingDate);
+
+    public static string BookingConfirmedMessage(string deskNumber, string? location, DateOnly bookingDate)
     {
-        var deskLabel = DeskLocationFormatter.FormatDeskWithLocation(deskNumber);
+        var deskLabel = DeskLocationFormatter.FormatDeskWithLocation(deskNumber, location);
         var dateLabel = bookingDate.ToString("dddd, MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
         return $"Your desk booking is confirmed for {deskLabel} on {dateLabel}.";
     }
@@ -77,7 +80,7 @@ public sealed class ExistingBookingRowViewModel
 
     public DateOnly BookingDate { get; init; }
 
-    public string DeskLabel => DeskLocationFormatter.FormatDeskWithLocation(DeskNumber);
+    public string DeskLabel => DeskLocationFormatter.FormatDeskWithLocation(DeskNumber, Location);
 
     public string BookingDateLabel =>
         BookingDate.ToString("dddd, MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));

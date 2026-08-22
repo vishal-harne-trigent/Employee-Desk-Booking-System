@@ -27,6 +27,11 @@ public class DeskConfiguration : IEntityTypeConfiguration<Desk>
             .HasConversion<byte>()
             .IsRequired();
 
+        builder.Property(desk => desk.Location)
+            .HasMaxLength(100)
+            .IsRequired()
+            .HasDefaultValue(string.Empty);
+
         builder.Property(desk => desk.CreatedAt).IsRequired();
         builder.Property(desk => desk.UpdatedAt).IsRequired();
     }

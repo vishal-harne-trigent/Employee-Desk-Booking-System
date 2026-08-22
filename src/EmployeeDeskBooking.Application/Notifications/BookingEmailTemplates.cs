@@ -8,7 +8,7 @@ public static class BookingEmailTemplates
     private static readonly CultureInfo EmailCulture = CultureInfo.GetCultureInfo("en-US");
 
     public static string ConfirmationSubject(BookingEmailDetails details) =>
-        $"Desk booking confirmed — {DeskLocationFormatter.FormatDeskWithLocation(details.DeskNumber)} on {FormatSubjectDate(details.BookingDate)}";
+        $"Desk booking confirmed — {FormatDesk(details)} on {FormatSubjectDate(details.BookingDate)}";
 
     public static string CancellationSubject(BookingEmailDetails details) =>
         $"Desk booking cancelled — {details.DeskNumber} on {FormatSubjectDate(details.BookingDate)}";
@@ -20,7 +20,7 @@ public static class BookingEmailTemplates
         BuildBody(
             details,
             intro: "Your desk reservation is confirmed. We look forward to seeing you in the office.",
-            deskNumber: DeskLocationFormatter.FormatDeskWithLocation(details.DeskNumber),
+            deskNumber: FormatDesk(details),
             action: "Booking confirmed");
 
     public static string CancellationBody(BookingEmailDetails details) =>
@@ -62,6 +62,9 @@ public static class BookingEmailTemplates
             </body></html>
             """;
     }
+
+    private static string FormatDesk(BookingEmailDetails details) =>
+        DeskLocationFormatter.FormatDeskWithLocation(details.DeskNumber, details.DeskLocation);
 
     private static string FormatSubjectDate(DateOnly date) =>
         date.ToString("yyyy-MM-dd", EmailCulture);

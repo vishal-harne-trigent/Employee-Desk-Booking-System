@@ -26,6 +26,7 @@ public sealed class DeskService(
             {
                 DeskId = desk.Id,
                 DeskNumber = desk.DeskNumber,
+                Location = DeskLocationFormatter.ResolveLocation(desk.DeskNumber, desk.Location),
                 Status = desk.Status,
                 CanDeactivate = desk.Status == DeskStatus.Active && !hasBlockingBookings,
             });
@@ -36,6 +37,7 @@ public sealed class DeskService(
 
     public async Task<DeskOperationResult> CreateDeskAsync(
         string deskNumber,
+        string? location = null,
         CancellationToken cancellationToken = default)
     {
         var normalized = NormalizeDeskNumber(deskNumber);
@@ -49,12 +51,14 @@ public sealed class DeskService(
             return DeskOperationResult.Failure(DeskOperationFailureReason.DuplicateDeskNumber);
         }
 
+        var trimmedNumber = deskNumber.Trim();
         var now = DateTimeOffset.UtcNow;
         var desk = new Desk
         {
             Id = Guid.NewGuid(),
-            DeskNumber = deskNumber.Trim(),
+            DeskNumber = trimmedNumber,
             DeskNumberNormalized = normalized,
+            Location = ResolveStoredLocation(trimmedNumber, location),
             Status = DeskStatus.Active,
             CreatedAt = now,
             UpdatedAt = now,
@@ -73,9 +77,10 @@ public sealed class DeskService(
         }
     }
 
-    public async Task<DeskOperationResult> UpdateDeskNumberAsync(
+    public async Task<DeskOperationResult> UpdateDeskAsync(
         Guid deskId,
         string deskNumber,
+        string? location = null,
         CancellationToken cancellationToken = default)
     {
         var desk = await desks.GetDeskByIdAsync(deskId, cancellationToken);
@@ -90,18 +95,16 @@ public sealed class DeskService(
             return DeskOperationResult.Failure(DeskOperationFailureReason.DuplicateDeskNumber);
         }
 
-        if (desk.DeskNumberNormalized == normalized)
-        {
-            return DeskOperationResult.Success(desk.Id);
-        }
-
-        if (await desks.DeskNumberExistsAsync(normalized, deskId, cancellationToken))
+        if (desk.DeskNumberNormalized != normalized
+            && await desks.DeskNumberExistsAsync(normalized, deskId, cancellationToken))
         {
             return DeskOperationResult.Failure(DeskOperationFailureReason.DuplicateDeskNumber);
         }
 
-        desk.DeskNumber = deskNumber.Trim();
+        var trimmedNumber = deskNumber.Trim();
+        desk.DeskNumber = trimmedNumber;
         desk.DeskNumberNormalized = normalized;
+        desk.Location = ResolveStoredLocation(trimmedNumber, location);
         desk.UpdatedAt = DateTimeOffset.UtcNow;
 
         try
@@ -165,6 +168,14 @@ public sealed class DeskService(
 
     private static string NormalizeDeskNumber(string deskNumber) =>
         deskNumber.Trim().ToUpperInvariant();
+
+    private static string ResolveStoredLocation(string deskNumber, string? location)
+    {
+        var normalized = DeskLocationFormatter.NormalizeStoredLocation(location);
+        return normalized.Length > 0
+            ? normalized
+            : DeskLocationFormatter.FormatLocation(deskNumber);
+    }
 
     private static bool IsUniqueConstraintViolation(Exception ex)
     {

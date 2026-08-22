@@ -17,6 +17,10 @@
     @if (isAuthenticated)
     {
         <nav class="app-nav-links" aria-label="Main">
+            <a asp-area="" asp-controller="Desks" asp-action="Availability"
+               class="@(controller == "Desks" ? "active" : null)">Desk Availability</a>
+            <a asp-area="" asp-controller="MyBookings" asp-action="Index"
+               class="@(controller == "MyBookings" ? "active" : null)">My Bookings</a>
             @if (isAdmin)
             {
                 <a asp-area="Admin" asp-controller="AdminDesks" asp-action="Index"
@@ -25,13 +29,6 @@
                    class="@(controller == "AdminUsers" ? "active" : null)">Users</a>
                 <a asp-area="Admin" asp-controller="AdminBookings" asp-action="Index"
                    class="@(controller == "AdminBookings" ? "active" : null)">All Bookings</a>
-            }
-            else
-            {
-                <a asp-controller="Desks" asp-action="Availability"
-                   class="@(controller == "Desks" ? "active" : null)">Desk Availability</a>
-                <a asp-controller="MyBookings" asp-action="Index"
-                   class="@(controller == "MyBookings" ? "active" : null)">My Bookings</a>
             }
         </nav>
 

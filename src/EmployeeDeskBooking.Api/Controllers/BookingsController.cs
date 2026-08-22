@@ -10,7 +10,7 @@ namespace EmployeeDeskBooking.Api.Controllers;
 
 [ApiController]
 [Route("api/bookings")]
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 public sealed class BookingsController(IBookingService bookingService) : ControllerBase
 {
     [HttpGet("availability")]

@@ -31,6 +31,8 @@ public sealed class MyBookingItem
 
     public required string DeskNumber { get; init; }
 
+    public required string Location { get; init; }
+
     public required BookingStatus Status { get; init; }
 
     public required bool CanCancel { get; init; }

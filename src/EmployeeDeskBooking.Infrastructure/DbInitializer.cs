@@ -1,3 +1,4 @@
+using EmployeeDeskBooking.Application.Desks;
 using EmployeeDeskBooking.Application.Security;
 using EmployeeDeskBooking.Domain.Desks;
 using EmployeeDeskBooking.Domain.Users;
@@ -15,10 +16,16 @@ public static class DbInitializer
     public const string DefaultAdminName = "Super Admin";
     public const string DefaultPassword = "Password1!";
 
-    public const int DefaultDeskCount = 10;
+    public const int DefaultDeskCount = 5;
 
     public static IReadOnlyList<string> DefaultDeskNumbers { get; } =
         Enumerable.Range(1, DefaultDeskCount).Select(i => $"A-{i:D2}").ToArray();
+
+    private static readonly string[] LegacySampleUserEmails =
+    [
+        "admin@company.com",
+        "employee@company.com",
+    ];
 
     public static Task SeedAsync(IServiceProvider services) =>
         SeedAsync(services, resetDefaultPasswordsInDevelopment: false);
@@ -28,6 +35,8 @@ public static class DbInitializer
         var dbContext = services.GetRequiredService<AppDbContext>();
         var passwordVerifier = services.GetRequiredService<IPasswordVerifier>();
         var now = DateTimeOffset.UtcNow;
+
+        await RemoveLegacySampleUsersAsync(dbContext);
 
         await EnsureDefaultUserAsync(
             dbContext,
@@ -48,6 +57,52 @@ public static class DbInitializer
             now);
 
         await SeedDesksAsync(dbContext);
+    }
+
+    private static async Task RemoveLegacySampleUsersAsync(AppDbContext dbContext)
+    {
+        var normalizedEmails = LegacySampleUserEmails.Select(NormalizeEmail).ToList();
+        var users = await dbContext.Users
+            .Where(user => normalizedEmails.Contains(user.EmailNormalized))
+            .ToListAsync();
+
+        if (users.Count == 0)
+        {
+            return;
+        }
+
+        var userIds = users.Select(user => user.Id).ToList();
+        var bookingIds = await dbContext.Bookings
+            .Where(booking => userIds.Contains(booking.UserId))
+            .Select(booking => booking.Id)
+            .ToListAsync();
+
+        if (bookingIds.Count > 0)
+        {
+            dbContext.BookingReminders.RemoveRange(
+                await dbContext.BookingReminders
+                    .Where(reminder => bookingIds.Contains(reminder.BookingId))
+                    .ToListAsync());
+            dbContext.EmailDeliveryLogs.RemoveRange(
+                await dbContext.EmailDeliveryLogs
+                    .Where(log => log.BookingId.HasValue && bookingIds.Contains(log.BookingId.Value))
+                    .ToListAsync());
+            dbContext.Bookings.RemoveRange(
+                await dbContext.Bookings
+                    .Where(booking => bookingIds.Contains(booking.Id))
+                    .ToListAsync());
+        }
+
+        dbContext.EmailDeliveryLogs.RemoveRange(
+            await dbContext.EmailDeliveryLogs
+                .Where(log => log.UserId.HasValue && userIds.Contains(log.UserId.Value))
+                .ToListAsync());
+        dbContext.NotificationPreferences.RemoveRange(
+            await dbContext.NotificationPreferences
+                .Where(preference => userIds.Contains(preference.UserId))
+                .ToListAsync());
+        dbContext.Users.RemoveRange(users);
+        await dbContext.SaveChangesAsync();
     }
 
     private static async Task EnsureDefaultUserAsync(
@@ -84,6 +139,9 @@ public static class DbInitializer
     private static async Task SeedDesksAsync(AppDbContext dbContext)
     {
         var now = DateTimeOffset.UtcNow;
+        var allowedNumbers = DefaultDeskNumbers
+            .Select(number => number.Trim().ToUpperInvariant())
+            .ToHashSet(StringComparer.Ordinal);
 
         if (!await dbContext.Desks.AnyAsync())
         {
@@ -102,13 +160,61 @@ public static class DbInitializer
             .Select(number => CreateDesk(number, DeskStatus.Active, now))
             .ToList();
 
-        if (missingDesks.Count == 0)
+        if (missingDesks.Count > 0)
         {
-            return;
+            dbContext.Desks.AddRange(missingDesks);
+            await dbContext.SaveChangesAsync();
         }
 
-        dbContext.Desks.AddRange(missingDesks);
-        await dbContext.SaveChangesAsync();
+        var extraDesks = await dbContext.Desks
+            .Where(d => !allowedNumbers.Contains(d.DeskNumberNormalized))
+            .ToListAsync();
+
+        if (extraDesks.Count > 0)
+        {
+            var extraDeskIds = extraDesks.Select(d => d.Id).ToList();
+            var deskIdsWithBookings = await dbContext.Bookings
+                .Where(b => extraDeskIds.Contains(b.DeskId))
+                .Select(b => b.DeskId)
+                .Distinct()
+                .ToListAsync();
+            var deskIdsWithBookingsSet = deskIdsWithBookings.ToHashSet();
+
+            var removableDesks = extraDesks
+                .Where(d => !deskIdsWithBookingsSet.Contains(d.Id))
+                .ToList();
+            if (removableDesks.Count > 0)
+            {
+                dbContext.Desks.RemoveRange(removableDesks);
+                await dbContext.SaveChangesAsync();
+            }
+
+            foreach (var desk in extraDesks.Where(d => deskIdsWithBookingsSet.Contains(d.Id)))
+            {
+                if (desk.Status == DeskStatus.Active)
+                {
+                    desk.Status = DeskStatus.Inactive;
+                    desk.UpdatedAt = now;
+                }
+            }
+
+            await dbContext.SaveChangesAsync();
+        }
+
+        var desksMissingLocation = await dbContext.Desks
+            .Where(d => d.Location == string.Empty)
+            .ToListAsync();
+
+        foreach (var desk in desksMissingLocation)
+        {
+            desk.Location = DeskLocationFormatter.FormatLocation(desk.DeskNumber);
+            desk.UpdatedAt = now;
+        }
+
+        if (desksMissingLocation.Count > 0)
+        {
+            await dbContext.SaveChangesAsync();
+        }
     }
 
     public static Desk CreateDesk(string deskNumber, DeskStatus status, DateTimeOffset now) =>
@@ -117,6 +223,7 @@ public static class DbInitializer
             Id = Guid.NewGuid(),
             DeskNumber = deskNumber,
             DeskNumberNormalized = deskNumber.Trim().ToUpperInvariant(),
+            Location = DeskLocationFormatter.FormatLocation(deskNumber),
             Status = status,
             CreatedAt = now,
             UpdatedAt = now,

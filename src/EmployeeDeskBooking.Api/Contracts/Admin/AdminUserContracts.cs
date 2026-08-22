@@ -49,9 +49,14 @@ public sealed class AdminUserMutationResponse
     public required string Status { get; init; }
 }
 
+public sealed class AdminResetPasswordRequest
+{
+    public required string NewPassword { get; init; }
+}
+
 public sealed class AdminResetPasswordResponse
 {
     public required Guid UserId { get; init; }
 
-    public required string TemporaryPassword { get; init; }
+    public required string Status { get; init; }
 }

@@ -1,13 +1,13 @@
 @model EmployeeDeskBooking.Web.Areas.Admin.Models.AdminBookingsViewModel
 @using EmployeeDeskBooking.Domain.Bookings
 @{
-    ViewData["Title"] = "All Bookings";
+    ViewData["Title"] = "All bookings";
     Layout = "_Layout";
 }
 
 <div class="page-header">
-    <h1>All Bookings</h1>
-    <p class="text-muted">View and manage desk bookings across all employees.</p>
+    <h1>All bookings</h1>
+    <p class="text-muted">View and manage bookings across all employees.</p>
 </div>
 
 @if (!string.IsNullOrEmpty(Model.SuccessMessage))
@@ -24,14 +24,14 @@
     <form asp-area="Admin" asp-controller="AdminBookings" asp-action="ApplyFilters" method="post" class="date-filter-form admin-filter-form">
         @Html.AntiForgeryToken()
         <div class="field inline-field">
-            <label for="filterDate">Date</label>
+            <label for="filterDate">Office date</label>
             <input id="filterDate" name="filterDate" type="date"
                    value="@(Model.FilterDate?.ToString("yyyy-MM-dd"))" />
         </div>
         <div class="field inline-field">
             <label for="filterStatus">Status</label>
             <select id="filterStatus" name="filterStatus">
-                <option value="">All</option>
+                <option value="">All statuses</option>
                 <option value="0" selected="@(Model.FilterStatus == BookingStatus.Confirmed ? "selected" : null)">Confirmed</option>
                 <option value="1" selected="@(Model.FilterStatus == BookingStatus.Cancelled ? "selected" : null)">Cancelled</option>
                 <option value="2" selected="@(Model.FilterStatus == BookingStatus.Completed ? "selected" : null)">Completed</option>
@@ -65,39 +65,43 @@ else
         <table class="desk-table bookings-table admin-bookings-table">
             <thead>
                 <tr>
-                    <th scope="col">Date</th>
                     <th scope="col">Employee</th>
                     <th scope="col">Desk</th>
+                    <th scope="col">Office date</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Action</th>
+                    <th scope="col">Created</th>
+                    <th scope="col">Cancelled on</th>
+                    <th scope="col"><span class="sr-only">Actions</span></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var booking in Model.Bookings)
                 {
                     <tr>
-                        <td>@booking.BookingDate.ToString("dd MMM yyyy")</td>
                         <td>
                             <span class="employee-name">@booking.EmployeeName</span>
                             <span class="employee-email text-muted">@booking.EmployeeEmail</span>
                         </td>
-                        <td>@booking.DeskNumber</td>
+                        <td class="desk-id">@booking.DeskNumber</td>
+                        <td>@booking.OfficeDateDisplay</td>
                         <td>
                             <span class="status-pill status-@booking.StatusLabel.ToLowerInvariant()">
                                 <span class="status-icon" aria-hidden="true">●</span>
                                 @booking.StatusLabel
                             </span>
                         </td>
+                        <td>@booking.CreatedDisplay</td>
+                        <td>@booking.CancelledOnDisplay</td>
                         <td>
                             @if (booking.CanCancel)
                             {
                                 <form asp-area="Admin" asp-controller="AdminBookings" asp-action="Cancel" method="post" class="inline-form"
-                                      onsubmit="return confirm('Cancel booking for @booking.EmployeeEmail on @booking.BookingDate.ToString("dd MMM yyyy")?');">
+                                      onsubmit="return confirm('Cancel booking for @booking.EmployeeEmail on @booking.OfficeDateDisplay?');">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="bookingId" value="@booking.BookingId" />
                                     <input type="hidden" name="filterDate" value="@Model.FilterDate?.ToString("yyyy-MM-dd")" />
                                     <input type="hidden" name="filterStatus" value="@Model.FilterStatus" />
-                                    <button type="submit" class="btn btn-secondary btn-sm">Cancel</button>
+                                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
                                 </form>
                             }
                             else

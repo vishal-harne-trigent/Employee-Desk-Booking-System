@@ -11,10 +11,6 @@ public class AdminUsersViewModel
 
     public string? ErrorMessage { get; set; }
 
-    public string? ResetPasswordForEmail { get; set; }
-
-    public string? TemporaryPassword { get; set; }
-
     public static string ErrorMessageFor(UserAdminFailureReason reason) =>
         reason switch
         {

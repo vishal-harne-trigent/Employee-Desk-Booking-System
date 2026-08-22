@@ -18,9 +18,9 @@ public class AdminDesksController(IDeskService deskService) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(string deskNumber, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(string deskNumber, string? location, CancellationToken cancellationToken)
     {
-        var result = await deskService.CreateDeskAsync(deskNumber, cancellationToken);
+        var result = await deskService.CreateDeskAsync(deskNumber, location, cancellationToken);
         if (!result.Succeeded)
         {
             var errorModel = await BuildViewModelAsync(cancellationToken);
@@ -35,9 +35,13 @@ public class AdminDesksController(IDeskService deskService) : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid deskId, string deskNumber, CancellationToken cancellationToken)
+    public async Task<IActionResult> Edit(
+        Guid deskId,
+        string deskNumber,
+        string? location,
+        CancellationToken cancellationToken)
     {
-        var result = await deskService.UpdateDeskNumberAsync(deskId, deskNumber, cancellationToken);
+        var result = await deskService.UpdateDeskAsync(deskId, deskNumber, location, cancellationToken);
         if (!result.Succeeded)
         {
             var errorModel = await BuildViewModelAsync(cancellationToken);
@@ -46,7 +50,7 @@ public class AdminDesksController(IDeskService deskService) : Controller
         }
 
         var successModel = await BuildViewModelAsync(cancellationToken);
-        successModel.SuccessMessage = "Desk number updated.";
+        successModel.SuccessMessage = "Desk updated.";
         return View("Index", successModel);
     }
 
@@ -96,6 +100,7 @@ public class AdminDesksController(IDeskService deskService) : Controller
                     DeskNumber = d.DeskNumber,
                     Status = d.Status,
                     CanDeactivate = d.CanDeactivate,
+                    Location = d.Location,
                 })
                 .ToList(),
         };

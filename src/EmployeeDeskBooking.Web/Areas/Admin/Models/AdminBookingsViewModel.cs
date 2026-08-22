@@ -43,5 +43,11 @@ public sealed class AdminBookingRowViewModel
 
     public required bool CanCancel { get; init; }
 
+    public required string OfficeDateDisplay { get; init; }
+
+    public required string CreatedDisplay { get; init; }
+
+    public required string CancelledOnDisplay { get; init; }
+
     public string StatusLabel => Status.ToString();
 }

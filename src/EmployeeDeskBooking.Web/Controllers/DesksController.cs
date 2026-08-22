@@ -1,5 +1,4 @@
 using EmployeeDeskBooking.Application.Bookings;
-using EmployeeDeskBooking.Web.Helpers;
 using EmployeeDeskBooking.Web.Models;
 using EmployeeDeskBooking.Web.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +7,7 @@ using System.Security.Claims;
 
 namespace EmployeeDeskBooking.Web.Controllers;
 
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 public class DesksController(
     IBookingService bookingService,
     BookPageModelFactory bookPageModelFactory) : Controller
@@ -33,22 +32,34 @@ public class DesksController(
         var successModel = await bookPageModelFactory.BuildAsync(userId, date, true, cancellationToken);
         if (successModel.ExistingBooking is null)
         {
-            var bookedDeskNumber = successModel.Desks.FirstOrDefault(d => d.DeskId == deskId)?.DeskNumber;
-            if (bookedDeskNumber is not null)
+            var bookedDesk = successModel.Desks.FirstOrDefault(d => d.DeskId == deskId);
+            if (bookedDesk is not null)
             {
                 successModel.ExistingBooking = new ExistingBookingRowViewModel
                 {
-                    DeskNumber = bookedDeskNumber,
-                    Location = DeskLocationHelper.FormatLocation(bookedDeskNumber),
+                    DeskNumber = bookedDesk.DeskNumber,
+                    Location = bookedDesk.Location,
                     BookingDate = date,
                 };
             }
         }
 
-        var confirmedDeskNumber = successModel.ExistingBooking?.DeskNumber
-            ?? successModel.Desks.FirstOrDefault(d => d.DeskId == deskId)?.DeskNumber
-            ?? "your desk";
-        successModel.SuccessMessage = BookIndexViewModel.BookingConfirmedMessage(confirmedDeskNumber, date);
+        string confirmedDeskNumber;
+        string? confirmedLocation;
+        if (successModel.ExistingBooking is not null)
+        {
+            confirmedDeskNumber = successModel.ExistingBooking.DeskNumber;
+            confirmedLocation = successModel.ExistingBooking.Location;
+        }
+        else
+        {
+            var bookedDesk = successModel.Desks.FirstOrDefault(d => d.DeskId == deskId);
+            confirmedDeskNumber = bookedDesk?.DeskNumber ?? "your desk";
+            confirmedLocation = bookedDesk?.Location;
+        }
+
+        successModel.SuccessMessage =
+            BookIndexViewModel.BookingConfirmedMessage(confirmedDeskNumber, confirmedLocation, date);
         if (!result.EmailNotificationSent)
         {
             successModel.EmailWarning =

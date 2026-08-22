@@ -83,11 +83,11 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
     public Task<HttpResponseMessage> GetAdminDesksAsync() =>
         Client.GetAsync("/api/admin/desks");
 
-    public Task<HttpResponseMessage> CreateAdminDeskAsync(string deskNumber) =>
-        Client.PostAsJsonAsync("/api/admin/desks", new { deskNumber });
+    public Task<HttpResponseMessage> CreateAdminDeskAsync(string deskNumber, string? location = null) =>
+        Client.PostAsJsonAsync("/api/admin/desks", new { deskNumber, location });
 
-    public Task<HttpResponseMessage> UpdateAdminDeskAsync(Guid deskId, string deskNumber) =>
-        Client.PutAsJsonAsync($"/api/admin/desks/{deskId}", new { deskNumber });
+    public Task<HttpResponseMessage> UpdateAdminDeskAsync(Guid deskId, string deskNumber, string? location = null) =>
+        Client.PutAsJsonAsync($"/api/admin/desks/{deskId}", new { deskNumber, location });
 
     public Task<HttpResponseMessage> DeactivateAdminDeskAsync(Guid deskId) =>
         Client.PostAsync($"/api/admin/desks/{deskId}/deactivate", null);
@@ -115,8 +115,8 @@ public sealed class ApiTestClient(CustomApiApplicationFactory factory)
     public Task<HttpResponseMessage> DeactivateAdminUserAsync(Guid userId) =>
         Client.PostAsync($"/api/admin/users/{userId}/deactivate", null);
 
-    public Task<HttpResponseMessage> ResetAdminUserPasswordAsync(Guid userId) =>
-        Client.PostAsync($"/api/admin/users/{userId}/reset-password", null);
+    public Task<HttpResponseMessage> ResetAdminUserPasswordAsync(Guid userId, string newPassword) =>
+        Client.PostAsJsonAsync($"/api/admin/users/{userId}/reset-password", new { newPassword });
 
     public Task<HttpResponseMessage> GetAvailabilityAsync(DateOnly date) =>
         Client.GetAsync($"/api/bookings/availability?date={date:yyyy-MM-dd}");

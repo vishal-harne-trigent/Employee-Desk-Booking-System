@@ -4,7 +4,6 @@ using EmployeeDeskBooking.Web.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Text.RegularExpressions;
 
 namespace EmployeeDeskBooking.Tests;
 
@@ -88,12 +87,20 @@ public class AdminUsersTests(CustomWebApplicationFactory factory) : IClassFixtur
         Assert.Equal(StatusCodes.Status200OK, (int)loginResponse.StatusCode);
         var body = await loginResponse.Content.ReadAsStringAsync();
         Assert.Contains(AuthMessages.DeactivatedAccount, body);
+
+        var activate = await client.ActivateUserAsync(userId);
+        activate.EnsureSuccessStatusCode();
+
+        var loginAfterActivate = factory.CreateLoginTestClient();
+        var activeLoginResponse = await loginAfterActivate.LoginAsync(email, TestPassword);
+        Assert.Equal(302, (int)activeLoginResponse.StatusCode);
     }
 
-    [Fact(DisplayName = "Admin reset password shows one-time password (US-006/AC-05)")]
+    [Fact(DisplayName = "Admin reset password sets new password (US-006/AC-05)")]
     public async Task Admin_resets_password_US_006_AC_05()
     {
         var email = UniqueEmail("reset");
+        const string newPassword = "ResetPass9!";
         var client = new AdminUsersTestClient(factory);
         await client.LoginAsAdminAsync();
         await client.CreateUserAsync(email, "Reset Me", "0", TestPassword);
@@ -105,16 +112,19 @@ public class AdminUsersTests(CustomWebApplicationFactory factory) : IClassFixtur
             userId = db.Users.Single(u => u.Email == email).Id;
         }
 
-        var response = await client.ResetPasswordAsync(userId);
-        var body = await response.Content.ReadAsStringAsync();
+        var page = await client.GetResetPasswordPageAsync(userId);
+        var pageBody = await page.Content.ReadAsStringAsync();
+        page.EnsureSuccessStatusCode();
+        Assert.Contains("Reset password", pageBody, StringComparison.Ordinal);
+        Assert.Contains("Reset Me", pageBody, StringComparison.Ordinal);
+        Assert.Contains(email, pageBody, StringComparison.Ordinal);
 
-        response.EnsureSuccessStatusCode();
-        var match = Regex.Match(body, @"<code class=""temporary-password"">([^<]+)</code>");
-        Assert.True(match.Success, "Temporary password panel was not rendered.");
-        var temporaryPassword = match.Groups[1].Value;
+        var response = await client.ResetPasswordAsync(userId, newPassword, newPassword);
+        Assert.Equal(302, (int)response.StatusCode);
+        Assert.Contains("/Admin/AdminUsers", response.Headers.Location?.OriginalString, StringComparison.Ordinal);
 
         var login = factory.CreateLoginTestClient();
-        var loginResponse = await login.LoginAsync(email, temporaryPassword);
+        var loginResponse = await login.LoginAsync(email, newPassword);
         Assert.Equal(302, (int)loginResponse.StatusCode);
     }
 

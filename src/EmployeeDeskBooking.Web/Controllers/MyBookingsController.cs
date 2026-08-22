@@ -1,5 +1,4 @@
 using EmployeeDeskBooking.Application.Bookings;
-using EmployeeDeskBooking.Web.Helpers;
 using EmployeeDeskBooking.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,7 @@ using System.Security.Claims;
 
 namespace EmployeeDeskBooking.Web.Controllers;
 
-[Authorize(Roles = "Employee")]
+[Authorize(Roles = "Employee,Admin")]
 public class MyBookingsController(IBookingService bookingService) : Controller
 {
     [HttpGet]
@@ -55,7 +54,7 @@ public class MyBookingsController(IBookingService bookingService) : Controller
                     BookingId = b.BookingId,
                     BookingDate = b.BookingDate,
                     DeskNumber = b.DeskNumber,
-                    Location = DeskLocationHelper.FormatLocation(b.DeskNumber),
+                    Location = b.Location,
                     Status = b.Status,
                     CanCancel = b.CanCancel,
                 })

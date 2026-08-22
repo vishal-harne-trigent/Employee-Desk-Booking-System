@@ -19,7 +19,7 @@ public sealed class AdminDesksTestClient(CustomWebApplicationFactory factory)
     public Task<HttpResponseMessage> GetAdminDesksPageAsync() =>
         Login.Client.GetAsync("/Admin/AdminDesks");
 
-    public async Task<HttpResponseMessage> CreateDeskAsync(string deskNumber)
+    public async Task<HttpResponseMessage> CreateDeskAsync(string deskNumber, string? location = null)
     {
         var token = await GetTokenFromPageAsync();
         var form = new Dictionary<string, string>
@@ -27,10 +27,15 @@ public sealed class AdminDesksTestClient(CustomWebApplicationFactory factory)
             ["deskNumber"] = deskNumber,
             ["__RequestVerificationToken"] = token,
         };
+        if (location is not null)
+        {
+            form["location"] = location;
+        }
+
         return await Login.Client.PostAsync("/Admin/AdminDesks/Create", new FormUrlEncodedContent(form));
     }
 
-    public async Task<HttpResponseMessage> EditDeskAsync(Guid deskId, string deskNumber)
+    public async Task<HttpResponseMessage> EditDeskAsync(Guid deskId, string deskNumber, string? location = null)
     {
         var token = await GetTokenFromPageAsync();
         var form = new Dictionary<string, string>
@@ -39,6 +44,11 @@ public sealed class AdminDesksTestClient(CustomWebApplicationFactory factory)
             ["deskNumber"] = deskNumber,
             ["__RequestVerificationToken"] = token,
         };
+        if (location is not null)
+        {
+            form["location"] = location;
+        }
+
         return await Login.Client.PostAsync("/Admin/AdminDesks/Edit", new FormUrlEncodedContent(form));
     }
 

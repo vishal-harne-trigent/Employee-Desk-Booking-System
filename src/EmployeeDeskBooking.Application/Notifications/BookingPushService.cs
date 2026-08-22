@@ -11,15 +11,15 @@ public sealed class BookingPushService(
     public Task SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(
             bookingId,
-            details => $"Desk booking confirmed — {FormatDesk(details.DeskNumber)}",
-            details => $"Desk {FormatDesk(details.DeskNumber)} on {FormatDate(details.BookingDate)}",
+            details => $"Desk booking confirmed — {FormatDesk(details)}",
+            details => $"Desk {FormatDesk(details)} on {FormatDate(details.BookingDate)}",
             cancellationToken);
 
     public Task SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(
             bookingId,
-            details => $"Desk booking cancelled — {FormatDesk(details.DeskNumber)}",
-            details => $"Desk {FormatDesk(details.DeskNumber)} on {FormatDate(details.BookingDate)} was cancelled.",
+            details => $"Desk booking cancelled — {FormatDesk(details)}",
+            details => $"Desk {FormatDesk(details)} on {FormatDate(details.BookingDate)} was cancelled.",
             cancellationToken);
 
     private async Task SendAsync(
@@ -60,6 +60,6 @@ public sealed class BookingPushService(
     private static string FormatDate(DateOnly date) =>
         date.ToString("dd MMM yyyy");
 
-    private static string FormatDesk(string deskNumber) =>
-        DeskLocationFormatter.FormatDeskWithLocation(deskNumber);
+    private static string FormatDesk(BookingEmailDetails details) =>
+        DeskLocationFormatter.FormatDeskWithLocation(details.DeskNumber, details.DeskLocation);
 }
