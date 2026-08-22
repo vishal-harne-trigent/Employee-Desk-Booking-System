@@ -2,7 +2,15 @@ namespace EmployeeDeskBooking.Infrastructure.Notifications;
 
 public sealed class EmailOptions
 {
+    public const string DeliveryModeSmtp = "Smtp";
+
+    public const string DeliveryModeFileDrop = "FileDrop";
+
     public bool Enabled { get; set; }
+
+    public string DeliveryMode { get; set; } = DeliveryModeSmtp;
+
+    public string FileDropPath { get; set; } = "App_Data/sent-emails";
 
     public string FromAddress { get; set; } = "noreply@deskbooking.local";
 
@@ -19,4 +27,12 @@ public sealed class EmailOptions
     public string? Password { get; set; }
 
     public int ReminderHourLocal { get; set; } = 8;
+
+    public bool UsesFileDrop => string.Equals(DeliveryMode, DeliveryModeFileDrop, StringComparison.OrdinalIgnoreCase);
+
+    public bool HasConfiguredSmtpCredentials =>
+        !string.IsNullOrWhiteSpace(Username)
+        && !string.IsNullOrWhiteSpace(Password)
+        && !Password.Contains("REPLACE_WITH", StringComparison.OrdinalIgnoreCase)
+        && !Password.Contains("PASTE_", StringComparison.OrdinalIgnoreCase);
 }

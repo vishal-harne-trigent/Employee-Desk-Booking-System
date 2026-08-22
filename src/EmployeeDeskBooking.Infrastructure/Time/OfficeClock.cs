@@ -12,6 +12,9 @@ public sealed class OfficeClock(IConfiguration configuration) : IOfficeClock
     public DateOnly Today =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, OfficeTimeZone));
 
+    public TimeOnly LocalTime =>
+        TimeOnly.FromDateTime(TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, OfficeTimeZone));
+
     public bool IsWorkingDay(DateOnly date) =>
         date.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday;
 

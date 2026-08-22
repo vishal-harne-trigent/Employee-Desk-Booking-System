@@ -28,7 +28,9 @@ public class BookingEmailTests(CustomWebApplicationFactory factory) : IClassFixt
         Assert.Equal("employee@test.com", email.To);
         Assert.Contains("confirmed", email.Subject, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("A-01", email.HtmlBody, StringComparison.Ordinal);
-        Assert.Contains(BookingDate.ToString("dd MMM yyyy"), email.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("Test Employee", email.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains(BookingDate.ToString("dddd, MMMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US")), email.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("Action: Booking confirmed", email.HtmlBody, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Cancellation email on employee cancel (US-007/AC-02)")]
@@ -104,8 +106,8 @@ public class BookingEmailTests(CustomWebApplicationFactory factory) : IClassFixt
 
         var email = Assert.Single(factory.GetEmailSender().Sent);
         Assert.Contains("A-02", email.HtmlBody, StringComparison.Ordinal);
-        Assert.Contains(BookingDate.ToString("dd MMM yyyy"), email.HtmlBody, StringComparison.Ordinal);
-        Assert.Contains("A-02", email.Subject, StringComparison.Ordinal);
+        Assert.Contains(BookingDate.ToString("dddd, MMMM d, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US")), email.HtmlBody, StringComparison.Ordinal);
+        Assert.Contains("A-02 — Floor 1, Zone C", email.Subject, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "SMTP failures logged without blocking booking (US-007/AC-05)")]

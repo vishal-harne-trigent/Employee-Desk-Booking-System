@@ -9,6 +9,8 @@ public class MyBookingsViewModel
 
     public string? SuccessMessage { get; set; }
 
+    public string? EmailWarning { get; set; }
+
     public string? ErrorMessage { get; set; }
 
     public static string CancelErrorMessage(CancelBookingFailureReason reason) =>
@@ -28,6 +30,8 @@ public sealed class MyBookingRowViewModel
     public required DateOnly BookingDate { get; init; }
 
     public required string DeskNumber { get; init; }
+
+    public required string Location { get; init; }
 
     public required BookingStatus Status { get; init; }
 

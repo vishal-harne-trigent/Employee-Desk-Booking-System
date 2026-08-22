@@ -1,10 +1,16 @@
+using System.Globalization;
 using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Application.Desks;
 
 namespace EmployeeDeskBooking.Web.Models;
 
 public class BookIndexViewModel
 {
     public DateOnly SelectedDate { get; set; }
+
+    public DateOnly MinBookingDate { get; set; }
+
+    public DateOnly MaxBookingDate { get; set; }
 
     public bool AvailabilityRequested { get; set; }
 
@@ -14,7 +20,11 @@ public class BookIndexViewModel
 
     public string? SuccessMessage { get; set; }
 
-    public string? ExistingBookingDeskNumber { get; set; }
+    public string? EmailWarning { get; set; }
+
+    public ExistingBookingRowViewModel? ExistingBooking { get; set; }
+
+    public bool HasExistingBooking => ExistingBooking is not null;
 
     public IReadOnlyList<DeskRowViewModel> Desks { get; set; } = Array.Empty<DeskRowViewModel>();
 
@@ -39,6 +49,13 @@ public class BookIndexViewModel
                 "Someone else just booked that desk. Please choose another desk.",
             _ => "Unable to complete the booking. Please try again.",
         };
+
+    public static string BookingConfirmedMessage(string deskNumber, DateOnly bookingDate)
+    {
+        var deskLabel = DeskLocationFormatter.FormatDeskWithLocation(deskNumber);
+        var dateLabel = bookingDate.ToString("dddd, MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
+        return $"Your desk booking is confirmed for {deskLabel} on {dateLabel}.";
+    }
 }
 
 public sealed class DeskRowViewModel
@@ -47,5 +64,21 @@ public sealed class DeskRowViewModel
 
     public required string DeskNumber { get; init; }
 
+    public required string Location { get; init; }
+
     public bool IsAvailable { get; init; }
+}
+
+public sealed class ExistingBookingRowViewModel
+{
+    public required string DeskNumber { get; init; }
+
+    public required string Location { get; init; }
+
+    public DateOnly BookingDate { get; init; }
+
+    public string DeskLabel => DeskLocationFormatter.FormatDeskWithLocation(DeskNumber);
+
+    public string BookingDateLabel =>
+        BookingDate.ToString("dddd, MMMM d, yyyy", CultureInfo.GetCultureInfo("en-US"));
 }

@@ -139,7 +139,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
             join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
             where booking.Id == bookingId
-            select new { booking.Id, booking.UserId, user.Email, desk.DeskNumber, booking.BookingDate })
+            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, booking.BookingDate })
             .FirstOrDefaultAsync(cancellationToken);
 
         if (row is null)
@@ -152,6 +152,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             BookingId = row.Id,
             UserId = row.UserId,
             RecipientEmail = row.Email,
+            EmployeeName = row.Name,
             DeskNumber = row.DeskNumber,
             BookingDate = row.BookingDate,
         };
@@ -166,7 +167,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
             join desk in dbContext.Desks.AsNoTracking() on booking.DeskId equals desk.Id
             join user in dbContext.Users.AsNoTracking() on booking.UserId equals user.Id
             where booking.BookingDate == bookingDate && booking.Status == BookingStatus.Confirmed
-            select new { booking.Id, booking.UserId, user.Email, desk.DeskNumber, booking.BookingDate })
+            select new { booking.Id, booking.UserId, user.Email, user.Name, desk.DeskNumber, booking.BookingDate })
             .ToListAsync(cancellationToken);
 
         return rows
@@ -175,6 +176,7 @@ public sealed class EfBookingRepository(AppDbContext dbContext) : IBookingReposi
                 BookingId = row.Id,
                 UserId = row.UserId,
                 RecipientEmail = row.Email,
+                EmployeeName = row.Name,
                 DeskNumber = row.DeskNumber,
                 BookingDate = row.BookingDate,
             })

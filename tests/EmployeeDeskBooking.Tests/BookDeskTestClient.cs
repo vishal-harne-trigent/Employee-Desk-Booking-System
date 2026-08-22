@@ -26,39 +26,22 @@ public sealed class BookDeskTestClient(CustomWebApplicationFactory factory)
     {
         var response = await Login.LoginAsync("employee@test.com", CustomWebApplicationFactory.TestPassword);
         Assert.Equal(302, (int)response.StatusCode);
-        Assert.StartsWith("/Book", response.Headers.Location?.OriginalString, StringComparison.Ordinal);
+        Assert.StartsWith("/Desks/Availability", response.Headers.Location?.OriginalString, StringComparison.Ordinal);
     }
 
-    public async Task<HttpResponseMessage> CheckAvailabilityAsync(DateOnly date)
+    public Task<HttpResponseMessage> GetAvailabilityPageAsync(DateOnly? date = null)
     {
-        var bookPage = await Login.Client.GetAsync("/Book/Index");
-        bookPage.EnsureSuccessStatusCode();
-        var token = await GetAntiforgeryTokenAsync(await bookPage.Content.ReadAsStringAsync());
-
-        var form = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["selectedDate"] = date.ToString("yyyy-MM-dd"),
-            ["__RequestVerificationToken"] = token,
-        });
-
-        return await Login.Client.PostAsync("/Book/CheckAvailability", form);
+        var path = date.HasValue
+            ? $"/Desks/Availability?date={date.Value:yyyy-MM-dd}"
+            : "/Desks/Availability";
+        return Login.Client.GetAsync(path);
     }
 
-    public async Task<HttpResponseMessage> BookDeskAsync(Guid deskId, DateOnly date)
-    {
-        var bookPage = await Login.Client.GetAsync("/Book/Index");
-        bookPage.EnsureSuccessStatusCode();
-        var token = await GetAntiforgeryTokenAsync(await bookPage.Content.ReadAsStringAsync());
+    public Task<HttpResponseMessage> CheckAvailabilityAsync(DateOnly date) =>
+        GetAvailabilityPageAsync(date);
 
-        var form = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["deskId"] = deskId.ToString(),
-            ["selectedDate"] = date.ToString("yyyy-MM-dd"),
-            ["__RequestVerificationToken"] = token,
-        });
-
-        return await Login.Client.PostAsync("/Book/BookDesk", form);
-    }
+    public Task<HttpResponseMessage> BookDeskAsync(Guid deskId, DateOnly date) =>
+        Login.Client.GetAsync($"/Desks/Book?deskId={deskId}&date={date:yyyy-MM-dd}");
 
     public Guid GetDeskIdByNumber(string deskNumber)
     {
@@ -66,14 +49,6 @@ public sealed class BookDeskTestClient(CustomWebApplicationFactory factory)
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var desk = db.Desks.Single(d => d.DeskNumber == deskNumber);
         return desk.Id;
-    }
-
-    private static async Task<string> GetAntiforgeryTokenAsync(string html)
-    {
-        var document = await HtmlParser.OpenAsync(req => req.Content(html));
-        var input = document.QuerySelector("input[name='__RequestVerificationToken']") as IHtmlInputElement
-            ?? throw new InvalidOperationException("Anti-forgery token input was not found.");
-        return input.Value ?? throw new InvalidOperationException("Anti-forgery token value was empty.");
     }
 }
 

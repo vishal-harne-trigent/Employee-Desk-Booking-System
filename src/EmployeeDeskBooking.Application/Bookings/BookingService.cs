@@ -114,9 +114,9 @@ public sealed class BookingService(
         {
             await bookings.AddBookingAsync(booking, cancellationToken);
             await bookings.SaveChangesAsync(cancellationToken);
-            await bookingEmails.SendConfirmationAsync(booking.Id, cancellationToken);
+            var emailSent = await bookingEmails.SendConfirmationAsync(booking.Id, cancellationToken);
             await bookingPush.SendConfirmationAsync(booking.Id, cancellationToken);
-            return CreateBookingResult.Success(booking.Id);
+            return CreateBookingResult.Success(booking.Id, emailSent);
         }
         catch (Exception ex) when (IsUniqueConstraintViolation(ex))
         {
@@ -217,9 +217,9 @@ public sealed class BookingService(
         booking.UpdatedAt = now;
 
         await bookings.SaveChangesAsync(cancellationToken);
-        await bookingEmails.SendCancellationAsync(booking.Id, cancellationToken);
+        var emailSent = await bookingEmails.SendCancellationAsync(booking.Id, cancellationToken);
         await bookingPush.SendCancellationAsync(booking.Id, cancellationToken);
-        return CancelBookingResult.Success();
+        return CancelBookingResult.Success(emailSent);
     }
 
     private static bool CanCancel(Booking booking, DateOnly today) =>

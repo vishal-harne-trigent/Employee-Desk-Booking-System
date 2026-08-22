@@ -14,7 +14,10 @@ public sealed class CancelBookingResult
 
     public CancelBookingFailureReason? FailureReason { get; init; }
 
-    public static CancelBookingResult Success() => new() { Succeeded = true };
+    public bool EmailNotificationSent { get; init; }
+
+    public static CancelBookingResult Success(bool emailNotificationSent) =>
+        new() { Succeeded = true, EmailNotificationSent = emailNotificationSent };
 
     public static CancelBookingResult Failure(CancelBookingFailureReason reason) =>
         new() { Succeeded = false, FailureReason = reason };

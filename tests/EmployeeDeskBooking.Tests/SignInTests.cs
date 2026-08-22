@@ -13,7 +13,7 @@ public class SignInTests(CustomWebApplicationFactory factory) : IClassFixture<Cu
         var response = await login.LoginAsync("employee@test.com", CustomWebApplicationFactory.TestPassword);
 
         Assert.Equal(StatusCodes.Status302Found, (int)response.StatusCode);
-        Assert.Equal("/Book/Index", response.Headers.Location?.OriginalString);
+        Assert.Equal("/Desks/Availability", response.Headers.Location?.OriginalString);
 
         var bookPage = await login.Client.GetAsync(response.Headers.Location!);
         var html = await bookPage.Content.ReadAsStringAsync();
@@ -44,7 +44,7 @@ public class SignInTests(CustomWebApplicationFactory factory) : IClassFixture<Cu
         var html = await response.Content.ReadAsStringAsync();
         Assert.Contains(AuthMessages.InvalidCredentials, html);
 
-        var protectedResponse = await login.Client.GetAsync("/Book/Index");
+        var protectedResponse = await login.Client.GetAsync("/Desks/Availability");
         Assert.Equal(StatusCodes.Status302Found, (int)protectedResponse.StatusCode);
         Assert.Contains("/Account/Login", protectedResponse.Headers.Location?.OriginalString, StringComparison.OrdinalIgnoreCase);
     }
@@ -67,14 +67,14 @@ public class SignInTests(CustomWebApplicationFactory factory) : IClassFixture<Cu
         var signIn = await login.LoginAsync("employee@test.com", CustomWebApplicationFactory.TestPassword);
         Assert.Equal(StatusCodes.Status302Found, (int)signIn.StatusCode);
 
-        var logout = await login.LogoutFromAsync("/Book/Index");
+        var logout = await login.LogoutFromAsync("/Desks/Availability");
         Assert.Equal(StatusCodes.Status302Found, (int)logout.StatusCode);
         var logoutLocation = logout.Headers.Location?.OriginalString ?? string.Empty;
         Assert.True(
             logoutLocation is "/" or "/Account/Login",
             $"Expected sign-in redirect, got {logoutLocation}");
 
-        var protectedResponse = await login.Client.GetAsync("/Book/Index");
+        var protectedResponse = await login.Client.GetAsync("/Desks/Availability");
         Assert.Equal(StatusCodes.Status302Found, (int)protectedResponse.StatusCode);
         Assert.Contains("/Account/Login", protectedResponse.Headers.Location?.OriginalString, StringComparison.OrdinalIgnoreCase);
     }

@@ -42,19 +42,23 @@ public sealed class AvailabilityResult
 
 public sealed class CreateBookingResult
 {
-    private CreateBookingResult(Guid? bookingId, CreateBookingFailureReason? failureReason)
+    private CreateBookingResult(Guid? bookingId, CreateBookingFailureReason? failureReason, bool emailNotificationSent)
     {
         BookingId = bookingId;
         FailureReason = failureReason;
+        EmailNotificationSent = emailNotificationSent;
     }
 
     public Guid? BookingId { get; }
 
     public CreateBookingFailureReason? FailureReason { get; }
 
+    public bool EmailNotificationSent { get; }
+
     public bool Succeeded => BookingId is not null;
 
-    public static CreateBookingResult Success(Guid bookingId) => new(bookingId, null);
+    public static CreateBookingResult Success(Guid bookingId, bool emailNotificationSent) =>
+        new(bookingId, null, emailNotificationSent);
 
-    public static CreateBookingResult Failure(CreateBookingFailureReason reason) => new(null, reason);
+    public static CreateBookingResult Failure(CreateBookingFailureReason reason) => new(null, reason, false);
 }

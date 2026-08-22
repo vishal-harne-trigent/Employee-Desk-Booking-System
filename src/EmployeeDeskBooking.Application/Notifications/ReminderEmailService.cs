@@ -1,6 +1,7 @@
 using EmployeeDeskBooking.Application.Bookings;
 using EmployeeDeskBooking.Application.Time;
 using EmployeeDeskBooking.Domain.Notifications;
+using Microsoft.Extensions.Options;
 
 namespace EmployeeDeskBooking.Application.Notifications;
 
@@ -9,10 +10,16 @@ public sealed class ReminderEmailService(
     IOfficeClock officeClock,
     IEmailSender emailSender,
     IEmailDeliveryLogRepository deliveryLogs,
-    IBookingReminderRepository reminders) : IReminderEmailService
+    IBookingReminderRepository reminders,
+    IOptions<ReminderEmailSettings> reminderSettings) : IReminderEmailService
 {
     public async Task ProcessDueRemindersAsync(CancellationToken cancellationToken = default)
     {
+        if (!IsReminderSendWindow())
+        {
+            return;
+        }
+
         var today = officeClock.Today;
         var tomorrow = today.AddDays(1);
 
@@ -71,4 +78,13 @@ public sealed class ReminderEmailService(
             await deliveryLogs.SaveChangesAsync(cancellationToken);
         }
     }
+
+    private bool IsReminderSendWindow()
+    {
+        var scheduledHour = ResolveReminderHourLocal();
+        return officeClock.LocalTime.Hour == scheduledHour;
+    }
+
+    private int ResolveReminderHourLocal() =>
+        reminderSettings.Value.ReminderHourLocal;
 }

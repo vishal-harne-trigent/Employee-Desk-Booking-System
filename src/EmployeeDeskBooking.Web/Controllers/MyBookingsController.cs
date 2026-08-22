@@ -1,4 +1,5 @@
 using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Web.Helpers;
 using EmployeeDeskBooking.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -32,6 +33,11 @@ public class MyBookingsController(IBookingService bookingService) : Controller
 
         var success = await BuildViewModelAsync(userId, cancellationToken);
         success.SuccessMessage = "Your booking has been cancelled.";
+        if (!result.EmailNotificationSent)
+        {
+            success.EmailWarning =
+                "We could not send a cancellation email. Add Smtp:Username and Smtp:Password (see appsettings.Development.local.json.example), then restart the app.";
+        }
         return View("Index", success);
     }
 
@@ -49,6 +55,7 @@ public class MyBookingsController(IBookingService bookingService) : Controller
                     BookingId = b.BookingId,
                     BookingDate = b.BookingDate,
                     DeskNumber = b.DeskNumber,
+                    Location = DeskLocationHelper.FormatLocation(b.DeskNumber),
                     Status = b.Status,
                     CanCancel = b.CanCancel,
                 })

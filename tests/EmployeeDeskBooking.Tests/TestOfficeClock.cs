@@ -2,9 +2,17 @@ using EmployeeDeskBooking.Application.Time;
 
 namespace EmployeeDeskBooking.Tests;
 
-public sealed class TestOfficeClock(DateOnly today) : IOfficeClock
+public sealed class TestOfficeClock : IOfficeClock
 {
-    public DateOnly Today { get; } = today;
+    public TestOfficeClock(DateOnly today, TimeOnly? localTime = null)
+    {
+        Today = today;
+        LocalTime = localTime ?? new TimeOnly(8, 0);
+    }
+
+    public DateOnly Today { get; set; }
+
+    public TimeOnly LocalTime { get; set; }
 
     public bool IsWorkingDay(DateOnly date) =>
         date.DayOfWeek is not DayOfWeek.Saturday and not DayOfWeek.Sunday;

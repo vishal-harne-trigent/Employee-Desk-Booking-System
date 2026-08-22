@@ -12,14 +12,19 @@
   --color-error: #ef4444;
   --color-error-bg: #fef2f2;
   --color-error-border: #fecaca;
+  --color-success-bg: #ecfdf5;
+  --color-success-text: #047857;
   --focus-ring: 0 0 0 3px rgba(0, 230, 118, 0.2);
+  --radius-sm: 8px;
   --radius-md: 12px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
   --space-5: 20px;
   --space-6: 24px;
-  --font-body: "Segoe UI", system-ui, sans-serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --shadow-sm: 0 1px 3px rgba(13, 27, 42, 0.06);
+  --shadow-primary: 0 2px 8px rgba(0, 230, 118, 0.35);
 }
 
 * {
@@ -55,6 +60,13 @@ body {
   display: block;
   max-width: 180px;
   margin: 0 auto var(--space-5);
+}
+
+.login-card .brand-logo {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0 0 var(--space-6);
 }
 
 .login-card h1 {
@@ -115,6 +127,7 @@ body {
   padding: 0.85rem 1rem;
   background: var(--color-primary);
   color: var(--color-primary-foreground);
+  box-shadow: var(--shadow-primary);
 }
 
 .btn-primary:hover {
@@ -150,36 +163,51 @@ body {
 .app-nav {
   background: var(--color-nav);
   color: #fff;
-  padding: 0 var(--space-6);
+  padding: 0;
   min-height: 68px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  gap: 2rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
 }
 
 .brand {
   display: flex;
   align-items: center;
+  justify-self: start;
+  grid-column: 1;
+  height: 68px;
+  line-height: 0;
 }
 
-.brand-logo-nav {
-  height: 36px;
+.brand-logo.brand-logo-nav {
+  height: 68px;
   width: auto;
+  max-width: none;
   margin: 0;
+  display: block;
 }
 
 .app-nav-links {
   display: flex;
   gap: 0.25rem;
+  justify-self: center;
+  grid-column: 2;
 }
 
 .app-nav-links a {
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
   text-decoration: none;
   padding: 0.5rem 0.85rem;
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 500;
+  white-space: nowrap;
+}
+
+.app-nav-links a:not(.active):hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .app-nav-links a.active {
@@ -189,10 +217,12 @@ body {
 }
 
 .app-nav-right {
-  margin-left: auto;
+  justify-self: end;
+  grid-column: 3;
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding-right: var(--space-6);
 }
 
 .avatar {
@@ -223,7 +253,7 @@ body {
 .signout {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.85);
+  color: #fff;
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -249,63 +279,155 @@ body {
   border-radius: var(--radius-md);
   padding: var(--space-6);
   border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-card {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-header {
+  margin-bottom: 1.75rem;
+}
+
+.page-header h1 {
+  margin: 0 0 var(--space-2);
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.page-header .text-muted {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 .text-muted {
   color: var(--color-text-muted);
 }
 
-.page-header h1 {
-  margin: 0 0 var(--space-2);
-}
-
 .date-filter-form {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: 1rem;
   align-items: flex-end;
+}
+
+.date-filter-form .field label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.date-filter-form .field input,
+.date-filter-form .field select {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 220px;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--color-input-border);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  background: #fff;
+}
+
+.date-filter-form .field input:focus,
+.date-filter-form .field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--focus-ring);
 }
 
 .inline-field {
   margin-bottom: 0;
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .date-filter-form .btn-primary {
   width: auto;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
 }
 
 .desk-table-card {
-  margin-top: var(--space-4);
+  margin-top: 0;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.desk-table-card .empty-state,
+.desk-table-card .desk-table-empty {
+  padding: var(--space-6);
+  margin: 0;
 }
 
 .desk-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 0.875rem;
 }
 
 .desk-table th,
 .desk-table td {
-  padding: var(--space-3) var(--space-4);
+  padding: 1rem 1.25rem;
   border-bottom: 1px solid var(--color-border);
   text-align: left;
 }
 
-.desk-number {
+.availability-table thead th {
+  background: #fff;
+  padding: 0.85rem 1.25rem;
+  font-size: 0.75rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.availability-table tbody td {
+  padding: 1rem 1.25rem;
+  vertical-align: middle;
+}
+
+.availability-table .desk-location {
+  color: var(--color-text);
+  font-weight: 400;
+}
+
+.availability-table .desk-number {
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 .pill {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
 }
 
+.pill::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .pill-available {
-  background: #ecfdf5;
-  color: #047857;
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.pill-available::before {
+  background: var(--color-primary);
 }
 
 .pill-booked {
@@ -313,13 +435,59 @@ body {
   color: #64748b;
 }
 
-.btn-sm {
-  width: auto;
-  padding: 0.5rem 1rem;
+.pill-booked::before {
+  background: var(--color-text-muted);
 }
 
-.inline-form {
-  display: inline;
+.btn-outline-accent {
+  background: #fff;
+  border: 1.5px solid var(--color-primary);
+  color: var(--color-text);
+  width: auto;
+  border-radius: var(--radius-sm);
+}
+
+.btn-outline-accent:hover {
+  background: var(--color-success-bg);
+}
+
+.availability-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.desk-action {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.btn-secondary {
+  background: var(--color-bg-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  width: auto;
+}
+
+.btn-sm {
+  width: auto;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+}
+
+.push-permission-help {
+  margin-top: 1rem;
+}
+
+.push-permission-help ol {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.push-permission-help p {
+  margin: 0;
+}
+
+.push-permission-note {
+  margin-top: 0.75rem;
 }
 
 .alert-success {

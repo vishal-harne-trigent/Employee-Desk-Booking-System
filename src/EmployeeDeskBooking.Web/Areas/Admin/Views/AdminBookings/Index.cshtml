@@ -21,7 +21,7 @@
 }
 
 <div class="page-card">
-    <form asp-action="ApplyFilters" method="post" class="date-filter-form admin-filter-form">
+    <form asp-area="Admin" asp-controller="AdminBookings" asp-action="ApplyFilters" method="post" class="date-filter-form admin-filter-form">
         @Html.AntiForgeryToken()
         <div class="field inline-field">
             <label for="filterDate">Date</label>
@@ -40,7 +40,7 @@
         <button type="submit" class="btn btn-primary">Apply filters</button>
         @if (Model.FiltersApplied)
         {
-            <a asp-action="Index" class="btn btn-secondary">Clear filters</a>
+            <a asp-area="Admin" asp-controller="AdminBookings" asp-action="Index" class="btn btn-secondary">Clear filters</a>
         }
     </form>
 </div>
@@ -51,7 +51,7 @@
         @if (Model.FiltersApplied)
         {
             <p>No bookings match the selected filters.</p>
-            <a asp-action="Index" class="btn btn-secondary">Clear filters</a>
+            <a asp-area="Admin" asp-controller="AdminBookings" asp-action="Index" class="btn btn-secondary">Clear filters</a>
         }
         else
         {
@@ -91,7 +91,7 @@ else
                         <td>
                             @if (booking.CanCancel)
                             {
-                                <form asp-action="Cancel" method="post" class="inline-form"
+                                <form asp-area="Admin" asp-controller="AdminBookings" asp-action="Cancel" method="post" class="inline-form"
                                       onsubmit="return confirm('Cancel booking for @booking.EmployeeEmail on @booking.BookingDate.ToString("dd MMM yyyy")?');">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="bookingId" value="@booking.BookingId" />

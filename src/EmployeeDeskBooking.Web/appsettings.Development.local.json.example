@@ -1,0 +1,7 @@
+{
+  "Smtp": {
+    "Mode": "Smtp",
+    "Username": "your-mailbox@gmail.com",
+    "Password": "YOUR_GMAIL_APP_PASSWORD"
+  }
+}

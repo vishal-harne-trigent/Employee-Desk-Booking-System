@@ -15,6 +15,11 @@ public static class DbInitializer
     public const string DefaultAdminName = "Super Admin";
     public const string DefaultPassword = "Password1!";
 
+    public const int DefaultDeskCount = 10;
+
+    public static IReadOnlyList<string> DefaultDeskNumbers { get; } =
+        Enumerable.Range(1, DefaultDeskCount).Select(i => $"A-{i:D2}").ToArray();
+
     public static Task SeedAsync(IServiceProvider services) =>
         SeedAsync(services, resetDefaultPasswordsInDevelopment: false);
 
@@ -78,20 +83,31 @@ public static class DbInitializer
 
     private static async Task SeedDesksAsync(AppDbContext dbContext)
     {
-        if (await dbContext.Desks.AnyAsync())
+        var now = DateTimeOffset.UtcNow;
+
+        if (!await dbContext.Desks.AnyAsync())
+        {
+            dbContext.Desks.AddRange(
+                DefaultDeskNumbers.Select(deskNumber => CreateDesk(deskNumber, DeskStatus.Active, now)));
+            await dbContext.SaveChangesAsync();
+            return;
+        }
+
+        var existingNumbers = await dbContext.Desks
+            .Select(d => d.DeskNumberNormalized)
+            .ToListAsync();
+
+        var missingDesks = DefaultDeskNumbers
+            .Where(number => !existingNumbers.Contains(number.Trim().ToUpperInvariant()))
+            .Select(number => CreateDesk(number, DeskStatus.Active, now))
+            .ToList();
+
+        if (missingDesks.Count == 0)
         {
             return;
         }
 
-        var now = DateTimeOffset.UtcNow;
-        dbContext.Desks.AddRange(
-            CreateDesk("A-01", DeskStatus.Active, now),
-            CreateDesk("A-02", DeskStatus.Active, now),
-            CreateDesk("A-03", DeskStatus.Active, now),
-            CreateDesk("A-04", DeskStatus.Active, now),
-            CreateDesk("A-05", DeskStatus.Active, now),
-            CreateDesk("B-99", DeskStatus.Inactive, now));
-
+        dbContext.Desks.AddRange(missingDesks);
         await dbContext.SaveChangesAsync();
     }
 

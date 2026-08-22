@@ -86,5 +86,5 @@ public class AccountController(IAuthService authService) : Controller
     private IActionResult RedirectToRoleHome(UserRole role) =>
         role == UserRole.Admin
             ? RedirectToAction("Index", "AdminBookings", new { area = "Admin" })
-            : RedirectToAction("Index", "Book");
+            : RedirectToAction("Availability", "Desks");
 }

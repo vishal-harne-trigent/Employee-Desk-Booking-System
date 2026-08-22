@@ -1,4 +1,5 @@
 using EmployeeDeskBooking.Application.Bookings;
+using EmployeeDeskBooking.Application.Desks;
 
 namespace EmployeeDeskBooking.Application.Notifications;
 
@@ -10,15 +11,15 @@ public sealed class BookingPushService(
     public Task SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(
             bookingId,
-            details => $"Desk booking confirmed — {details.DeskNumber}",
-            details => $"Desk {details.DeskNumber} on {FormatDate(details.BookingDate)}",
+            details => $"Desk booking confirmed — {FormatDesk(details.DeskNumber)}",
+            details => $"Desk {FormatDesk(details.DeskNumber)} on {FormatDate(details.BookingDate)}",
             cancellationToken);
 
     public Task SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(
             bookingId,
-            details => $"Desk booking cancelled — {details.DeskNumber}",
-            details => $"Desk {details.DeskNumber} on {FormatDate(details.BookingDate)} was cancelled.",
+            details => $"Desk booking cancelled — {FormatDesk(details.DeskNumber)}",
+            details => $"Desk {FormatDesk(details.DeskNumber)} on {FormatDate(details.BookingDate)} was cancelled.",
             cancellationToken);
 
     private async Task SendAsync(
@@ -58,4 +59,7 @@ public sealed class BookingPushService(
 
     private static string FormatDate(DateOnly date) =>
         date.ToString("dd MMM yyyy");
+
+    private static string FormatDesk(string deskNumber) =>
+        DeskLocationFormatter.FormatDeskWithLocation(deskNumber);
 }

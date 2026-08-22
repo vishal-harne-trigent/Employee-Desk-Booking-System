@@ -15,6 +15,11 @@
     <div class="alert alert-success" role="status" aria-live="polite">@Model.SuccessMessage</div>
 }
 
+@if (!string.IsNullOrEmpty(Model.EmailWarning))
+{
+    <div class="alert alert-warning" role="alert">@Model.EmailWarning</div>
+}
+
 @if (!string.IsNullOrEmpty(Model.ErrorMessage))
 {
     <div class="alert alert-error" role="alert">@Model.ErrorMessage</div>
@@ -24,7 +29,7 @@
 {
     <div class="page-card empty-state">
         <p>You do not have any desk bookings yet.</p>
-        <a asp-controller="Book" asp-action="Index" class="btn btn-primary">Book a desk</a>
+        <a asp-controller="Desks" asp-action="Availability" class="btn btn-primary">Book a desk</a>
         <p class="settings-link">
             <a asp-controller="NotificationSettings" asp-action="Index">Notification settings</a>
         </p>
@@ -38,6 +43,7 @@ else
                 <tr>
                     <th scope="col">Date</th>
                     <th scope="col">Desk</th>
+                    <th scope="col">Location</th>
                     <th scope="col">Status</th>
                     <th scope="col">Action</th>
                 </tr>
@@ -48,6 +54,7 @@ else
                     <tr>
                         <td>@booking.BookingDate.ToString("dd MMM yyyy")</td>
                         <td>@booking.DeskNumber</td>
+                        <td>@booking.Location</td>
                         <td>
                             <span class="status-pill status-@booking.StatusLabel.ToLowerInvariant()">
                                 <span class="status-icon" aria-hidden="true">●</span>

@@ -37,6 +37,7 @@ public class MyBookingsTests(CustomWebApplicationFactory factory) : IClassFixtur
         Assert.Contains("Cancelled", body, StringComparison.Ordinal);
         Assert.Contains("Completed", body, StringComparison.Ordinal);
         Assert.Contains("A-01", body, StringComparison.Ordinal);
+        Assert.Contains("Floor 1, Zone C", body, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Cancel confirmed future booking (US-003/AC-02)")]
@@ -101,6 +102,6 @@ public class MyBookingsTests(CustomWebApplicationFactory factory) : IClassFixtur
 
         response.EnsureSuccessStatusCode();
         Assert.Contains("do not have any desk bookings", body, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("/Book/Index", body, StringComparison.Ordinal);
+        Assert.Contains("/Desks/Availability", body, StringComparison.Ordinal);
     }
 }

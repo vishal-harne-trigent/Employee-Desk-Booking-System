@@ -44,6 +44,7 @@ public class PushNotificationTests(CustomWebApplicationFactory factory) : IClass
         var push = Assert.Single(factory.GetPushSender().Sent);
         Assert.Contains("confirmed", push.Title, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("A-01", push.Body, StringComparison.Ordinal);
+        Assert.Contains("Floor 1, Zone C", push.Body, StringComparison.Ordinal);
         Assert.Contains(BookingDate.ToString("dd MMM yyyy"), push.Body, StringComparison.Ordinal);
     }
 
@@ -70,6 +71,7 @@ public class PushNotificationTests(CustomWebApplicationFactory factory) : IClass
 
         var push = Assert.Single(factory.GetPushSender().Sent);
         Assert.Contains("cancelled", push.Title, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Floor 1, Zone C", push.Body, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Opt out stops subsequent push (US-008/AC-04)")]

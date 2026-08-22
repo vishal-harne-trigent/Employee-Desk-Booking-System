@@ -114,6 +114,19 @@ public class AdminBookingsTests(CustomWebApplicationFactory factory) : IClassFix
         Assert.Equal(BookingStatus.Cancelled, booking.Status);
     }
 
+    [Fact(DisplayName = "Admin filter form targets ApplyFilters POST action (regression)")]
+    public async Task Admin_filter_form_targets_apply_filters_action()
+    {
+        var client = new AdminBookingsTestClient(factory);
+        await client.LoginAsAdminAsync();
+
+        var response = await client.GetAdminBookingsPageAsync();
+        var body = await response.Content.ReadAsStringAsync();
+
+        response.EnsureSuccessStatusCode();
+        Assert.Contains("action=\"/Admin/AdminBookings/ApplyFilters\"", body, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact(DisplayName = "Employee cannot access admin bookings page (US-004/V-07)")]
     public async Task Employee_cannot_access_admin_bookings_V_07()
     {

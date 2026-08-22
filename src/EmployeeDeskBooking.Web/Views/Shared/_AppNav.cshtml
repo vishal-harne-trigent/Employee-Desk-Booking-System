@@ -28,8 +28,8 @@
             }
             else
             {
-                <a asp-controller="Book" asp-action="Index"
-                   class="@(controller == "Book" ? "active" : null)">Desk Availability</a>
+                <a asp-controller="Desks" asp-action="Availability"
+                   class="@(controller == "Desks" ? "active" : null)">Desk Availability</a>
                 <a asp-controller="MyBookings" asp-action="Index"
                    class="@(controller == "MyBookings" ? "active" : null)">My Bookings</a>
             }
@@ -38,7 +38,10 @@
         <div class="app-nav-right">
             <div class="avatar" aria-hidden="true">@initials</div>
             <span class="user-label">@displayName</span>
-            <a asp-area="" asp-controller="Account" asp-action="Logout" class="signout">Sign out</a>
+            <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="nav-logout-form">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="signout">Sign out</button>
+            </form>
         </div>
     }
 </header>

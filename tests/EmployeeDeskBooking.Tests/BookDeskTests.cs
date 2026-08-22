@@ -96,6 +96,27 @@ public class BookDeskTests(CustomWebApplicationFactory factory) : IClassFixture<
             b.Status == BookingStatus.Confirmed));
     }
 
+    [Fact(DisplayName = "Already booked date shows your booking instead of availability grid (US-002/AC-05)")]
+    public async Task Already_booked_date_shows_existing_booking_US_002_AC_05()
+    {
+        await ResetAsync();
+        var client = new BookDeskTestClient(factory);
+        await client.LoginAsEmployeeAsync();
+
+        var deskId = client.GetDeskIdByNumber("A-01");
+        await client.BookDeskAsync(deskId, ValidDate);
+
+        var response = await client.CheckAvailabilityAsync(ValidDate);
+        var body = await response.Content.ReadAsStringAsync();
+
+        response.EnsureSuccessStatusCode();
+        Assert.Contains("Your booking for this date", body, StringComparison.Ordinal);
+        Assert.Contains("A-01", body, StringComparison.Ordinal);
+        Assert.Contains("Floor 1, Zone C", body, StringComparison.Ordinal);
+        Assert.Contains("Manage booking", body, StringComparison.Ordinal);
+        Assert.DoesNotContain("Book desk", body, StringComparison.Ordinal);
+    }
+
     [Fact(DisplayName = "Double booking same day is rejected (US-002/AC-05)")]
     public async Task Double_booking_same_day_rejected_US_002_AC_05()
     {

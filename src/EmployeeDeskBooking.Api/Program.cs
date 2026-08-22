@@ -9,8 +9,18 @@ using Infra = EmployeeDeskBooking.Infrastructure.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Development.local.json", optional: true, reloadOnChange: true);
+}
+
 builder.Services.AddApplication();
-builder.Services.AddInfrastructure(builder.Configuration);
+var isTesting = builder.Environment.IsEnvironment("Testing");
+var reminderJobEnabled = builder.Configuration.GetValue("ReminderJob:Enabled", true);
+builder.Services.AddInfrastructure(
+    builder.Configuration,
+    enableReminderJob: reminderJobEnabled && !isTesting,
+    enableCompletionJob: !isTesting);
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();

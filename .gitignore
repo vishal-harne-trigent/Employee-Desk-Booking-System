@@ -1,6 +1,12 @@
 # Local secrets — copy .env.example to .env and fill in values
 .env
 
+# Local SMTP credentials (copy appsettings.Development.local.json.example)
+**/appsettings.Development.local.json
+
+# Dev file-drop emails
+**/App_Data/sent-emails/
+
 bin/
 obj/
 .vs/

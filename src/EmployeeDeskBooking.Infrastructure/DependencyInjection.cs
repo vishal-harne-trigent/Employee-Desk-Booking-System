@@ -38,11 +38,37 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordVerifier, AspNetPasswordVerifier>();
         services.AddSingleton<IOfficeClock, OfficeClock>();
 
-        services.Configure<EmailOptions>(configuration.GetSection("Email"));
-
-        if (configuration.GetValue("Email:Enabled", false))
+        services.Configure<EmailOptions>(options =>
         {
-            services.AddScoped<IEmailSender, MailKitEmailSender>();
+            configuration.GetSection("Email").Bind(options);
+            BindSmtpOverrides(configuration.GetSection("Smtp"), options);
+        });
+
+        services.Configure<ReminderEmailSettings>(options =>
+        {
+            options.ReminderHourLocal = configuration.GetValue("Email:ReminderHourLocal", 8);
+            var runAt = configuration["ReminderJob:RunAtLocalTime"];
+            if (!string.IsNullOrWhiteSpace(runAt) && TimeOnly.TryParse(runAt, out var parsed))
+            {
+                options.ReminderHourLocal = parsed.Hour;
+            }
+        });
+
+        var emailEnabled = configuration.GetValue("Email:Enabled", false)
+            || configuration.GetValue("Smtp:Enabled", false);
+        if (emailEnabled)
+        {
+            var deliveryMode = configuration["Smtp:Mode"]
+                ?? configuration["Email:DeliveryMode"]
+                ?? EmailOptions.DeliveryModeSmtp;
+            if (string.Equals(deliveryMode, EmailOptions.DeliveryModeFileDrop, StringComparison.OrdinalIgnoreCase))
+            {
+                services.AddScoped<IEmailSender, FileDropEmailSender>();
+            }
+            else
+            {
+                services.AddScoped<IEmailSender, MailKitEmailSender>();
+            }
         }
         else
         {
@@ -59,9 +85,15 @@ public static class DependencyInjection
             services.AddHostedService<CompletePastBookingsHostedService>();
         }
 
-        services.Configure<VapidOptions>(configuration.GetSection("Push"));
+        services.Configure<VapidOptions>(options =>
+        {
+            configuration.GetSection("Push").Bind(options);
+            BindVapidOverrides(configuration.GetSection("Vapid"), options);
+        });
 
-        if (configuration.GetValue("Push:Enabled", false))
+        var pushEnabled = configuration.GetValue("Push:Enabled", false)
+            || configuration.GetValue("Vapid:Enabled", false);
+        if (pushEnabled)
         {
             services.AddScoped<IPushNotificationSender, WebPushNotificationSender>();
         }
@@ -71,6 +103,38 @@ public static class DependencyInjection
         }
 
         return services;
+    }
+
+    private static void BindSmtpOverrides(IConfigurationSection smtp, EmailOptions options)
+    {
+        if (!smtp.Exists())
+        {
+            return;
+        }
+
+        options.Enabled = smtp.GetValue("Enabled", options.Enabled);
+        options.DeliveryMode = smtp["Mode"] ?? options.DeliveryMode;
+        options.FileDropPath = smtp["FileDropPath"] ?? options.FileDropPath;
+        options.SmtpHost = smtp["Host"] ?? options.SmtpHost;
+        options.SmtpPort = smtp.GetValue("Port", options.SmtpPort);
+        options.UseStartTls = smtp.GetValue("UseSsl", options.UseStartTls);
+        options.FromName = smtp["FromName"] ?? options.FromName;
+        options.FromAddress = smtp["FromAddress"] ?? options.FromAddress;
+        options.Username = smtp["Username"] ?? options.Username;
+        options.Password = smtp["Password"] ?? options.Password;
+    }
+
+    private static void BindVapidOverrides(IConfigurationSection vapid, VapidOptions options)
+    {
+        if (!vapid.Exists())
+        {
+            return;
+        }
+
+        options.Enabled = vapid.GetValue("Enabled", options.Enabled);
+        options.Subject = vapid["Subject"] ?? options.Subject;
+        options.PublicKey = vapid["PublicKey"] ?? options.PublicKey;
+        options.PrivateKey = vapid["PrivateKey"] ?? options.PrivateKey;
     }
 
     public static async Task InitializeDatabaseAsync(IServiceProvider services, bool isDevelopment = false)

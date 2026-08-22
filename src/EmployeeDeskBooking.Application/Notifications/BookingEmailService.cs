@@ -8,13 +8,13 @@ public sealed class BookingEmailService(
     IEmailSender emailSender,
     IEmailDeliveryLogRepository deliveryLogs) : IBookingEmailService
 {
-    public Task SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
+    public Task<bool> SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(bookingId, EmailType.Confirmation, BookingEmailTemplates.ConfirmationSubject, BookingEmailTemplates.ConfirmationBody, cancellationToken);
 
-    public Task SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
+    public Task<bool> SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default) =>
         SendAsync(bookingId, EmailType.Cancellation, BookingEmailTemplates.CancellationSubject, BookingEmailTemplates.CancellationBody, cancellationToken);
 
-    private async Task SendAsync(
+    private async Task<bool> SendAsync(
         Guid bookingId,
         EmailType emailType,
         Func<BookingEmailDetails, string> subjectFactory,
@@ -24,7 +24,7 @@ public sealed class BookingEmailService(
         var details = await bookings.GetBookingEmailDetailsAsync(bookingId, cancellationToken);
         if (details is null)
         {
-            return;
+            return false;
         }
 
         var message = new EmailMessage
@@ -57,32 +57,6 @@ public sealed class BookingEmailService(
 
         await deliveryLogs.AddAsync(log, cancellationToken);
         await deliveryLogs.SaveChangesAsync(cancellationToken);
+        return log.Status == EmailDeliveryStatus.Sent;
     }
-}
-
-internal static class BookingEmailTemplates
-{
-    public static string ConfirmationSubject(BookingEmailDetails details) =>
-        $"Desk booking confirmed — {details.DeskNumber} on {FormatDate(details.BookingDate)}";
-
-    public static string CancellationSubject(BookingEmailDetails details) =>
-        $"Desk booking cancelled — {details.DeskNumber} on {FormatDate(details.BookingDate)}";
-
-    public static string ReminderSubject(BookingEmailDetails details) =>
-        $"Reminder: desk {details.DeskNumber} tomorrow ({FormatDate(details.BookingDate)})";
-
-    public static string ConfirmationBody(BookingEmailDetails details) =>
-        WrapBody($"Your desk <strong>{details.DeskNumber}</strong> is confirmed for <strong>{FormatDate(details.BookingDate)}</strong>.");
-
-    public static string CancellationBody(BookingEmailDetails details) =>
-        WrapBody($"Your booking for desk <strong>{details.DeskNumber}</strong> on <strong>{FormatDate(details.BookingDate)}</strong> has been cancelled.");
-
-    public static string ReminderBody(BookingEmailDetails details) =>
-        WrapBody($"Reminder: you have desk <strong>{details.DeskNumber}</strong> booked for <strong>{FormatDate(details.BookingDate)}</strong>.");
-
-    private static string FormatDate(DateOnly date) =>
-        date.ToString("dd MMM yyyy");
-
-    private static string WrapBody(string message) =>
-        $"<html><body><p>{message}</p></body></html>";
 }

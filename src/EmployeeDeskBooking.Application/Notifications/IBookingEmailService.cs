@@ -8,6 +8,8 @@ public sealed class BookingEmailDetails
 
     public required string RecipientEmail { get; init; }
 
+    public required string EmployeeName { get; init; }
+
     public required string DeskNumber { get; init; }
 
     public required DateOnly BookingDate { get; init; }
@@ -15,9 +17,9 @@ public sealed class BookingEmailDetails
 
 public interface IBookingEmailService
 {
-    Task SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default);
+    Task<bool> SendConfirmationAsync(Guid bookingId, CancellationToken cancellationToken = default);
 
-    Task SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default);
+    Task<bool> SendCancellationAsync(Guid bookingId, CancellationToken cancellationToken = default);
 }
 
 public interface IReminderEmailService
