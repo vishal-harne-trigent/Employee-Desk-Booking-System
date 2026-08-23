@@ -3,10 +3,12 @@
 The Architect's **Gate 1 deliverable**: the shape the whole build shares, written
 once requirements are frozen and before any code exists. Two documents:
 
-| File                 | Contains                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| `db-design.md`       | Entities, their relationships and cardinality, keys, the shape the data takes, and why        |
-| `app-architecture.md` | Services/modules, their boundaries, how they talk, where shared logic sits, and why           |
+| File | Contains |
+| ---- | -------- |
+| [`technical-specification.md`](technical-specification.md) | **Consolidated TSD** — stack, **EDBS System Architecture** diagram (§2.4), API, UI, data, config |
+| [`edbs-system-architecture.png`](edbs-system-architecture.png) | Visual architecture diagram (Web → Api → Infrastructure → Domain) |
+| `db-design.md` | Entities, relationships, keys, constraints |
+| `app-architecture.md` | Layered architecture, services, flows, decisions |
 
 ## What goes in `db-design.md`
 
@@ -47,9 +49,10 @@ PR. Tailor this README to your project; it is yours from here.
 
 | File | Status |
 | ---- | ------ |
+| [`technical-specification.md`](technical-specification.md) | **v1.3** — as-built TSD + EDBS System Architecture diagram, 2026-08-24 |
 | [`db-design.md`](db-design.md) | Draft — EF Core / SQL Server, 2026-08-17 |
 | [`app-architecture.md`](app-architecture.md) | Draft — .NET 8 MVC + Web API, 2026-08-17 |
 
-**Style:** Layered Architecture (N-tier) — Presentation · Application · Domain · Infrastructure · Data
+**Style:** API-first layered architecture — **Web → Api → Infrastructure → Domain → SQL Server**
 
 **Stack:** .NET 8 · ASP.NET Core MVC (Razor) · Web API · EF Core 8.0.11 · SQL Server · MailKit · WebPush
