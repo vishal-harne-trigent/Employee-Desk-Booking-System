@@ -135,6 +135,7 @@ Business rules are numbered **BR-001.\*** in architecture docs and implemented i
 | -------- | -------- | --- |
 | Requirements | `inception/product/requirements/` | BRD-001, SRS-001, REQ-001 … |
 | User stories | `inception/stories/user-stories/` | US-001 … US-009 |
+| **Consolidated stories** | `inception/stories/STORIES-001-desk-booking.md` | All stories in one document |
 | Screens | `inception/design/screens/` | SCR-001 … SCR-007 |
 | Architecture | `inception/architecture/` | TSD-001, db-design, app-architecture |
 | Traceability | `knowledge/traceability/manifest.json` | Links REQ, US, tests, Jira |

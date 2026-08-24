@@ -868,7 +868,8 @@ Database migrations apply automatically on startup via `InitializeDatabaseAsync`
 | US-009 | Auto-complete past bookings                          | Implemented |
 
 
-Detailed specs: `[inception/specs/](../specs/index.md)`
+Detailed specs: [`inception/specs/`](../specs/index.md)  
+Consolidated stories: [`inception/stories/STORIES-001-desk-booking.md`](../stories/STORIES-001-desk-booking.md)
 
 ---
 
@@ -916,6 +917,7 @@ Detailed specs: `[inception/specs/](../specs/index.md)`
 | DB design             | `inception/architecture/db-design.md`                           |
 | Screen specs          | `inception/design/screens/`                                     |
 | User stories          | `inception/stories/user-stories/`                               |
+| Consolidated stories  | `inception/stories/STORIES-001-desk-booking.md`                 |
 | Traceability manifest | `knowledge/traceability/manifest.json`                          |
 
 
