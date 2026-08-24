@@ -26,12 +26,12 @@
 
 ## Architectural style: Layered (N-tier)
 
-The system uses **Layered Architecture** with an **API-first** topology: **Web MVC is a UI host** that calls the **REST API** over HTTP; **only the Api project** registers Application and Infrastructure libraries.
+The system uses **Layered Architecture** with **dual presentation hosts**: **Web MVC** (cookie session) and **REST API** (JWT) both register and call the shared **Application** and **Infrastructure** libraries.
 
 | Tier | Project(s) | Responsibility |
 | ---- | ---------- | -------------- |
-| **Presentation (UI)** | `EmployeeDeskBooking.Web` | Razor views, cookie session, CSRF, navigation — calls Api via typed HTTP client |
-| **Presentation (gateway)** | `EmployeeDeskBooking.Api` | REST endpoints, JWT, Swashbuckle — injects Application services |
+| **Presentation (UI)** | `EmployeeDeskBooking.Web` | Razor views, cookie session, CSRF, navigation — injects Application services |
+| **Presentation (API)** | `EmployeeDeskBooking.Api` | REST endpoints, JWT, Swashbuckle — injects Application services |
 | **Application** | `EmployeeDeskBooking.Application` | Use cases, orchestration, DTOs, validation, business rules (BR-001.*) |
 | **Domain** | `EmployeeDeskBooking.Domain` | Entities, enums, domain exceptions — no framework references |
 | **Infrastructure** | `EmployeeDeskBooking.Infrastructure` | EF Core `DbContext`, repositories, MailKit, WebPush, hosted jobs |
@@ -40,22 +40,23 @@ The system uses **Layered Architecture** with an **API-first** topology: **Web M
 ### Dependency rules
 
 ```
-Web (MVC)  ──HTTP REST──►  Api  ──►  Application  ──►  Domain
-                              ▲
-                       Infrastructure  ──►  Domain
-                              ↓
-                         SQL Server
+Web (MVC)  ──►  Application  ──►  Domain
+Api (REST) ──►  Application  ──►  Domain
+                    ▲
+             Infrastructure  ──►  Domain
+                    ↓
+               SQL Server
 ```
 
 | Rule | Enforcement |
 | ---- | ----------- |
-| **Web calls Api only** | No project references to Application or Infrastructure in `Web.csproj` |
-| **Api calls Application only** | Api controllers inject `IBookingService`, not `AppDbContext` |
+| **Web and Api call Application only** | Controllers inject `IBookingService`, not `AppDbContext` |
+| **Both hosts register Infrastructure** | `AddApplication()` + `AddInfrastructure()` in each host's `Program.cs` |
 | Application defines **interfaces**; Infrastructure implements them | `IUserRepository`, `IEmailSender` in Application; implementations in Infrastructure |
 | **Domain** has zero upward dependencies | No references to Application, Infrastructure, Web, or Api |
 | Infrastructure references Domain + Application contracts | EF entity configs map to Domain types |
-| No **layer skipping** from Api | Api must not query EF or SQL directly |
-| Business logic stays in Application | Web and Api are thin adapters; Web delegates all domain work to Api |
+| No **layer skipping** from Web or Api | Presentation hosts must not query EF or SQL directly |
+| Business logic stays in Application | Web and Api are thin adapters |
 
 Background jobs (`IHostedService`) live in **Infrastructure** (registered by Api host) and invoke **Application** services — they do not bypass the Application tier.
 

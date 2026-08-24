@@ -6,31 +6,34 @@
 | ---------------- | -------------------------------------------------------------------------------- |
 | **Author**       | BA persona (AI draft) with PO/BA human                                           |
 | **Source input** | `inception/product/inputs/2026-08-13-client-discussion.md`, `inception/product/inputs/2026-08-14-admin-provisioning.md`, `inception/product/inputs/2026-08-14-notifications.md` |
-| **Related**      | EPIC-001 (filled when stories are drafted after design approval)                 |
+| **Version**      | 1.1 (2026-08-24 — aligned to as-built release)                                   |
+| **Related**      | SRS-001, EPIC-001, SCR-001 … SCR-007, TSD-001                                    |
 
 ## 1. Business goal
 
-Provide a web application so employees at a single hybrid office can reserve a specific desk before coming in, and so administrators can oversee bookings, maintain desk inventory, and manage user accounts for the office.
+Provide a web application so employees at a single hybrid office can reserve a specific desk before coming in, and so administrators can oversee bookings, maintain desk inventory (including desk location), and manage user accounts for the office. Administrators who work hybrid may also book desks for themselves.
 
 ## 2. Actors
 
 | Actor    | Description                                      | Needs                                                                 |
 | -------- | ------------------------------------------------ | --------------------------------------------------------------------- |
-| Employee | Staff member who works hybrid and books a desk   | Sign in, book/view/cancel desks; receive booking emails; optionally enable browser push for book/cancel |
-| Admin    | Office administrator                             | Sign in; view/cancel all bookings; manage desks and users; receive same booking emails when acting on behalf of employees where applicable |
+| Employee | Staff member who works hybrid and books a desk   | Sign in, book/view/cancel desks; see desk location; receive booking emails; optionally enable browser push for book/cancel |
+| Admin    | Office administrator; may also book for self     | Sign in; book/view/cancel own desks (same as Employee); view/cancel all bookings; manage desks (number, location, status) and users; optionally enable browser push |
 | System   | Desk booking application                         | Enforce business rules; send email notifications; deliver opt-in browser push |
+| API consumer | Integrations, automated tests, future clients | Programmatic access to booking and admin operations via REST API (JWT) |
 
 ## 3. Workflows
 
-1. **Employee books a desk:** Employee signs in → selects a date (today through +30 days, working day, office timezone) → views desks by unique number with availability → selects one available desk → booking is created with status **Confirmed**.
-2. **Employee reviews bookings:** Employee opens own bookings list → sees past and future bookings with status → can cancel today or future **Confirmed** bookings → cancelled bookings become **Cancelled**.
+1. **Employee books a desk:** Employee signs in → selects a date (today through +30 days, working day, office timezone) → views desks by unique number **and location** with availability → selects one available desk → booking is created with status **Confirmed**.
+2. **Employee reviews bookings:** Employee opens own bookings list → sees past and future bookings with status and **desk location** → can cancel today or future **Confirmed** bookings → cancelled bookings become **Cancelled**.
 3. **Employee changes desk:** Employee cancels the existing booking for that date → books a different available desk for the same date (no direct desk swap on an existing booking).
 4. **Admin monitors bookings:** Admin signs in → views all bookings → filters by date and/or status → can cancel a **Confirmed** booking on behalf of an employee for today or a future date.
-5. **Booking completes:** When a **Confirmed** booking date passes in office local time without cancellation, status becomes **Completed**.
-6. **Admin manages desks:** Admin signs in → views desk inventory → adds a desk with a unique number → edits desk number (when allowed) → activates or deactivates desks → inactive desks are excluded from employee booking availability.
-7. **Admin manages users:** Admin signs in → views user list → creates a user (email, role, initial credentials) → edits user details → assigns **Employee** or **Admin** role → deactivates users → resets a user's password (admin-initiated, not self-service).
-8. **Booking notifications (email):** When a booking becomes **Confirmed** or **Cancelled**, the system sends an email to the employee who owns the booking. For each **Confirmed** booking on a future working day, the system sends a reminder email on the previous calendar day (office local timezone).
-9. **Booking notifications (browser push, optional):** An Employee may opt in to browser push alerts. When opted in, the system sends a push notification on book and on cancel (employee-initiated or admin-initiated cancel of that employee's booking). Day-before reminders remain email only.
+5. **Admin books for self:** Admin signs in → uses **Desk Availability** and **My Bookings** (same flows as Employee) → subject to the same one-desk-per-day and cancel-then-book rules.
+6. **Booking completes:** When a **Confirmed** booking date passes in office local time without cancellation, status becomes **Completed**.
+7. **Admin manages desks:** Admin signs in → views desk inventory → adds a desk with a unique number and optional **location** → edits desk number and location (when allowed) → activates or deactivates desks → inactive desks are excluded from booking availability.
+8. **Admin manages users:** Admin signs in → views user list → creates a user (email, role, initial credentials) → edits user details → assigns **Employee** or **Admin** role → deactivates users → **reactivates** deactivated users → resets a user's password on a dedicated page (admin enters new password and confirmation; password is not emailed).
+9. **Booking notifications (email):** When a booking becomes **Confirmed** or **Cancelled**, the system sends an email to the booking owner. Emails include desk number, **location**, and date. For each **Confirmed** booking on a future working day, the system sends a reminder email on the previous calendar day (office local timezone).
+10. **Booking notifications (browser push, optional):** A signed-in user (Employee or Admin) may opt in to browser push alerts. When opted in, the system sends a push notification on book and on cancel (self-initiated or admin-initiated cancel of that user's booking). Day-before reminders remain email only.
 
 ## 4. Functional requirements
 
@@ -38,13 +41,13 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 | ID      | Requirement | Priority | Source |
 | ------- | ----------- | -------- | ------ |
-| REQ-001 | The product is a browser-based web application for desk booking at one office location. | Must | `2026-08-13-client-discussion.md` |
+| REQ-001 | The product is a browser-based web application for desk booking at one office location, with an optional REST API for programmatic access. | Must | `2026-08-13-client-discussion.md`, as-built 2026-08-24 |
 | REQ-002 | A user can sign in with email and password. | Must | `2026-08-13-client-discussion.md` |
 | REQ-003 | A signed-in user can sign out. | Must | `2026-08-13-client-discussion.md` |
 | REQ-004 | The system assigns each user exactly one role: **Employee** or **Admin**. | Must | `2026-08-13-client-discussion.md` |
 | REQ-005 | A user marked deactivated cannot sign in. | Must | `2026-08-13-client-discussion.md` |
 | REQ-006 | An Employee can select a booking date from today through 30 calendar days ahead, calculated in the office local timezone. | Must | `2026-08-13-client-discussion.md` |
-| REQ-007 | For a selected date, an Employee can view desk availability where each desk is identified by a unique desk number (e.g. A-01, B-02). | Must | `2026-08-13-client-discussion.md`, PO/BA interview |
+| REQ-007 | For a selected date, a user can view desk availability where each desk is identified by a unique desk number (e.g. A-01, B-02) and a **location** label (e.g. Floor 1, Zone C). | Must | `2026-08-13-client-discussion.md`, PO/BA interview, as-built 2026-08-24 |
 | REQ-008 | An Employee can book exactly one available desk for one selected date. | Must | `2026-08-13-client-discussion.md` |
 | REQ-009 | An Employee can view a list of their own bookings, including past and future dates. | Must | `2026-08-13-client-discussion.md` |
 | REQ-010 | An Employee can cancel their own booking for today or a future date; past bookings cannot be cancelled by the Employee. | Must | `2026-08-13-client-discussion.md`, PO/BA interview |
@@ -52,19 +55,22 @@ Provide a web application so employees at a single hybrid office can reserve a s
 | REQ-012 | An Admin can filter all bookings by date. | Must | `2026-08-13-client-discussion.md` |
 | REQ-013 | An Admin can filter all bookings by status (**Confirmed**, **Cancelled**, or **Completed**). | Must | `2026-08-13-client-discussion.md`, PO/BA interview |
 | REQ-014 | An Admin can cancel an Employee's booking on their behalf for today or a future date; past bookings cannot be cancelled by the Admin. | Must | `2026-08-13-client-discussion.md`, PO/BA interview |
-| REQ-015 | An Admin can add a new desk identified by a unique desk number. | Must | `2026-08-14-admin-provisioning.md` |
-| REQ-016 | An Admin can edit an existing desk's desk number, subject to uniqueness validation. | Must | `2026-08-14-admin-provisioning.md` |
+| REQ-015 | An Admin can add a new desk identified by a unique desk number and an optional **location** label. | Must | `2026-08-14-admin-provisioning.md`, as-built 2026-08-24 |
+| REQ-016 | An Admin can edit an existing desk's desk number and **location**, subject to desk-number uniqueness validation. | Must | `2026-08-14-admin-provisioning.md`, as-built 2026-08-24 |
 | REQ-017 | An Admin can activate or deactivate a desk; **Inactive** desks must not appear in employee booking availability. | Must | `2026-08-14-admin-provisioning.md` |
 | REQ-018 | An Admin can create a user account with email, name, role (**Employee** or **Admin**), and an initial password set by the Admin. | Must | `2026-08-14-admin-provisioning.md` |
 | REQ-019 | An Admin can edit a user's name and email. | Must | `2026-08-14-admin-provisioning.md` |
 | REQ-020 | An Admin can deactivate a user account; deactivated users cannot sign in (see REQ-005). | Must | `2026-08-14-admin-provisioning.md` |
-| REQ-021 | An Admin can reset a user's password (admin-initiated); this is not a self-service forgot-password flow. | Must | `2026-08-14-admin-provisioning.md` |
+| REQ-021 | An Admin can reset a user's password on a dedicated page by entering a new password and confirmation (admin-initiated; not self-service; password not emailed to the user). | Must | `2026-08-14-admin-provisioning.md`, as-built 2026-08-24 |
 | REQ-022 | An Admin can assign or change a user's role between **Employee** and **Admin**. | Must | `2026-08-14-admin-provisioning.md` |
+| REQ-028 | An Admin can **reactivate** a previously deactivated user account. | Must | as-built 2026-08-24 |
+| REQ-029 | An Admin can book, view, and cancel their own desk reservations using the same flows and rules as an Employee. | Must | as-built 2026-08-24 |
+| REQ-030 | Transactional emails and browser push payloads for booking events shall include desk number, **location**, and booking date. | Must | `2026-08-14-notifications.md`, as-built 2026-08-24 |
 | REQ-023 | When a booking is created with status **Confirmed**, the system sends a confirmation email to the booking owner at their account email address. | Must | `2026-08-14-notifications.md` |
 | REQ-024 | When a booking becomes **Cancelled**, the system sends a cancellation email to the booking owner at their account email address. | Must | `2026-08-14-notifications.md` |
 | REQ-025 | For each **Confirmed** booking on a future working day, the system sends a reminder email to the booking owner on the calendar day immediately before the booking date (office local timezone). | Must | `2026-08-14-notifications.md` |
-| REQ-026 | An Employee can opt in to or opt out of browser push notifications for booking events; default is opt-out. | Must | `2026-08-14-notifications.md` |
-| REQ-027 | When an Employee has opted in to browser push, the system sends a push notification on **Confirmed** (book) and **Cancelled** events for that Employee's bookings. | Must | `2026-08-14-notifications.md` |
+| REQ-026 | A signed-in user (Employee or Admin) can opt in to or opt out of browser push notifications for booking events; default is opt-out. | Must | `2026-08-14-notifications.md`, as-built 2026-08-24 |
+| REQ-027 | When a user has opted in to browser push, the system sends a push notification on **Confirmed** (book) and **Cancelled** events for that user's own bookings. | Must | `2026-08-14-notifications.md`, as-built 2026-08-24 |
 
 ## 5. Non-functional requirements
 
@@ -81,7 +87,7 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 ### BR-001.1 One desk per employee per working day
 
-- **Statement:** When an Employee attempts to create a booking, the system must reject the request if that Employee already has a **Confirmed** booking for the same calendar date (office local timezone).
+- **Statement:** When a user (Employee, or Admin booking for themselves) attempts to create a booking, the system must reject the request if that user already has a **Confirmed** booking for the same calendar date (office local timezone).
 - **Rationale:** Prevents double-booking and matches hybrid office policy of one seat per person per day.
 - **Examples:** Pass — Employee with no booking on 2026-08-20 books desk A-01. Fail — Employee with **Confirmed** booking on 2026-08-20 attempts to book desk B-02 the same date.
 - **Affects:** REQ-008
@@ -158,10 +164,10 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 ### BR-001.12 Admin password reset delivery
 
-- **Statement:** When an Admin resets a user's password, the system must set a new password and display it once to the Admin in the application (copy-to-clipboard encouraged); the system must not email the password to the user unless a separate requirement is approved.
-- **Rationale:** REQ-021 is admin-initiated; email delivery is not assumed (notifications open question #3).
-- **Examples:** Pass — Admin resets password; new temporary value shown once on screen. Fail — Password change with no feedback to the Admin performing the reset.
-- **Affects:** REQ-021
+- **Statement:** When an Admin resets a user's password, the system must present a dedicated **Reset password** page where the Admin enters a **new password** and **confirm password**; the values must match before the password is saved. The system must **not** email the new password to the user. The Admin communicates the password to the user through an out-of-band channel agreed by the organization.
+- **Rationale:** REQ-021 is admin-initiated; explicit entry replaces earlier one-time generated-password display and gives the Admin control over the credential shared with the user.
+- **Examples:** Pass — Admin opens Reset password for Jane, enters matching passwords, submits successfully. Fail — Passwords do not match; reset rejected. Fail — New password emailed automatically to the user.
+- **Affects:** REQ-021, V-12
 
 ### BR-001.13 Mandatory booking emails
 
@@ -179,9 +185,9 @@ Provide a web application so employees at a single hybrid office can reserve a s
 
 ### BR-001.15 Browser push opt-in only
 
-- **Statement:** Browser push for book/cancel events must be disabled until the Employee explicitly opts in (REQ-026); opting out must stop subsequent push notifications without affecting email notifications.
+- **Statement:** Browser push for book/cancel events must be disabled until the user (Employee or Admin) explicitly opts in (REQ-026); opting out must stop subsequent push notifications without affecting email notifications.
 - **Rationale:** Push is optional per client request; email remains the reliable channel.
-- **Examples:** Pass — Employee enables push; receives push on next booking. Fail — Push sent to Employee who never opted in.
+- **Examples:** Pass — Employee enables push; receives push on next booking. Fail — Push sent to a user who never opted in.
 - **Affects:** REQ-026, REQ-027
 
 ### BR-001.16 Push scope excludes reminders
@@ -190,6 +196,13 @@ Provide a web application so employees at a single hybrid office can reserve a s
 - **Rationale:** Client specified push for book/cancel only.
 - **Examples:** Pass — Reminder email sent; no push for reminder. Fail — Push notification for day-before reminder.
 - **Affects:** REQ-025, REQ-027
+
+### BR-001.17 Desk location labelling
+
+- **Statement:** When a desk is shown in availability, booking lists, or notifications, the system must display a **location** label. An Admin may store a custom location when adding or editing a desk; when no custom location is stored, the system must derive a readable default from the desk-number prefix (e.g. A-01 → Floor 1, Zone C).
+- **Rationale:** Hybrid workers need to find their reserved desk in the physical office; location is distinct from the desk number identifier.
+- **Examples:** Pass — Availability shows "A-01 — Floor 1, Zone C". Pass — Admin sets location "Near window" on desk B-02; that label appears in My Bookings and confirmation email. Fail — Booking confirmation shows desk number only with no location context.
+- **Affects:** REQ-007, REQ-015, REQ-016, REQ-030
 
 ## 7. Validations
 
@@ -207,14 +220,15 @@ Provide a web application so employees at a single hybrid office can reserve a s
 | V-10 | User email must be unique on create/edit | REQ-018, REQ-019, BR-001.10 |
 | V-11 | Cannot remove the last active **Admin** | REQ-020, REQ-022, BR-001.11 |
 | V-12 | Password reset must meet minimum length/complexity policy | REQ-021 — **min 8 chars; upper, lower, digit, special** (PO/security, 2026-08-21) |
-| V-13 | Email notifications include desk number and booking date | REQ-023, REQ-024, REQ-025 |
+| V-13 | Email and push notifications include desk number, **location**, and booking date | REQ-023, REQ-024, REQ-025, REQ-030 |
 | V-14 | Push notifications only when user opt-in flag is true | REQ-026, REQ-027, BR-001.15 |
 
 ## 8. Constraints
 
 - Single office location only (no multi-site routing or selection).
 - Email/password authentication only; no SSO or social login in this release.
-- Desk inventory and user accounts are maintained in-app by Admins (REQ-015–REQ-022); initial bootstrap of the first Admin account: **`DbInitializer` seed when no users exist** (PO/Architect, 2026-08-21).
+- Desk inventory and user accounts are maintained in-app by Admins (REQ-015–REQ-022, REQ-028); initial bootstrap of the first Admin account and default desk inventory: **`DbInitializer` seed when no users exist** — five default desks (A-01 … A-05) with derived locations (PO/Architect, 2026-08-21; as-built 2026-08-24).
+- Admin navigation includes employee self-service items (**Desk Availability**, **My Bookings**) in addition to admin screens (**Desks**, **Users**, **All Bookings**).
 - Company public holidays are not yet defined in scope — until resolved, only weekend exclusion (BR-001.3) is guaranteed.
 
 ## 9. Risks
@@ -225,7 +239,7 @@ Provide a web application so employees at a single hybrid office can reserve a s
 | RISK-002 | Holiday calendar undefined — employees may book on company holidays. | Medium | Medium | Resolve open question #2; interim Mon–Fri rule documented in BR-001.3. |
 | RISK-003 | No self-service password reset; employees depend on Admin for password help. | Medium | Low | REQ-021 admin reset; self-service remains out of scope per §10. |
 | RISK-004 | Concurrent booking of the same desk could cause double-booking without proper locking. | Low | High | Address in architecture/delivery (not a BA design decision). |
-| RISK-005 | Admin displays new password on screen — shoulder-surfing / log exposure if mishandled. | Low | Medium | Show once + copy; UX warning copy; no password in persistent audit log. |
+| RISK-005 | Admin-entered password on reset page — shoulder-surfing or insecure handoff to the user. | Low | Medium | Dedicated page with confirm field; UX guidance to share password securely; no password in persistent audit log. |
 | RISK-006 | Email delivery failures (wrong address, SMTP outage) leave users uninformed. | Medium | Medium | Log failures (NFR-005); operational monitoring; valid email on user create (REQ-018). |
 | RISK-007 | Browser push permission denied or unsupported — user expects alerts. | Medium | Low | Clear UX that push is optional; email always sent (BR-001.13). |
 
@@ -253,3 +267,12 @@ Provide a web application so employees at a single hybrid office can reserve a s
 | 5   | Minimum password length/complexity for create and reset (V-12)? | PO/security | **Resolved** — min 8 chars; upper, lower, digit, special (2026-08-21) |
 | 6   | When deactivating a desk with future bookings, must the Admin cancel all affected bookings in one step, or block until manually cleared? | PO/client | Open — default BR-001.9: block or cancel-in-same-flow |
 | 7   | Approved sender address / email domain and SMTP service for transactional mail? | PO/IT | Open |
+
+---
+
+## Document history
+
+| Version | Date | Summary |
+| ------- | ---- | ------- |
+| 1.0 | Gate 1 baseline | Initial BRD from client inputs and PO/BA interviews |
+| 1.1 | 2026-08-24 | Aligned to as-built release: desk **location** (REQ-015/016/030, BR-001.17), Admin **self-booking** (REQ-029), user **reactivate** (REQ-028), dedicated **reset-password** page (REQ-021, BR-001.12), REST API in scope (REQ-001), five-desk seed, Admin nav, push opt-in for Admin |

@@ -3,9 +3,9 @@
 | | |
 | --- | --- |
 | **Document ID** | TSD-001 |
-| **Version** | 1.3 |
+| **Version** | 1.4 |
 | **Date** | 2026-08-24 |
-| **Status** | As-built — API-first topology (Web → API → libraries) |
+| **Status** | As-built — dual presentation hosts (Web + Api → shared libraries) |
 | **Traces to** | BRD-001, SRS-001, US-001 … US-009 |
 | **Related** | [`app-architecture.md`](app-architecture.md), [`db-design.md`](db-design.md), [`../specs/index.md`](../specs/index.md) |
 
@@ -53,11 +53,11 @@ It consolidates architecture, technology choices, data model, API surface, UI ro
 
 ### 2.4 EDBS System Architecture
 
-Canonical topology for the Employee Desk Booking System. **Web MVC calls the API**; **only the API host** wires Infrastructure and Application libraries. External API consumers use the same REST surface with JWT.
+Canonical topology for the Employee Desk Booking System. **Web MVC** and **REST API** are both presentation hosts; each registers **Application** and **Infrastructure** and shares the same domain services. External API consumers use JWT on the Api host; browser users use cookie auth on the Web host.
 
 ![EDBS System Architecture](edbs-system-architecture.png)
 
-> **Flow correction vs. earlier drafts:** Web does **not** call Infrastructure directly — all domain traffic is **Web → Api → Infrastructure → Domain → SQL Server**.
+> **As-built (v1.1):** Both `EmployeeDeskBooking.Web` and `EmployeeDeskBooking.Api` reference Application + Infrastructure directly. The diagram above shows logical tiers; physical project references are documented in [`app-architecture.md`](app-architecture.md).
 
 #### Component map
 
@@ -65,8 +65,8 @@ Canonical topology for the Employee Desk Booking System. **Web MVC calls the API
 | ----- | --------- | ------- | ---------------- |
 | **Clients** | Browser (MVC UI) | — | End users; **Cookie auth** to Web |
 | **Clients** | API consumers (Swagger/HTTP) | — | Integrations, tests, mobile; **JWT Bearer** to Api |
-| **Application Project** | **EDBS.Web** | `EmployeeDeskBooking.Web` | MVC + Razor + BS5 · `sw.js` service worker · server-side HTTP client to Api |
-| **Application Project** | **EDBS.Api** | `EmployeeDeskBooking.Api` | REST + Swagger · push subscribe API · registers Application + Infrastructure |
+| **Presentation** | **EDBS.Web** | `EmployeeDeskBooking.Web` | MVC + Razor + BS5 · `sw.js` service worker · calls Application services |
+| **Presentation** | **EDBS.Api** | `EmployeeDeskBooking.Api` | REST + Swagger · push subscribe API · calls Application services |
 | **Libraries** | **EDBS.Infrastructure** | `EmployeeDeskBooking.Infrastructure` | EF Core · repositories · Auth helpers · MailKit · WebPush · hosted jobs |
 | **Libraries** | **EDBS.Application** | `EmployeeDeskBooking.Application` | Application services · validators · BR-001.* (referenced by Infrastructure/Api) |
 | **Libraries** | **EDBS.Domain** | `EmployeeDeskBooking.Domain` | Entities · enums |
@@ -80,7 +80,7 @@ Canonical topology for the Employee Desk Booking System. **Web MVC calls the API
 | ---------- | ------- | ------- |
 | **Cookie auth** (blue) | Browser session to Web | `Browser → EDBS.Web` |
 | **JWT Bearer** (green) | Token auth to Api | `API consumers → EDBS.Api` |
-| **Internal flow** (orange) | In-process or HTTP between EDBS components | `Web → Api → Infrastructure → Domain → SQL Server` |
+| **Internal flow** (orange) | Shared libraries between presentation hosts | `Web/Api → Application → Infrastructure → Domain → SQL Server` |
 | **External integration** (dashed) | Outbound from Infrastructure | `Infrastructure ↔ SMTP · Web Push` |
 
 #### Architecture diagram (Mermaid)
@@ -109,10 +109,10 @@ flowchart TB
 
     BROWSER -->|"Cookie auth"| WEB
     APICLI -->|"JWT Bearer"| API
-    WEB -->|"Internal flow · HTTP REST"| API
-    API --> INF
+    WEB --> APP
+    WEB --> INF
     API --> APP
-    INF --> APP
+    API --> INF
     INF --> DOM
     DOM --> DB
     INF -.->|"External integration"| SMTP

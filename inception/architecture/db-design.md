@@ -57,6 +57,7 @@ Bookable workspace identified by a unique desk number. (REQ-007, REQ-015–REQ-0
 | ------------- | ----------------- | ---- | ----- |
 | `Id`          | `uniqueidentifier`| NO   | PK |
 | `DeskNumber`  | `nvarchar(32)`    | NO   | e.g. `A-01`; unique case-insensitively (BR-001.4, BR-001.8) |
+| `Location`    | `nvarchar(100)`   | NO   | Stored placement label; may be empty — UI derives `Floor N, Zone X` from desk-number prefix when blank |
 | `Status`      | `tinyint` / enum  | NO   | `Active` = 0, `Inactive` = 1 (REQ-017) |
 | `CreatedAt`   | `datetimeoffset`  | NO   | Audit |
 | `UpdatedAt`   | `datetimeoffset`  | NO   | Audit |
