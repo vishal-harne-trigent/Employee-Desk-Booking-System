@@ -56,13 +56,20 @@ ai/                               Framework (gates, roles, standards, templates)
 
 ---
 
-## Architecture (target vs as-built)
+## Architecture (as-built)
 
-**Target topology (documented in `inception/architecture/`):** Browser → **Web** (cookie) → **HTTP REST** → **Api** (JWT) → Application → Infrastructure → Domain → SQL Server. Only the Api host should register Application + Infrastructure; Web is a thin UI client.
+**Canonical topology (TSD-001 §2.4):** **Web MVC** (cookie auth) and **REST API** (JWT) are dual presentation hosts. Both call `AddApplication()` and `AddInfrastructure()` in `Program.cs` and inject Application services in controllers. Web does **not** proxy domain operations through Api over HTTP.
 
-**As-built note:** Both **Web** and **Api** currently call `AddApplication()` and `AddInfrastructure()` directly. The Web project has not yet been refactored to an HTTP client to Api. When implementing or reviewing, treat the architecture docs as the direction of travel; do not assume Web→Api wiring exists until the refactor lands.
+```
+Browser → Web ──► Application ──► Domain
+API clients → Api ──► Application ──► Domain
+                        ▲
+                 Infrastructure ──► Domain → SQL Server
+```
 
-**Background jobs** (registered when `ReminderJob:Enabled` / completion job are on):
+See [`inception/architecture/technical-specification.md`](inception/architecture/technical-specification.md) for diagrams and flows.
+
+**Background jobs** (registered when `ReminderJob:Enabled` / completion job are on; Web host in dev, either host may register):
 
 - `ReminderEmailHostedService` — hourly; sends day-before reminders at office local hour (default 08:00)
 - `CompletePastBookingsHostedService` — marks past confirmed bookings as Completed
@@ -147,6 +154,10 @@ Business rules are numbered **BR-001.\*** in architecture docs and implemented i
 - Email/push fakes: `InMemoryEmailSender`, `InMemoryPushNotificationSender`, `TestOfficeClock`
 - Run a single test class: `dotnet test --filter "FullyQualifiedName~ReminderEmailTests"`
 
+### Testing delivery phase
+
+The full as-built branch includes AC-linked tests for US-001 … US-009. **Current scaffold delivery may ship story PRs without new automated AC tests** when the PO defers test authoring for that sprint. Manual verification and `dotnet build` still apply. Before Gate 3 release, restore AC coverage per `ai/standards/testing-standards.md` and update `knowledge/traceability/manifest.json`.
+
 ---
 
 ## Standards — tailoring status
@@ -181,8 +192,8 @@ Approvals are **GitHub PR reviews**, never chat text (except Gate D1 implementat
 
 ## Known open items
 
-- **Web → Api refactor** — architecture docs describe API-first; Web still references Application/Infrastructure directly
 - **Branch protection** — `aidlc-check` as required status may not be enforced on current GitHub plan (convention until configured)
+- **Gate 3 test restore** — deferred AC tests on scaffold branches must be re-linked before production release
 
 ---
 

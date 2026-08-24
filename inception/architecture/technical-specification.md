@@ -1,13 +1,15 @@
 # Technical Specification — Employee Desk Booking System
 
-| | |
-| --- | --- |
-| **Document ID** | TSD-001 |
-| **Version** | 1.5 |
-| **Date** | 2026-08-24 |
-| **Status** | As-built — dual presentation hosts (Web + Api → shared Application/Infrastructure) |
-| **Traces to** | BRD-001 v1.1, SRS-001 v1.1, US-001 … US-009 |
-| **Related** | [`app-architecture.md`](app-architecture.md), [`db-design.md`](db-design.md), [`../specs/index.md`](../specs/index.md) |
+
+|                 |                                                                                                                        |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **Document ID** | TSD-001                                                                                                                |
+| **Version**     | 1.0                                                                                                                    |
+| **Date**        | 2026-08-24                                                                                                             |
+| **Status**      | As-built — dual presentation hosts (Web + Api → shared Application/Infrastructure)                                     |
+| **Traces to**   | BRD-001 v1.1, SRS-001 v1.1, US-001 … US-009                                                                            |
+| **Related**     | `[app-architecture.md](app-architecture.md)`, `[db-design.md](db-design.md)`, `[../specs/index.md](../specs/index.md)` |
+
 
 ---
 
@@ -29,12 +31,14 @@ It consolidates architecture, technology choices, data model, API surface, UI ro
 
 ### 2.1 Business context
 
-| Actor | Description |
-| ----- | ----------- |
-| **Employee** | Books, views, and cancels their own desk reservations; receives email and optional browser push notifications |
-| **Admin** | Manages all bookings, desks (number + location), and users; may book for themselves via employee flows |
-| **System** | Enforces booking rules, sends notifications, completes past bookings, and runs reminder jobs |
-| **API consumer** | Integrations and automated tests calling REST endpoints with JWT |
+
+| Actor            | Description                                                                                                   |
+| ---------------- | ------------------------------------------------------------------------------------------------------------- |
+| **Employee**     | Books, views, and cancels their own desk reservations; receives email and optional browser push notifications |
+| **Admin**        | Manages all bookings, desks (number + location), and users; may book for themselves via employee flows        |
+| **System**       | Enforces booking rules, sends notifications, completes past bookings, and runs reminder jobs                  |
+| **API consumer** | Integrations and automated tests calling REST endpoints with JWT                                              |
+
 
 ### 2.2 Scope (release 1)
 
@@ -59,33 +63,37 @@ It consolidates architecture, technology choices, data model, API surface, UI ro
 
 Canonical topology for the Employee Desk Booking System. **Web MVC** and **REST API** are both presentation hosts; each registers **Application** and **Infrastructure** and shares the same domain services. External API consumers use JWT on the Api host; browser users use cookie auth on the Web host.
 
-![EDBS System Architecture](edbs-system-architecture.png)
+EDBS System Architecture
 
-> **As-built (v1.5):** Both `EmployeeDeskBooking.Web` and `EmployeeDeskBooking.Api` reference Application + Infrastructure directly and inject Application services in controllers. The PNG diagram shows logical tiers; physical wiring is documented in [`app-architecture.md`](app-architecture.md).
+> **As-built (v1.5):** Both `EmployeeDeskBooking.Web` and `EmployeeDeskBooking.Api` reference Application + Infrastructure directly and inject Application services in controllers. The PNG diagram shows logical tiers; physical wiring is documented in `[app-architecture.md](app-architecture.md)`.
 
 #### Component map
 
-| Layer | Component | Project | Responsibilities |
-| ----- | --------- | ------- | ---------------- |
-| **Clients** | Browser (MVC UI) | — | End users; **Cookie auth** to Web |
-| **Clients** | API consumers (Swagger/HTTP) | — | Integrations, tests, mobile; **JWT Bearer** to Api |
-| **Presentation** | **EDBS.Web** | `EmployeeDeskBooking.Web` | MVC + Razor + BS5 · `sw.js` service worker · calls Application services |
-| **Presentation** | **EDBS.Api** | `EmployeeDeskBooking.Api` | REST + Swagger · push subscribe API · calls Application services |
-| **Libraries** | **EDBS.Infrastructure** | `EmployeeDeskBooking.Infrastructure` | EF Core · repositories · Auth helpers · MailKit · WebPush · hosted jobs |
-| **Libraries** | **EDBS.Application** | `EmployeeDeskBooking.Application` | Application services · validators · BR-001.* (referenced by Infrastructure/Api) |
-| **Libraries** | **EDBS.Domain** | `EmployeeDeskBooking.Domain` | Entities · enums |
-| **Data** | SQL Server (EDBS) | — | Persistent store |
-| **External** | SMTP | — | Transactional + reminder email |
-| **External** | FCM / Web Push | — | Browser push notifications (VAPID) |
+
+| Layer            | Component                    | Project                              | Responsibilities                                                                |
+| ---------------- | ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------- |
+| **Clients**      | Browser (MVC UI)             | —                                    | End users; **Cookie auth** to Web                                               |
+| **Clients**      | API consumers (Swagger/HTTP) | —                                    | Integrations, tests, mobile; **JWT Bearer** to Api                              |
+| **Presentation** | **EDBS.Web**                 | `EmployeeDeskBooking.Web`            | MVC + Razor + BS5 · `sw.js` service worker · calls Application services         |
+| **Presentation** | **EDBS.Api**                 | `EmployeeDeskBooking.Api`            | REST + Swagger · push subscribe API · calls Application services                |
+| **Libraries**    | **EDBS.Infrastructure**      | `EmployeeDeskBooking.Infrastructure` | EF Core · repositories · Auth helpers · MailKit · WebPush · hosted jobs         |
+| **Libraries**    | **EDBS.Application**         | `EmployeeDeskBooking.Application`    | Application services · validators · BR-001.* (referenced by Infrastructure/Api) |
+| **Libraries**    | **EDBS.Domain**              | `EmployeeDeskBooking.Domain`         | Entities · enums                                                                |
+| **Data**         | SQL Server (EDBS)            | —                                    | Persistent store                                                                |
+| **External**     | SMTP                         | —                                    | Transactional + reminder email                                                  |
+| **External**     | FCM / Web Push               | —                                    | Browser push notifications (VAPID)                                              |
+
 
 #### Connection legend
 
-| Line style | Meaning | Example |
-| ---------- | ------- | ------- |
-| **Cookie auth** (blue) | Browser session to Web | `Browser → EDBS.Web` |
-| **JWT Bearer** (green) | Token auth to Api | `API consumers → EDBS.Api` |
-| **Internal flow** (orange) | Shared libraries between presentation hosts | `Web/Api → Application → Infrastructure → Domain → SQL Server` |
-| **External integration** (dashed) | Outbound from Infrastructure | `Infrastructure ↔ SMTP · Web Push` |
+
+| Line style                        | Meaning                                     | Example                                                        |
+| --------------------------------- | ------------------------------------------- | -------------------------------------------------------------- |
+| **Cookie auth** (blue)            | Browser session to Web                      | `Browser → EDBS.Web`                                           |
+| **JWT Bearer** (green)            | Token auth to Api                           | `API consumers → EDBS.Api`                                     |
+| **Internal flow** (orange)        | Shared libraries between presentation hosts | `Web/Api → Application → Infrastructure → Domain → SQL Server` |
+| **External integration** (dashed) | Outbound from Infrastructure                | `Infrastructure ↔ SMTP · Web Push`                             |
+
 
 #### Architecture diagram (Mermaid)
 
@@ -123,6 +131,8 @@ flowchart TB
     INF -.->|"External integration"| PUSH
 ```
 
+
+
 #### Booking request flow (employee or admin self-book via Web)
 
 ```mermaid
@@ -143,6 +153,8 @@ sequenceDiagram
     App-->>Web: Success
     Web-->>User: Redirect · availability / My Bookings
 ```
+
+
 
 #### Role-based navigation (Web)
 
@@ -165,6 +177,8 @@ flowchart LR
     Emp["Employee role"] --> N1
     Emp --> N2
 ```
+
+
 
 Employee-facing nav links use `asp-area=""` so routes resolve to `/Desks/Availability` and `/MyBookings` from Admin area pages.
 
@@ -195,25 +209,27 @@ Employee-facing nav links use `asp-area=""` so routes resolve to `/Desks/Availab
     SMTP (email)          FCM / Web Push
 ```
 
-For layer rules and module detail, see [`app-architecture.md`](app-architecture.md).
+For layer rules and module detail, see `[app-architecture.md](app-architecture.md)`.
 
 ---
 
 ## 3. Technology stack
 
-| Layer | Technology | Version |
-| ----- | ---------- | ------- |
-| Runtime | .NET | 8.0 |
-| Web UI | ASP.NET Core MVC, Razor, Bootstrap 5, custom CSS | 8.0 |
-| API | ASP.NET Core Web API, Swashbuckle (OpenAPI) | 8.0 |
-| ORM | Entity Framework Core | 8.0.11 |
-| Database | Microsoft SQL Server (LocalDB in development) | — |
-| Password hashing | ASP.NET Identity Core `IPasswordHasher<User>` | 8.0 |
-| Email | MailKit (SMTP) / file-drop mode for local dev | 4.17+ |
-| Push | WebPush (VAPID) | 1.0.12 |
-| Auth (Web) | Cookie authentication | — |
-| Auth (API) | JWT Bearer | — |
-| Testing | xUnit, WebApplicationFactory integration tests | — |
+
+| Layer            | Technology                                       | Version |
+| ---------------- | ------------------------------------------------ | ------- |
+| Runtime          | .NET                                             | 8.0     |
+| Web UI           | ASP.NET Core MVC, Razor, Bootstrap 5, custom CSS | 8.0     |
+| API              | ASP.NET Core Web API, Swashbuckle (OpenAPI)      | 8.0     |
+| ORM              | Entity Framework Core                            | 8.0.11  |
+| Database         | Microsoft SQL Server (LocalDB in development)    | —       |
+| Password hashing | ASP.NET Identity Core `IPasswordHasher<User>`    | 8.0     |
+| Email            | MailKit (SMTP) / file-drop mode for local dev    | 4.17+   |
+| Push             | WebPush (VAPID)                                  | 1.0.12  |
+| Auth (Web)       | Cookie authentication                            | —       |
+| Auth (API)       | JWT Bearer                                       | —       |
+| Testing          | xUnit, WebApplicationFactory integration tests   | —       |
+
 
 ---
 
@@ -257,14 +273,16 @@ API clients → Api ──► Application ──► Domain
 
 ### 5.1 Core entities
 
-| Entity | Key fields | Notes |
-| ------ | ----------- | ----- |
-| **User** | `Id`, `Email`, `Name`, `PasswordHash`, `Role`, `IsActive` | Roles: `Employee`, `Admin` |
-| **Desk** | `Id`, `DeskNumber`, `DeskNumberNormalized`, `Location`, `Status` | `Location` max 100 chars; defaults from desk prefix if blank |
-| **Booking** | `Id`, `UserId`, `DeskId`, `BookingDate`, `Status`, `CancelledAt`, `CancelledById`, `CompletedAt` | Status: `Confirmed`, `Cancelled`, `Completed` |
-| **NotificationPreference** | `UserId`, `PushOptIn`, `PushSubscription` | One row per user |
-| **BookingReminder** | `BookingId`, `SentAt` | Idempotency for day-before emails |
-| **EmailDeliveryLog** | `Id`, `BookingId`, `UserId`, `EmailType`, `Recipient`, `Status`, `ErrorMessage` | Audit trail for email sends |
+
+| Entity                     | Key fields                                                                                       | Notes                                                        |
+| -------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| **User**                   | `Id`, `Email`, `Name`, `PasswordHash`, `Role`, `IsActive`                                        | Roles: `Employee`, `Admin`                                   |
+| **Desk**                   | `Id`, `DeskNumber`, `DeskNumberNormalized`, `Location`, `Status`                                 | `Location` max 100 chars; defaults from desk prefix if blank |
+| **Booking**                | `Id`, `UserId`, `DeskId`, `BookingDate`, `Status`, `CancelledAt`, `CancelledById`, `CompletedAt` | Status: `Confirmed`, `Cancelled`, `Completed`                |
+| **NotificationPreference** | `UserId`, `PushOptIn`, `PushSubscription`                                                        | One row per user                                             |
+| **BookingReminder**        | `BookingId`, `SentAt`                                                                            | Idempotency for day-before emails                            |
+| **EmailDeliveryLog**       | `Id`, `BookingId`, `UserId`, `EmailType`, `Recipient`, `Status`, `ErrorMessage`                  | Audit trail for email sends                                  |
+
 
 ### 5.2 Booking lifecycle
 
@@ -276,13 +294,15 @@ Confirmed ──cancel──► Cancelled
 
 ### 5.3 Desk location (`DeskLocationFormatter`)
 
-| Concern | Implementation |
-| ------- | -------------- |
-| Storage | `Desks.Location` (`nvarchar(100)`); may be empty string |
-| Add/edit | Admin sets optional location on SCR-005; normalized via `NormalizeStoredLocation` |
-| Display fallback | When stored value is blank, derive from desk-number prefix (`A-01` → `Floor 1, Zone C`) |
-| Format | `FormatDeskWithLocation` → `{deskNumber} — {location}` for UI, email, push |
-| Surfaces | Desk Availability, My Bookings, All Bookings, confirmation banner, emails, push payloads |
+
+| Concern          | Implementation                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| Storage          | `Desks.Location` (`nvarchar(100)`); may be empty string                                  |
+| Add/edit         | Admin sets optional location on SCR-005; normalized via `NormalizeStoredLocation`        |
+| Display fallback | When stored value is blank, derive from desk-number prefix (`A-01` → `Floor 1, Zone C`)  |
+| Format           | `FormatDeskWithLocation` → `{deskNumber} — {location}` for UI, email, push               |
+| Surfaces         | Desk Availability, My Bookings, All Bookings, confirmation banner, emails, push payloads |
+
 
 ---
 
@@ -293,31 +313,37 @@ Confirmed ──cancel──► Cancelled
 
 ### 6.1 Critical constraints
 
-| Rule | Enforcement |
-| ---- | ----------- |
+
+| Rule                                        | Enforcement                                                                 |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
 | One confirmed booking per employee per date | Filtered unique index on `(UserId, BookingDate)` WHERE `Status = Confirmed` |
-| One confirmed booking per desk per date | Filtered unique index on `(DeskId, BookingDate)` WHERE `Status = Confirmed` |
-| Unique email (case-insensitive) | Unique index on `EmailNormalized` |
-| Unique desk number (case-insensitive) | Unique index on `DeskNumberNormalized` |
+| One confirmed booking per desk per date     | Filtered unique index on `(DeskId, BookingDate)` WHERE `Status = Confirmed` |
+| Unique email (case-insensitive)             | Unique index on `EmailNormalized`                                           |
+| Unique desk number (case-insensitive)       | Unique index on `DeskNumberNormalized`                                      |
+
 
 ### 6.2 Migrations (applied order)
 
-| Migration | Purpose |
-| --------- | ------- |
-| `InitialUsers` | Users table |
-| `AddDesksAndBookings` | Desks, Bookings, filtered unique indexes |
-| `AddEmailNotifications` | EmailDeliveryLogs |
-| `AddNotificationPreferences` | NotificationPreferences |
-| `AddDeskLocation` | `Desks.Location` column |
+
+| Migration                    | Purpose                                  |
+| ---------------------------- | ---------------------------------------- |
+| `InitialUsers`               | Users table                              |
+| `AddDesksAndBookings`        | Desks, Bookings, filtered unique indexes |
+| `AddEmailNotifications`      | EmailDeliveryLogs                        |
+| `AddNotificationPreferences` | NotificationPreferences                  |
+| `AddDeskLocation`            | `Desks.Location` column                  |
+
 
 ### 6.3 Seed data (`DbInitializer`)
 
-| Item | Default |
-| ---- | ------- |
-| Admin account | `admin@trigent.com` / `Password1!` |
-| Employee account | `vishal_h@trigent.com` / `Password1!` |
-| Default desks | `A-01` … `A-05` (5 active desks) |
-| Extra desks | Removed on startup if no bookings; desks beyond default set deactivated if they have booking history |
+
+| Item             | Default                                                                                              |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| Admin account    | `admin@trigent.com` / `Password1!`                                                                   |
+| Employee account | `vishal_h@trigent.com` / `Password1!`                                                                |
+| Default desks    | `A-01` … `A-05` (5 active desks)                                                                     |
+| Extra desks      | Removed on startup if no bookings; desks beyond default set deactivated if they have booking history |
+
 
 Legacy sample users (`admin@company.com`, `employee@company.com`) are removed on startup.
 
@@ -325,18 +351,20 @@ Legacy sample users (`admin@company.com`, `employee@company.com`) are removed on
 
 ## 7. Application services
 
-| Interface | Responsibility | User stories |
-| --------- | -------------- | ------------ |
-| `IAuthService` | Validate credentials, sign-in result | US-001 |
-| `IBookingService` | Availability, create/cancel bookings, admin list/cancel | US-002, US-003, US-004 |
-| `IBookingCompletionService` | Mark past confirmed bookings as completed | US-009 |
-| `IDeskService` | CRUD desks, activate/deactivate, location | US-005 |
-| `IUserAdminService` | User CRUD, activate/deactivate, reset password | US-006, REQ-028 |
-| `IBookingEmailService` | Confirmation and cancellation emails | US-007 |
-| `IReminderEmailService` | Day-before reminder batch | US-007 |
-| `INotificationPreferenceService` | Push opt-in/out, subscription storage | US-008 |
-| `IBookingPushService` | Push on book/cancel | US-008 |
-| `IOfficeClock` | Office-local “today”, working-day checks | NFR-001 |
+
+| Interface                        | Responsibility                                          | User stories           |
+| -------------------------------- | ------------------------------------------------------- | ---------------------- |
+| `IAuthService`                   | Validate credentials, sign-in result                    | US-001                 |
+| `IBookingService`                | Availability, create/cancel bookings, admin list/cancel | US-002, US-003, US-004 |
+| `IBookingCompletionService`      | Mark past confirmed bookings as completed               | US-009                 |
+| `IDeskService`                   | CRUD desks, activate/deactivate, location               | US-005                 |
+| `IUserAdminService`              | User CRUD, activate/deactivate, reset password          | US-006, REQ-028        |
+| `IBookingEmailService`           | Confirmation and cancellation emails                    | US-007                 |
+| `IReminderEmailService`          | Day-before reminder batch                               | US-007                 |
+| `INotificationPreferenceService` | Push opt-in/out, subscription storage                   | US-008                 |
+| `IBookingPushService`            | Push on book/cancel                                     | US-008                 |
+| `IOfficeClock`                   | Office-local “today”, working-day checks                | NFR-001                |
+
 
 ---
 
@@ -344,36 +372,42 @@ Legacy sample users (`admin@company.com`, `employee@company.com`) are removed on
 
 ### 8.1 Web (cookie-based MVC host)
 
-| Concern | Implementation |
-| ------- | -------------- |
-| Registration | `AddApplication()` + `AddInfrastructure()` in `Program.cs` |
-| Sign-in | `POST /Account/Login` → `IAuthService.SignInAsync` → cookie session with role claim |
-| Sign-out | `POST /Account/Logout` → clears authentication cookie |
-| Cookie | HttpOnly, SameSite=Strict, Secure in production |
-| Post-login redirect | Employee → `/Desks/Availability`; Admin → `/Admin/AdminBookings` |
-| Deactivated account | Sign-in rejected with deactivated message (SCR-001 ST-04) |
-| Invalid credentials | Generic error (no user enumeration) |
-| Authorization | `[Authorize(Roles = "Employee,Admin")]` on employee flows; `[Authorize(Roles = "Admin")]` on Admin area |
+
+| Concern             | Implementation                                                                                          |
+| ------------------- | ------------------------------------------------------------------------------------------------------- |
+| Registration        | `AddApplication()` + `AddInfrastructure()` in `Program.cs`                                              |
+| Sign-in             | `POST /Account/Login` → `IAuthService.SignInAsync` → cookie session with role claim                     |
+| Sign-out            | `POST /Account/Logout` → clears authentication cookie                                                   |
+| Cookie              | HttpOnly, SameSite=Strict, Secure in production                                                         |
+| Post-login redirect | Employee → `/Desks/Availability`; Admin → `/Admin/AdminBookings`                                        |
+| Deactivated account | Sign-in rejected with deactivated message (SCR-001 ST-04)                                               |
+| Invalid credentials | Generic error (no user enumeration)                                                                     |
+| Authorization       | `[Authorize(Roles = "Employee,Admin")]` on employee flows; `[Authorize(Roles = "Admin")]` on Admin area |
+
 
 ### 8.2 API (JWT Bearer)
 
-| Concern | Implementation |
-| ------- | -------------- |
-| Token issue | `POST /api/auth/login` |
-| Claims | `sub`, `email`, `name`, `role` |
-| Protected routes | All `/api/*` except login |
-| Admin routes | `[Authorize(Roles = "Admin")]` on `/api/admin/*` |
+
+| Concern          | Implementation                                   |
+| ---------------- | ------------------------------------------------ |
+| Token issue      | `POST /api/auth/login`                           |
+| Claims           | `sub`, `email`, `name`, `role`                   |
+| Protected routes | All `/api/*` except login                        |
+| Admin routes     | `[Authorize(Roles = "Admin")]` on `/api/admin/*` |
+
 
 ### 8.3 Role matrix
 
-| Capability | Employee | Admin |
-| ---------- | -------- | ----- |
-| Desk Availability / book | ✓ | ✓ (personal booking) |
-| My Bookings | ✓ | ✓ (personal bookings) |
-| Notification settings | ✓ | ✓ |
-| All Bookings (admin view) | ✗ | ✓ |
-| Manage desks | ✗ | ✓ |
-| Manage users | ✗ | ✓ |
+
+| Capability                | Employee | Admin                 |
+| ------------------------- | -------- | --------------------- |
+| Desk Availability / book  | ✓        | ✓ (personal booking)  |
+| My Bookings               | ✓        | ✓ (personal bookings) |
+| Notification settings     | ✓        | ✓                     |
+| All Bookings (admin view) | ✗        | ✓                     |
+| Manage desks              | ✗        | ✓                     |
+| Manage users              | ✗        | ✓                     |
+
 
 Employee-facing controllers use `[Authorize(Roles = "Employee,Admin")]` so Admins can book for themselves.
 
@@ -382,22 +416,24 @@ Employee-facing controllers use `[Authorize(Roles = "Employee,Admin")]` so Admin
 ## 9. Web UI specification
 
 **Host (dev):** `http://localhost:5198`  
-**Framework:** ASP.NET Core MVC, Razor views, Bootstrap 5, custom CSS (`wwwroot/css/site.css`)
+**Framework:** ASP.NET Core MVC, Razor views, Bootstrap 5, custom CSS (`wwwroot/css/site.css`, `wwwroot/css/edbs.css`)
 
 ### 9.1 Routes and screens
 
-| Route | Controller | Screen | Roles |
-| ----- | ---------- | ------ | ----- |
-| `/Account/Login` | `AccountController` | Sign in | Anonymous |
-| `/Desks/Availability` | `DesksController` | Desk Availability (SCR-002) | Employee, Admin |
-| `/Desks/Book` | `DesksController` | Book desk (GET — creates booking, redirects) | Employee, Admin |
-| `/MyBookings` | `MyBookingsController` | My Bookings (SCR-003) | Employee, Admin |
-| `/Settings/Notifications` | `NotificationSettingsController` | Push settings (SCR-007) | Employee, Admin |
-| `/Admin/AdminBookings` | `AdminBookingsController` | All Bookings (SCR-004) | Admin |
-| `/Admin/AdminDesks` | `AdminDesksController` | Manage desks — number, location, status (SCR-005) | Admin |
-| `/Admin/AdminUsers` | `AdminUsersController` | Manage users (SCR-006) | Admin |
-| `/Admin/AdminUsers/ResetPassword` | `AdminUsersController` | Reset password form (new + confirm) | Admin |
-| `POST /Admin/AdminUsers/Activate` | `AdminUsersController` | Reactivate deactivated user (Web only) | Admin |
+
+| Route                             | Controller                       | Screen                                            | Roles           |
+| --------------------------------- | -------------------------------- | ------------------------------------------------- | --------------- |
+| `/Account/Login`                  | `AccountController`              | Sign in                                           | Anonymous       |
+| `/Desks/Availability`             | `DesksController`                | Desk Availability (SCR-002)                       | Employee, Admin |
+| `/Desks/Book`                     | `DesksController`                | Book desk (GET — creates booking, redirects)      | Employee, Admin |
+| `/MyBookings`                     | `MyBookingsController`           | My Bookings (SCR-003)                             | Employee, Admin |
+| `/Settings/Notifications`         | `NotificationSettingsController` | Push settings (SCR-007)                           | Employee, Admin |
+| `/Admin/AdminBookings`            | `AdminBookingsController`        | All Bookings (SCR-004)                            | Admin           |
+| `/Admin/AdminDesks`               | `AdminDesksController`           | Manage desks — number, location, status (SCR-005) | Admin           |
+| `/Admin/AdminUsers`               | `AdminUsersController`           | Manage users (SCR-006)                            | Admin           |
+| `/Admin/AdminUsers/ResetPassword` | `AdminUsersController`           | Reset password form (new + confirm)               | Admin           |
+| `POST /Admin/AdminUsers/Activate` | `AdminUsersController`           | Reactivate deactivated user (Web only)            | Admin           |
+
 
 ### 9.2 Navigation
 
@@ -409,15 +445,17 @@ Employee-facing nav links use `asp-area=""` so they resolve to root routes (`/De
 
 ### 9.3 Key UI behaviours
 
-| Feature | Behaviour |
-| ------- | --------- |
-| Book desk | Select date → check availability → book available desk |
-| Change desk | Cancel existing booking, then book another (no in-place swap) |
-| Manage desks | Add/edit desk number and location; activate/deactivate |
-| Reset password | Dedicated page; Admin enters **new password** + **confirm password**; must match; password not emailed (REQ-021, BR-001.12) |
-| Reactivate user | **Activate** action on Manage users (Web MVC only; not yet on REST API) |
-| Admin filters | All Bookings filterable by office date and status |
-| CSRF | Anti-forgery tokens on all MVC POST forms |
+
+| Feature         | Behaviour                                                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Book desk       | Select date → check availability → book available desk                                                                      |
+| Change desk     | Cancel existing booking, then book another (no in-place swap)                                                               |
+| Manage desks    | Add/edit desk number and location; activate/deactivate                                                                      |
+| Reset password  | Dedicated page; Admin enters **new password** + **confirm password**; must match; password not emailed (REQ-021, BR-001.12) |
+| Reactivate user | **Activate** action on Manage users (Web MVC only; not yet on REST API)                                                     |
+| Admin filters   | All Bookings filterable by office date and status                                                                           |
+| CSRF            | Anti-forgery tokens on all MVC POST forms                                                                                   |
+
 
 ---
 
@@ -428,78 +466,90 @@ Employee-facing nav links use `asp-area=""` so they resolve to root routes (`/De
 
 ### 10.1 Auth
 
-| Method | Route | Auth | Description |
-| ------ | ----- | ---- | ----------- |
-| POST | `/api/auth/login` | Anonymous | Returns JWT |
+
+| Method | Route             | Auth      | Description |
+| ------ | ----------------- | --------- | ----------- |
+| POST   | `/api/auth/login` | Anonymous | Returns JWT |
+
 
 ### 10.2 Bookings (Employee + Admin)
 
-| Method | Route | Description |
-| ------ | ----- | ----------- |
-| GET | `/api/bookings/availability?date=` | Desk availability for date |
-| POST | `/api/bookings` | Create booking |
-| GET | `/api/bookings/mine` | Current user's bookings |
-| POST | `/api/bookings/{id}/cancel` | Cancel own booking |
+
+| Method | Route                              | Description                |
+| ------ | ---------------------------------- | -------------------------- |
+| GET    | `/api/bookings/availability?date=` | Desk availability for date |
+| POST   | `/api/bookings`                    | Create booking             |
+| GET    | `/api/bookings/mine`               | Current user's bookings    |
+| POST   | `/api/bookings/{id}/cancel`        | Cancel own booking         |
+
 
 ### 10.3 Admin
 
-| Method | Route | Description |
-| ------ | ----- | ----------- |
-| GET | `/api/admin/bookings` | All bookings (optional date/status filters) |
-| POST | `/api/admin/bookings/{id}/cancel` | Admin cancel |
-| GET/POST | `/api/admin/desks` | List / create desks (with optional location) |
-| PUT | `/api/admin/desks/{id}` | Update desk number and location |
-| POST | `/api/admin/desks/{id}/deactivate` | Deactivate desk |
-| POST | `/api/admin/desks/{id}/activate` | Activate desk |
-| GET/POST | `/api/admin/users` | List / create users |
-| PUT | `/api/admin/users/{id}` | Update user |
-| POST | `/api/admin/users/{id}/deactivate` | Deactivate user |
-| POST | `/api/admin/users/{id}/reset-password` | Set new password (`{ "newPassword": "..." }`) |
+
+| Method   | Route                                  | Description                                   |
+| -------- | -------------------------------------- | --------------------------------------------- |
+| GET      | `/api/admin/bookings`                  | All bookings (optional date/status filters)   |
+| POST     | `/api/admin/bookings/{id}/cancel`      | Admin cancel                                  |
+| GET/POST | `/api/admin/desks`                     | List / create desks (with optional location)  |
+| PUT      | `/api/admin/desks/{id}`                | Update desk number and location               |
+| POST     | `/api/admin/desks/{id}/deactivate`     | Deactivate desk                               |
+| POST     | `/api/admin/desks/{id}/activate`       | Activate desk                                 |
+| GET/POST | `/api/admin/users`                     | List / create users                           |
+| PUT      | `/api/admin/users/{id}`                | Update user                                   |
+| POST     | `/api/admin/users/{id}/deactivate`     | Deactivate user                               |
+| POST     | `/api/admin/users/{id}/reset-password` | Set new password (`{ "newPassword": "..." }`) |
+
 
 > **Gap (as-built):** User **activate** (`REQ-028`) is implemented on Web MVC (`POST /Admin/AdminUsers/Activate`) but not yet exposed as a REST endpoint.
 
 ### 10.4 Notifications
 
-| Method | Route | Description |
-| ------ | ----- | ----------- |
-| GET | `/api/notifications/preferences` | Get push preferences |
-| PUT | `/api/notifications/preferences` | Update push opt-in |
-| POST | `/api/notifications/push-subscription` | Save Web Push subscription JSON |
+
+| Method | Route                                  | Description                     |
+| ------ | -------------------------------------- | ------------------------------- |
+| GET    | `/api/notifications/preferences`       | Get push preferences            |
+| PUT    | `/api/notifications/preferences`       | Update push opt-in              |
+| POST   | `/api/notifications/push-subscription` | Save Web Push subscription JSON |
+
 
 ### 10.5 HTTP status conventions
 
-| Code | Usage |
-| ---- | ----- |
-| 200/201 | Success |
-| 400 | Validation error |
-| 401/403 | Auth / authorization failure |
-| 404 | Resource not found |
-| 409 | Conflict (duplicate desk/email, booking concurrency) |
-| 422 | Domain rejection (invalid date, business rule) |
+
+| Code    | Usage                                                |
+| ------- | ---------------------------------------------------- |
+| 200/201 | Success                                              |
+| 400     | Validation error                                     |
+| 401/403 | Auth / authorization failure                         |
+| 404     | Resource not found                                   |
+| 409     | Conflict (duplicate desk/email, booking concurrency) |
+| 422     | Domain rejection (invalid date, business rule)       |
+
 
 ---
 
 ## 11. Business rules
 
-| ID | Rule | Enforcement |
-| -- | ---- | ----------- |
-| BR-001.1 | One confirmed booking per employee per date | DB filtered unique index + service |
-| BR-001.2 | Change desk = cancel then book | Application service |
-| BR-001.3 | Bookings only Mon–Fri | `IOfficeClock.IsWorkingDay` |
-| BR-001.4 | Unique desk numbers | DB unique index on normalized number |
-| BR-001.5 | Status lifecycle Confirmed → Cancelled or Completed | Service + completion job |
-| BR-001.6 | Cancel only today or future confirmed bookings | Service |
-| BR-001.7 | Inactive desks excluded from availability | Repository query |
-| BR-001.8 | Desk number uniqueness on create/edit | Service + DB |
-| BR-001.9 | Cannot deactivate desk with future confirmed bookings | `IDeskService` |
-| BR-001.10 | Unique email on user create/edit | Service + DB |
-| BR-001.11 | Cannot remove last active Admin | `IUserAdminService` |
+
+| ID        | Rule                                                               | Enforcement                                                            |
+| --------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------- |
+| BR-001.1  | One confirmed booking per employee per date                        | DB filtered unique index + service                                     |
+| BR-001.2  | Change desk = cancel then book                                     | Application service                                                    |
+| BR-001.3  | Bookings only Mon–Fri                                              | `IOfficeClock.IsWorkingDay`                                            |
+| BR-001.4  | Unique desk numbers                                                | DB unique index on normalized number                                   |
+| BR-001.5  | Status lifecycle Confirmed → Cancelled or Completed                | Service + completion job                                               |
+| BR-001.6  | Cancel only today or future confirmed bookings                     | Service                                                                |
+| BR-001.7  | Inactive desks excluded from availability                          | Repository query                                                       |
+| BR-001.8  | Desk number uniqueness on create/edit                              | Service + DB                                                           |
+| BR-001.9  | Cannot deactivate desk with future confirmed bookings              | `IDeskService`                                                         |
+| BR-001.10 | Unique email on user create/edit                                   | Service + DB                                                           |
+| BR-001.11 | Cannot remove last active Admin                                    | `IUserAdminService`                                                    |
 | BR-001.12 | Admin enters new + confirm password on dedicated page; not emailed | Web `ResetPassword` view + `POST /api/admin/users/{id}/reset-password` |
-| BR-001.13 | Mandatory booking emails (confirm, cancel) | `IBookingEmailService` |
-| BR-001.14 | One reminder email per booking | `BookingReminders` table + `ReminderEmailHostedService` |
-| BR-001.15 | Push opt-out by default | `NotificationPreferences.PushOptIn = false` |
-| BR-001.16 | No push for day-before reminders | Email only in reminder job |
-| BR-001.17 | Desk location stored or derived from desk-number prefix | `DeskLocationFormatter` |
+| BR-001.13 | Mandatory booking emails (confirm, cancel)                         | `IBookingEmailService`                                                 |
+| BR-001.14 | One reminder email per booking                                     | `BookingReminders` table + `ReminderEmailHostedService`                |
+| BR-001.15 | Push opt-out by default                                            | `NotificationPreferences.PushOptIn = false`                            |
+| BR-001.16 | No push for day-before reminders                                   | Email only in reminder job                                             |
+| BR-001.17 | Desk location stored or derived from desk-number prefix            | `DeskLocationFormatter`                                                |
+
 
 ### 11.1 Booking date validation
 
@@ -517,11 +567,13 @@ Minimum 8 characters with uppercase, lowercase, digit, and special character (BR
 
 ### 12.1 Email (MailKit)
 
-| Event | Trigger | Template |
-| ----- | ------- | -------- |
-| Confirmation | Booking created (Confirmed) | Desk + location + date via `FormatDeskWithLocation` |
-| Cancellation | Booking cancelled | Desk + location + date |
-| Reminder | Day before booking date | Desk + location + date; sent once per booking via idempotent job |
+
+| Event        | Trigger                     | Template                                                         |
+| ------------ | --------------------------- | ---------------------------------------------------------------- |
+| Confirmation | Booking created (Confirmed) | Desk + location + date via `FormatDeskWithLocation`              |
+| Cancellation | Booking cancelled           | Desk + location + date                                           |
+| Reminder     | Day before booking date     | Desk + location + date; sent once per booking via idempotent job |
+
 
 **Configuration:** `Email` / `Smtp` section in `appsettings.json`; optional `appsettings.Development.local.json` for credentials.
 
@@ -529,10 +581,12 @@ Minimum 8 characters with uppercase, lowercase, digit, and special character (BR
 
 ### 12.2 Browser push (WebPush)
 
-| Event | Trigger |
-| ----- | ------- |
-| Book confirmed | If user opted in and subscription stored; payload includes desk + location |
-| Booking cancelled | If user opted in; payload includes desk + location |
+
+| Event             | Trigger                                                                    |
+| ----------------- | -------------------------------------------------------------------------- |
+| Book confirmed    | If user opted in and subscription stored; payload includes desk + location |
+| Booking cancelled | If user opted in; payload includes desk + location                         |
+
 
 VAPID keys configured under `Push` section. Day-before reminders are **email only**.
 
@@ -540,10 +594,12 @@ VAPID keys configured under `Push` section. Day-before reminders are **email onl
 
 ## 13. Background jobs
 
-| Service | Schedule | Purpose |
-| ------- | -------- | ------- |
-| `CompletePastBookingsHostedService` | Daily ~00:05 office local | US-009: Confirmed → Completed |
-| `ReminderEmailHostedService` | Daily 08:00 office local (configurable) | US-007: day-before emails |
+
+| Service                             | Schedule                                | Purpose                       |
+| ----------------------------------- | --------------------------------------- | ----------------------------- |
+| `CompletePastBookingsHostedService` | Daily ~00:05 office local               | US-009: Confirmed → Completed |
+| `ReminderEmailHostedService`        | Daily 08:00 office local (configurable) | US-007: day-before emails     |
+
 
 Both use `IOfficeClock` / configured `Office:TimeZone`. Disabled in `Testing` environment.
 
@@ -553,14 +609,16 @@ Both use `IOfficeClock` / configured `Office:TimeZone`. Disabled in `Testing` en
 
 ### 14.1 Key settings (`appsettings.json`)
 
-| Section | Keys | Purpose |
-| ------- | ---- | ------- |
-| `ConnectionStrings:DefaultConnection` | SQL Server connection | Database |
-| `Office:TimeZone` | e.g. `India Standard Time` | Office-local dates |
-| `Email` | `Enabled`, SMTP host/port, `ReminderHourLocal` | Transactional email |
-| `ReminderJob` | `Enabled`, `RunAtLocalTime` | Reminder schedule |
-| `Push` | `PublicKey`, `PrivateKey`, `Subject` | Web Push VAPID |
-| `Jwt` (Api) | `Issuer`, `Audience`, `SigningKey` | API tokens |
+
+| Section                               | Keys                                           | Purpose             |
+| ------------------------------------- | ---------------------------------------------- | ------------------- |
+| `ConnectionStrings:DefaultConnection` | SQL Server connection                          | Database            |
+| `Office:TimeZone`                     | e.g. `India Standard Time`                     | Office-local dates  |
+| `Email`                               | `Enabled`, SMTP host/port, `ReminderHourLocal` | Transactional email |
+| `ReminderJob`                         | `Enabled`, `RunAtLocalTime`                    | Reminder schedule   |
+| `Push`                                | `PublicKey`, `PrivateKey`, `Subject`           | Web Push VAPID      |
+| `Jwt` (Api)                           | `Issuer`, `Audience`, `SigningKey`             | API tokens          |
+
 
 ### 14.2 Local development
 
@@ -585,15 +643,17 @@ Optional: `appsettings.Development.local.json` in Web or Api for SMTP credential
 
 ## 15. Security
 
-| Topic | Approach |
-| ----- | -------- |
-| Transport | HTTPS in non-development environments |
-| Password storage | ASP.NET Identity hasher — never plaintext in DB |
-| CSRF | Anti-forgery on MVC forms |
-| Session cookies | HttpOnly, SameSite=Strict |
-| Authorization | Role-based on controllers |
-| Secrets | User secrets / environment variables — not committed |
-| Logging | No passwords or tokens in logs |
+
+| Topic            | Approach                                             |
+| ---------------- | ---------------------------------------------------- |
+| Transport        | HTTPS in non-development environments                |
+| Password storage | ASP.NET Identity hasher — never plaintext in DB      |
+| CSRF             | Anti-forgery on MVC forms                            |
+| Session cookies  | HttpOnly, SameSite=Strict                            |
+| Authorization    | Role-based on controllers                            |
+| Secrets          | User secrets / environment variables — not committed |
+| Logging          | No passwords or tokens in logs                       |
+
 
 ---
 
@@ -601,15 +661,19 @@ Optional: `appsettings.Development.local.json` in Web or Api for SMTP credential
 
 **Project:** `tests/EmployeeDeskBooking.Tests`
 
-| Type | Examples |
-| ---- | -------- |
+
+| Type              | Examples                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
 | Integration (Web) | `SignInTests`, `BookDeskTests`, `AdminDesksTests`, `AdminUsersTests`, `AdminBookingsTests` (nav links) |
-| Integration (API) | `ApiBookingTests`, `ApiAdminDesksTests`, `ApiAuthTests`, `ApiAdminUsersTests` |
-| Unit | `DeskLocationHelperTests`, email template tests |
+| Integration (API) | `ApiBookingTests`, `ApiAdminDesksTests`, `ApiAuthTests`, `ApiAdminUsersTests`                          |
+| Unit              | `DeskLocationHelperTests`, email template tests                                                        |
+
 
 **Test database:** `EmployeeDeskBooking_Tests` (LocalDB, `Testing` environment)
 
-**Run:**
+**Delivery phase note:** The full as-built branch includes AC-linked xUnit tests and `*.ac.test.js` traceability companions. During the current scaffold delivery phase, individual story PRs may ship **without new automated AC tests** when the PO defers test authoring — see `ai/project-context.md` (Testing delivery phase). Before Gate 3 release, restore AC coverage per `ai/standards/testing-standards.md`.
+
+**Run (when tests are in scope for the branch):**
 
 ```bash
 dotnet test tests/EmployeeDeskBooking.Tests
@@ -620,10 +684,12 @@ node tools/aidlc-check.mjs   # AI-DLC gate check before PR
 
 ## 17. Deployment (high level)
 
-| Environment | Components |
-| ----------- | ---------- |
-| Development | LocalDB + Kestrel (`dotnet run`) |
-| Production | TBD (Gate 3) — Azure App Service or IIS + SQL Server; corporate SMTP |
+
+| Environment | Components                                                           |
+| ----------- | -------------------------------------------------------------------- |
+| Development | LocalDB + Kestrel (`dotnet run`)                                     |
+| Production  | TBD (Gate 3) — Azure App Service or IIS + SQL Server; corporate SMTP |
+
 
 Database migrations apply automatically on startup via `InitializeDatabaseAsync`.
 
@@ -631,57 +697,67 @@ Database migrations apply automatically on startup via `InitializeDatabaseAsync`
 
 ## 18. Feature traceability
 
-| Story | Feature | Status |
-| ----- | ------- | ------ |
-| US-001 | Sign in / sign out | Implemented |
-| US-002 | Book a desk | Implemented |
-| US-003 | My bookings | Implemented |
-| US-004 | Admin all bookings | Implemented |
-| US-005 | Manage desks (+ location add/edit) | Implemented |
-| US-006 | Manage users (+ reset password page, activate) | Implemented |
-| US-007 | Booking emails + reminders (+ location in templates) | Implemented |
-| US-008 | Browser push preferences (Employee + Admin) | Implemented |
-| US-009 | Auto-complete past bookings | Implemented |
 
-Detailed specs: [`inception/specs/`](../specs/index.md)
+| Story  | Feature                                              | Status      |
+| ------ | ---------------------------------------------------- | ----------- |
+| US-001 | Sign in / sign out                                   | Implemented |
+| US-002 | Book a desk                                          | Implemented |
+| US-003 | My bookings                                          | Implemented |
+| US-004 | Admin all bookings                                   | Implemented |
+| US-005 | Manage desks (+ location add/edit)                   | Implemented |
+| US-006 | Manage users (+ reset password page, activate)       | Implemented |
+| US-007 | Booking emails + reminders (+ location in templates) | Implemented |
+| US-008 | Browser push preferences (Employee + Admin)          | Implemented |
+| US-009 | Auto-complete past bookings                          | Implemented |
+
+
+Detailed specs: `[inception/specs/](../specs/index.md)`
 
 ---
 
 ## 19. Open items
 
-| # | Topic | Owner |
-| - | ----- | ----- |
-| 1 | Holiday calendar | PO/client |
-| 2 | Reminder send time confirmation | PO/client |
-| 3 | Mobile vs desktop responsive target | PO/client |
-| 4 | Production SMTP / sender identity | PO/IT |
-| 5 | Production hosting topology | DevOps (Gate 3) |
-| 6 | V-12 password complexity enforcement in all paths | PO/security |
-| 7 | REST API: `POST /api/admin/users/{id}/activate` | Backlog |
+
+| #   | Topic                                             | Owner           |
+| --- | ------------------------------------------------- | --------------- |
+| 1   | Holiday calendar                                  | PO/client       |
+| 2   | Reminder send time confirmation                   | PO/client       |
+| 3   | Mobile vs desktop responsive target               | PO/client       |
+| 4   | Production SMTP / sender identity                 | PO/IT           |
+| 5   | Production hosting topology                       | DevOps (Gate 3) |
+| 6   | V-12 password complexity enforcement in all paths | PO/security     |
+| 7   | REST API: `POST /api/admin/users/{id}/activate`   | Backlog         |
+
 
 ---
 
 ## 20. Document history
 
-| Version | Date | Author | Changes |
-| ------- | ---- | ------ | ------- |
-| 1.0 | 2026-08-23 | AI-DLC (as-built) | Initial TSD from implemented system |
-| 1.1 | 2026-08-24 | AI-DLC (as-built) | Added architecture diagrams (§2.4): system context, N-tier layers, booking flow |
-| 1.2 | 2026-08-24 | AI-DLC (as-built) | API-first topology: Web MVC → API → libraries (§2.4, §4.1, §8.1) |
-| 1.3 | 2026-08-24 | AI-DLC (as-built) | Aligned §2.4 with EDBS System Architecture diagram (Web → Api → Infrastructure → Domain) |
-| 1.4 | 2026-08-24 | AI-DLC (as-built) | Corrected topology: dual presentation hosts both reference Application + Infrastructure directly |
-| 1.5 | 2026-08-24 | AI-DLC (as-built) | Aligned to BRD/SRS v1.1: desk location (BR-001.17), Admin self-booking, reset-password page, user activate, five-desk seed, nav diagram, Web auth fix, API gap notes, dev workflow |
+
+| Version | Date       | Author            | Changes                                                                                                                                                                            |
+| ------- | ---------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1.0     | 2026-08-23 | AI-DLC (as-built) | Initial TSD from implemented system                                                                                                                                                |
+| 1.1     | 2026-08-24 | AI-DLC (as-built) | Added architecture diagrams (§2.4): system context, N-tier layers, booking flow                                                                                                    |
+| 1.2     | 2026-08-24 | AI-DLC (as-built) | API-first topology: Web MVC → API → libraries (§2.4, §4.1, §8.1)                                                                                                                   |
+| 1.3     | 2026-08-24 | AI-DLC (as-built) | Aligned §2.4 with EDBS System Architecture diagram (Web → Api → Infrastructure → Domain)                                                                                           |
+| 1.4     | 2026-08-24 | AI-DLC (as-built) | Corrected topology: dual presentation hosts both reference Application + Infrastructure directly                                                                                   |
+| 1.5     | 2026-08-24 | AI-DLC (as-built) | Aligned to BRD/SRS v1.1: desk location (BR-001.17), Admin self-booking, reset-password page, user activate, five-desk seed, nav diagram, Web auth fix, API gap notes, dev workflow |
+| 1.6     | 2026-08-24 | AI-DLC (as-built) | Synced companion docs: `edbs.css` in §9; delivery-phase testing note in §16                                                                                                        |
+
 
 ---
 
 ## Appendix A — Project references
 
-| Document | Path |
-| -------- | ---- |
+
+| Document              | Path                                                            |
+| --------------------- | --------------------------------------------------------------- |
 | Business requirements | `inception/product/requirements/BRD-001-desk-booking.md` (v1.1) |
 | Software requirements | `inception/product/requirements/SRS-001-desk-booking.md` (v1.1) |
-| App architecture | `inception/architecture/app-architecture.md` |
-| DB design | `inception/architecture/db-design.md` |
-| Screen specs | `inception/design/screens/` |
-| User stories | `inception/stories/user-stories/` |
-| Traceability manifest | `knowledge/traceability/manifest.json` |
+| App architecture      | `inception/architecture/app-architecture.md`                    |
+| DB design             | `inception/architecture/db-design.md`                           |
+| Screen specs          | `inception/design/screens/`                                     |
+| User stories          | `inception/stories/user-stories/`                               |
+| Traceability manifest | `knowledge/traceability/manifest.json`                          |
+
+

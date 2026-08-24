@@ -58,7 +58,7 @@ Api (REST) ──►  Application  ──►  Domain
 | No **layer skipping** from Web or Api | Presentation hosts must not query EF or SQL directly |
 | Business logic stays in Application | Web and Api are thin adapters |
 
-Background jobs (`IHostedService`) live in **Infrastructure** (registered by Api host) and invoke **Application** services — they do not bypass the Application tier.
+Background jobs (`IHostedService`) live in **Infrastructure** and invoke **Application** services — registered by whichever host calls `AddInfrastructure(..., enableReminderJob: true, enableCompletionJob: true)` (Web in typical dev; Api may also register them).
 
 ---
 
@@ -71,28 +71,31 @@ See [`technical-specification.md §2.4`](technical-specification.md) for the can
 │  Browser (MVC UI · Cookie)   API consumers (JWT)│
 └─────────┬─────────────────────────┬─────────────┘
           ▼                         ▼
-┌───────── Application Project ───────────────────┐
-│  EDBS.Web  ────── HTTP REST ─────►  EDBS.Api  │
-│  MVC·Razor·BS5 · sw.js              REST·Swagger│
-└───────────────────────────────┬───────────────┘
-                                ▼ Internal flow
-              EDBS.Infrastructure (+ EDBS.Application)
-              Services · EF Core · Auth · Notifications
-                                ▼
-                    EDBS.Domain · Entities · Enums
-                                ▼
-                    SQL Server (EDBS)
-              ┌─────────────────┴─────────────────┐
-              ▼                                   ▼
-        SMTP (email)                    FCM / Web Push
+┌───────── Presentation ────────────────────────┐
+│  EDBS.Web (MVC·Razor·BS5)   EDBS.Api (REST)  │
+│  sw.js · Push SW            Swagger           │
+└─────────┬───────────────────────┬─────────────┘
+          │                       │
+          └───────────┬───────────┘
+                      ▼ Internal flow
+          EDBS.Application + EDBS.Infrastructure
+                      │
+                      ▼
+          EDBS.Domain · Entities · Enums
+                      │
+                      ▼
+              SQL Server (EDBS)
+          ┌───────────┴───────────┐
+          ▼                       ▼
+    SMTP (email)          FCM / Web Push
 ```
 
 | Client | Auth | Entry host | Domain path |
 | ------ | ---- | ---------- | ----------- |
-| Browser | Cookie | `EmployeeDeskBooking.Web` | Web → **HTTP** → Api → Infrastructure |
-| API consumer | JWT Bearer | `EmployeeDeskBooking.Api` | Api → Infrastructure |
+| Browser | Cookie | `EmployeeDeskBooking.Web` | Web → Application → Infrastructure |
+| API consumer | JWT Bearer | `EmployeeDeskBooking.Api` | Api → Application → Infrastructure |
 
-Outbound email uses **MailKit (SMTP)**; browser push uses **WebPush (VAPID)**. Hosted jobs (`CompletePastBookings`, `ReminderEmail`) register on the **Api** host with Infrastructure.
+Outbound email uses **MailKit (SMTP)**; browser push uses **WebPush (VAPID)**. Hosted jobs register with Infrastructure on the host that enables them (typically Web for local dev).
 
 ---
 
@@ -104,8 +107,8 @@ src/
   EmployeeDeskBooking.Domain/           ← Domain tier
   EmployeeDeskBooking.Application/      ← Application tier
   EmployeeDeskBooking.Infrastructure/   ← Infrastructure tier (+ DI registration)
-  EmployeeDeskBooking.Web/              ← UI tier (MVC) — HTTP client to Api only
-  EmployeeDeskBooking.Api/              ← API gateway — registers Application + Infrastructure
+  EmployeeDeskBooking.Web/              ← Presentation (MVC) — registers Application + Infrastructure
+  EmployeeDeskBooking.Api/              ← Presentation (REST) — registers Application + Infrastructure
 tests/
   EmployeeDeskBooking.Tests/            Unit + integration tests
 tools/                                  aidlc-check, aidlc-jira, seed utilities
@@ -119,42 +122,41 @@ tools/                                  aidlc-check, aidlc-jira, seed utilities
 
 | Tier | Project | Owns | Must not |
 | ---- | ------- | ---- | -------- |
-| **UI** | `Web` | MVC + Razor + BS5, `sw.js` push service worker, cookie auth, typed Api HTTP client | Reference Application/Infrastructure, call `DbContext`, embed BR-001.* rules |
-| **Gateway** | `Api` | REST + Swagger, push subscribe API, JWT, DI for Application + Infrastructure + hosted jobs | Call `DbContext`, embed BR-001.* rules |
+| **Presentation (UI)** | `Web` | MVC + Razor + BS5, `sw.js` push service worker, cookie auth, injects Application services | Query `DbContext` or SQL directly; embed BR-001.* rules |
+| **Presentation (API)** | `Api` | REST + Swagger, push subscribe API, JWT, injects Application services | Query `DbContext` or SQL directly; embed BR-001.* rules |
 | **Application** | `Application` | `IBookingService`, `IAuthService`, DTOs, validators, `IOfficeClock`, BR-001.* | Reference EF, MailKit, or ASP.NET |
 | **Domain** | `Domain` | `User`, `Desk`, `Booking`, enums, domain exceptions | Reference any other project |
 | **Infrastructure** | `Infrastructure` | `AppDbContext`, EF migrations, repository implementations, MailKit, WebPush, `IHostedService` jobs | Expose data access to Presentation |
 
-Web is a **UI adapter** (browser → Api). Api is the **domain gateway** — it delegates to Application services; no duplicated business logic.
+Web and Api are **thin presentation adapters** — both delegate to Application services; business logic is not duplicated between hosts.
 
 ---
 
 ## Authentication and authorization
 
-### Web (US-001) — Cookie UI + Api client
+### Web (US-001) — Cookie session + Application services
 
 | Concern | Design |
 | ------- | ------ |
-| UI role | Razor views and browser cookie session only — **all domain calls go to Api** |
-| Sign-in | `AccountController.Login` POST → Web calls `POST /api/auth/login` → sets cookie + stores JWT for server-side Api calls |
-| Sign-out | `AccountController.Logout` POST — clear auth cookie and Api token |
+| Sign-in | `AccountController.Login` POST → `IAuthService.SignInAsync` → cookie session with role claim |
+| Sign-out | `AccountController.Logout` POST — clear auth cookie |
 | Cookie | ASP.NET Core Cookie Authentication middleware; `HttpOnly`, `Secure`, `SameSite=Strict` in prod (NFR-003) |
-| Routing after login | Employee → `Desks/Availability` (SCR-002); Admin → `Admin/AdminBookings` (SCR-004) — US-001 AC-01/02 |
-| Deactivated user | Api returns 403; Web shows SCR-001 ST-04 message (REQ-005) |
-| Generic error | Invalid credentials + deactivated use same message (V-01) |
+| Routing after login | Employee → `/Desks/Availability` (SCR-002); Admin → `/Admin/AdminBookings` (SCR-004) — US-001 AC-01/02 |
+| Deactivated user | Sign-in rejected with deactivated message (SCR-001 ST-04, REQ-005) |
+| Generic error | Invalid credentials use same message (V-01) |
 
-**Authorization:** `[Authorize(Roles = "Admin")]` on admin controllers/areas. MVC `[Authorize]` reflects cookie session established after successful Api login.
+**Authorization:** `[Authorize(Roles = "Employee,Admin")]` on employee flows; `[Authorize(Roles = "Admin")]` on Admin area. Employee-facing nav uses `asp-area=""` so routes resolve from Admin pages.
 
 ### API — JWT Bearer
 
 | Concern | Design |
 | ------- | ------ |
-| Token issue | `POST /api/auth/login` returns JWT (for API clients / AJAX if used) |
+| Token issue | `POST /api/auth/login` returns JWT |
 | Validation | JWT Bearer middleware on all `/api/*` except login |
-| Claims | `sub`, `email`, `role` (`Employee` \| `Admin`) |
+| Claims | `sub`, `email`, `name`, `role` (`Employee` \| `Admin`) |
 | Admin endpoints | `[Authorize(Roles = "Admin")]` on `/api/admin/*` |
 
-MVC is the primary UI; it consumes the same REST surface as external clients. JWT supports OpenAPI consumers, server-side Web→Api calls, and progressive enhancement (e.g. push subscription POST from Razor page JavaScript).
+JWT supports OpenAPI consumers and automated tests. Web MVC uses cookie auth and Application services directly (not HTTP to Api).
 
 ---
 
@@ -184,7 +186,7 @@ Raises domain events or calls `INotificationService` on confirm/cancel.
 
 ### Users — US-006
 
-- CRUD, deactivate, reset password (return plaintext once to Admin — BR-001.12), last-admin check (BR-001.11)
+- CRUD, deactivate, **reactivate** (Web MVC), reset password on dedicated page (new + confirm — BR-001.12), last-admin check (BR-001.11)
 - Hash new passwords with `IPasswordHasher<User>`
 
 ### Notifications — US-007, US-008
@@ -215,7 +217,7 @@ Base path: `/api`. Document with Swashbuckle at `/swagger`.
 
 HTTP status: `200/201` success, `400` validation, `401/403` auth, `409` booking conflict, `422` domain rejection.
 
-MVC actions may mirror these operations server-side without calling the HTTP API (direct Application layer) — keep Api in sync for contract tests.
+MVC controllers call Application services directly; keep Api routes in sync for OpenAPI consumers and integration tests.
 
 ---
 
@@ -226,12 +228,13 @@ Controllers and views map to approved screens. Apply navy/green tokens from `inc
 | Area / route | Screen | Role |
 | ------------ | ------ | ---- |
 | `/Account/Login` | SCR-001 | Anonymous |
-| `/Book` | SCR-002 | Employee |
-| `/MyBookings` | SCR-003 | Employee |
-| `/Admin/Bookings` | SCR-004 | Admin |
-| `/Admin/Desks` | SCR-005 | Admin |
-| `/Admin/Users` | SCR-006 | Admin |
-| `/Settings/Notifications` | SCR-007 | Employee |
+| `/Desks/Availability` | SCR-002 | Employee, Admin |
+| `/MyBookings` | SCR-003 | Employee, Admin |
+| `/Admin/AdminBookings` | SCR-004 | Admin |
+| `/Admin/AdminDesks` | SCR-005 | Admin |
+| `/Admin/AdminUsers` | SCR-006 | Admin |
+| `/Admin/AdminUsers/ResetPassword` | SCR-006 (reset) | Admin |
+| `/Settings/Notifications` | SCR-007 | Employee, Admin |
 
 Shared `_Layout.cshtml`: role-based nav (Employee vs Admin per wireframes). View models per ST-## states (loading, empty, error).
 
@@ -268,10 +271,10 @@ Use `TimeZoneInfo` with configured `Office:TimeZone`. Jobs idempotent and logged
 
 ### Employee books (US-002)
 
-1. MVC: `BookController` GET — date picker → `GetAvailabilityAsync`
-2. POST selected desk → `CreateBookingAsync` inside transaction
+1. MVC: `DesksController.Availability` GET — date picker → `GetAvailabilityAsync`
+2. GET `/Desks/Book?deskId=&date=` → `CreateBookingAsync` inside transaction
 3. On success → MailKit confirmation + optional WebPush
-4. Redirect to success view (SCR-002 ST-05)
+4. Re-render availability view with success banner (SCR-002 ST-05)
 
 ### Day-before reminder (US-007)
 
