@@ -1,28 +1,35 @@
-# Testing standards
+# Testing standards — Employee Desk Booking System
 
-## Levels & placement
+## Policy (current development phase)
 
-| Level                         | Tool                                         | Where                        |
-| ----------------------------- | -------------------------------------------- | ---------------------------- |
-| Unit                          | Vitest                                       | `*.spec.ts` next to the unit |
-| Integration (API modules, DB) | Vitest + Nest testing module                 | `apps/api/**/*.spec.ts`      |
-| API contract                  | Vitest (supertest-style) against running app | `apps/api`                   |
-| UI component                  | Vitest (vitest-angular)                      | `apps/ui/**/*.spec.ts`       |
-| Accessibility                 | story a11y notes + review checklist §5       | asserted in component tests  |
-| Performance                   | budget asserts citing the NFR (`NFR-###`)    | `*.spec.ts` next to the code |
+**Automated tests for user stories are not required right now.**
 
-Run via Nx only: `npm run test`, `npm run affected:test`.
+- DEV does **not** create or run unit/integration tests when implementing `US-###` stories.
+- Evidence for a story PR in this phase: **manual verification** (steps in the PR description) + human review — not `dotnet test` output tied to ACs.
+- Existing tests in `tests/EmployeeDeskBooking.Tests/` remain in the repo but are **not** expanded for new story delivery until this policy is lifted.
+- When the PO re-enables testing, restore the rules in §Target state below and use `feat/US-###-<slug>` delivery branches again.
 
-## Rules
+See also: `ai/project-context.md` §Delivery policy.
 
-- Test the **requirement**: every TC cites `US-### / AC-##`; tests assert observable behavior, not implementation internals
-- Per story: positive cases from AC, then negative, then boundary — all three classes or a written justification
-- Deterministic tests only — no sleeps/real network/wall-clock deps; use fakes and fixed seeds
-- Test names read as specs: `describe('RoutingService') → it('rejects shipment when no feasible route exists (US-003/AC-04)')`
-- A red test is a finding: never deleted, skipped, or loosened to pass. Fix code or (with BA/human approval) fix the requirement
-- Coverage: every AC ≥1 TC before a story is _done_; graph-engine algorithms additionally cover the documented edge cases
-- **The AC citation is a label, not the proof.** `aidlc-check` can only confirm an active test named `US-###/AC-##` exists and passes — an empty body would satisfy it. The proof is the assertion, so write the test first and watch it fail; a reviewer who can't see which assertion maps to the AC treats that as a finding
+## Stack (when tests are used)
 
-## Bug reports
+| Level | Tool | Where |
+| ----- | ---- | ----- |
+| Integration (Web) | xUnit + `WebApplicationFactory` | `tests/EmployeeDeskBooking.Tests/*Tests.cs` |
+| Integration (API) | xUnit + `CustomApiApplicationFactory` | `tests/EmployeeDeskBooking.Tests/Api*Tests.cs` |
+| Unit | xUnit | Next to helpers or in `tests/` |
 
-Reproducible or it doesn't exist: steps, expected (AC ref), actual, environment, severity. Filed to DEV; regression TC added on fix.
+Run: `dotnet test tests/EmployeeDeskBooking.Tests`
+
+## Target state (when story testing is re-enabled)
+
+- Test the **requirement**: every test cites `US-### / AC-##` in the name; assert observable behavior, not internals.
+- Per story: positive cases from AC, then negative, then boundary — or written justification.
+- Deterministic tests only — no sleeps, real SMTP, or wall-clock deps; use fakes and `Testing` environment.
+- Test names read as specs: `[Fact] public async Task Admin_can_add_desk_with_location_US_005_AC_03()`
+- A red test is a finding: never deleted, skipped, or loosened to pass.
+- `aidlc-check` verifies active tests cite each manifest AC on `feat/US-###-*` branches.
+
+## Bug reports (always)
+
+Reproducible or it doesn't exist: steps, expected (AC or issue ref), actual, environment. Regression tests on bug fixes are **recommended** but not mandatory in the current deferred-testing phase unless the PO says otherwise.
