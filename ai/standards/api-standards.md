@@ -1,11 +1,65 @@
 # API standards
 
-- All routes under `/api`; resources plural nouns (`/api/shipments`); actions as sub-resources when unavoidable (`/api/routing/optimize`)
-- Versioning: none for POC; breaking changes need an ADR
-- Requests/responses are DTO classes — introspected by the swagger plugin; the OpenAPI spec at `/api-docs-json` **is** the contract, and `libs/api/client` is generated from it (never hand-edited)
-- Validation at the edge: class-validator on every input DTO; whitelist + forbidNonWhitelisted (global pipe)
-- Status codes: `200` read, `201` create, `400` validation, `401/403` auth, `404` missing, `409` conflict, `422` domain rejection (e.g., no feasible route), `500` never intentional
-- Error body: global exception filter shape — consistent `{ statusCode, message, error }`; no stack traces or internals leaked
-- Pagination for unbounded collections: `?page&limit` with a documented max
-- Admin surface (`/api/admin/*`) always behind `x-admin-key` guard
-- Every endpoint change regenerates the OpenAPI snapshot and typed client (`npm run generate-client`) — `libs/api/client` is never hand-edited
+Applies to `EmployeeDeskBooking.Api`. The OpenAPI document at **`/swagger/v1/swagger.json`** (Swashbuckle) **is** the contract.
+
+## Routing
+
+- All routes under `/api`; lowercase path segments
+- Resources plural: `/api/bookings`, `/api/admin/users`, `/api/admin/desks`
+- Admin surface under `/api/admin/*` — always `[Authorize(Roles = "Admin")]`
+- Employee + admin shared routes: `[Authorize(Roles = "Employee,Admin")]`
+- Auth endpoints: `/api/auth/login`, `/api/auth/me`
+- Health: `/api/health`
+- Versioning: none for release 1; breaking changes need an ADR
+
+## Request and response shapes
+
+- Contract types live in `EmployeeDeskBooking.Api/Contracts/` — never expose Domain entities directly
+- Request bodies: explicit properties; use `[FromBody]`, `[FromQuery]`, `[FromRoute]` as appropriate
+- Responses: typed DTOs with `[ProducesResponseType]` on every action
+- Date fields: `DateOnly` for booking dates (office calendar days)
+- IDs: `Guid` for entity identifiers
+
+## Validation
+
+- Validate at the controller edge before calling Application services
+- Model binding failures → ASP.NET default `400` with validation problem details
+- Business-rule failures from Application → map to explicit status codes (see below)
+- Reject unknown or out-of-range inputs; do not silently coerce invalid dates or IDs
+
+## Status codes
+
+| Code | Use |
+| ---- | --- |
+| `200` | Successful read or update returning a body |
+| `201` | Resource created (`CreateBooking`, etc.) |
+| `204` | Successful action with no body (delete, cancel where applicable) |
+| `400` | Model binding / format errors |
+| `401` | Missing or invalid JWT |
+| `403` | Authenticated but wrong role |
+| `404` | Referenced desk, user, or booking not found |
+| `409` | Conflict (desk already booked, duplicate constraint) |
+| `422` | Domain rejection — invalid booking date, outside window, inactive desk |
+| `500` | Never intentional — unhandled exception |
+
+## Error body
+
+- Use `Problem()` / RFC 7807 `ProblemDetails` via `ControllerBase.Problem`
+- Include a short `title` and human-readable `detail`; no stack traces or connection strings in responses
+- Reuse message helpers where they exist (e.g. `BookingApiMessages`)
+
+## Auth
+
+- JWT Bearer on all endpoints except `/api/auth/login` and `/api/health`
+- Claims: user id, name, email, role — read via `ClaimTypes.NameIdentifier` / custom helpers in controllers
+- No API-key header pattern; admin is role-based JWT, not a separate key
+
+## Pagination and collections
+
+- Current release: bounded lists (bookings by date, desk inventory) — no cursor pagination required
+- If an unbounded collection is added later: document `page`/`pageSize` with a max and cite an ADR
+
+## Documentation
+
+- Every new or changed endpoint updates Swashbuckle-visible types and `[ProducesResponseType]` attributes
+- After API changes, verify `/swagger` reflects the new contract before merging
