@@ -4,7 +4,7 @@
 |                 |                                                                                                                        |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | **Document ID** | TSD-001                                                                                                                |
-| **Version**     | 1.0                                                                                                                    |
+| **Version**     | 1.7                                                                                                                    |
 | **Date**        | 2026-08-24                                                                                                             |
 | **Status**      | As-built — dual presentation hosts (Web + Api → shared Application/Infrastructure)                                     |
 | **Traces to**   | BRD-001 v1.1, SRS-001 v1.1, US-001 … US-009                                                                            |
@@ -308,42 +308,199 @@ Confirmed ──cancel──► Cancelled
 
 ## 6. Database design
 
-**Engine:** SQL Server  
-**Database (dev):** `EmployeeDeskBooking` on `(localdb)\mssqllocaldb`
+**Engine:** Microsoft SQL Server (LocalDB in development)  
+**ORM:** Entity Framework Core 8.0.11  
+**Database (dev):** `EmployeeDeskBooking` on `(localdb)\mssqllocaldb`  
+**Access layer:** `AppDbContext` and repositories in **Infrastructure** — Web and Api never query SQL directly  
+**Office timezone:** `Office:TimeZone` in configuration (default `India Standard Time`, NFR-001)
 
-### 6.1 Critical constraints
+> Full companion doc: [`db-design.md`](db-design.md). When this section and migrations disagree, **EF Core migrations win** (`src/EmployeeDeskBooking.Infrastructure/Data/Migrations/`).
 
+### 6.1 Overview
 
-| Rule                                        | Enforcement                                                                 |
-| ------------------------------------------- | --------------------------------------------------------------------------- |
-| One confirmed booking per employee per date | Filtered unique index on `(UserId, BookingDate)` WHERE `Status = Confirmed` |
-| One confirmed booking per desk per date     | Filtered unique index on `(DeskId, BookingDate)` WHERE `Status = Confirmed` |
-| Unique email (case-insensitive)             | Unique index on `EmailNormalized`                                           |
-| Unique desk number (case-insensitive)       | Unique index on `DeskNumberNormalized`                                      |
+Single-office desk booking: **users** book **desks** on **calendar dates** with a three-state lifecycle. Master data (users, desks) is admin-maintained. Notification preferences and delivery logs support email and optional browser push.
 
+```
+User 1──* Booking *──1 Desk
+User 1──0..1 NotificationPreference
+Booking 0──* EmailDeliveryLog (audit of send attempts)
+Booking 0──0..1 BookingReminder (idempotency for day-before email)
+```
 
-### 6.2 Migrations (applied order)
+```mermaid
+erDiagram
+    Users ||--o{ Bookings : "creates"
+    Desks ||--o{ Bookings : "reserved on"
+    Users ||--o| NotificationPreferences : "has"
+    Bookings ||--o{ EmailDeliveryLogs : "logged for"
+    Bookings ||--o| BookingReminders : "reminder sent"
+    Users ||--o{ Bookings : "cancelled by"
+```
 
+### 6.2 Tables and columns
 
-| Migration                    | Purpose                                  |
-| ---------------------------- | ---------------------------------------- |
-| `InitialUsers`               | Users table                              |
-| `AddDesksAndBookings`        | Desks, Bookings, filtered unique indexes |
-| `AddEmailNotifications`      | EmailDeliveryLogs                        |
-| `AddNotificationPreferences` | NotificationPreferences                  |
-| `AddDeskLocation`            | `Desks.Location` column                  |
+#### `Users`
 
+Employee or Admin who can sign in. (REQ-002, REQ-004, REQ-005, REQ-018–REQ-022)
 
-### 6.3 Seed data (`DbInitializer`)
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `Id` | `uniqueidentifier` | NO | PK; app-generated GUID |
+| `Email` | `nvarchar(320)` | NO | Display / login address |
+| `EmailNormalized` | `nvarchar(320)` | NO | Lowercase trim; **unique index** (BR-001.10) |
+| `Name` | `nvarchar(200)` | NO | Display name |
+| `PasswordHash` | `nvarchar(500)` | NO | `IPasswordHasher<User>` — never plaintext |
+| `Role` | `tinyint` | NO | `Employee` = 0, `Admin` = 1 (REQ-004) |
+| `IsActive` | `bit` | NO | Default `1`; `0` = deactivated (REQ-005, REQ-020) |
+| `CreatedAt` | `datetimeoffset` | NO | Audit |
+| `UpdatedAt` | `datetimeoffset` | NO | Audit |
 
+**Lifecycle:** Deactivate via `IsActive = 0`; no hard deletes (booking history). Last active Admin rule enforced in `IUserAdminService` (BR-001.11).
 
-| Item             | Default                                                                                              |
-| ---------------- | ---------------------------------------------------------------------------------------------------- |
-| Admin account    | `admin@trigent.com` / `Password1!`                                                                   |
-| Employee account | `vishal_h@trigent.com` / `Password1!`                                                                |
-| Default desks    | `A-01` … `A-05` (5 active desks)                                                                     |
-| Extra desks      | Removed on startup if no bookings; desks beyond default set deactivated if they have booking history |
+#### `Desks`
 
+Bookable workspace identified by a unique desk number. (REQ-007, REQ-015–REQ-017, BR-001.17)
+
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `Id` | `uniqueidentifier` | NO | PK |
+| `DeskNumber` | `nvarchar(32)` | NO | e.g. `A-01` |
+| `DeskNumberNormalized` | `nvarchar(32)` | NO | Uppercase trim; **unique index** (BR-001.4, BR-001.8) |
+| `Location` | `nvarchar(100)` | NO | Stored label; default `''` — UI derives from prefix when blank |
+| `Status` | `tinyint` | NO | `Active` = 0, `Inactive` = 1 (REQ-017) |
+| `CreatedAt` | `datetimeoffset` | NO | Audit |
+| `UpdatedAt` | `datetimeoffset` | NO | Audit |
+
+**Lifecycle:** Deactivate via `Status = Inactive` (BR-001.7); no deletes when bookings exist.
+
+#### `Bookings`
+
+One employee, one desk, one calendar date, one status. (REQ-008, REQ-009, BR-001.5)
+
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `Id` | `uniqueidentifier` | NO | PK |
+| `UserId` | `uniqueidentifier` | NO | FK → `Users.Id` |
+| `DeskId` | `uniqueidentifier` | NO | FK → `Desks.Id` |
+| `BookingDate` | `date` | NO | Office-local calendar date (NFR-001) |
+| `Status` | `tinyint` | NO | `Confirmed` = 0, `Cancelled` = 1, `Completed` = 2 |
+| `CancelledAt` | `datetimeoffset` | YES | When cancelled |
+| `CancelledById` | `uniqueidentifier` | YES | FK → `Users.Id` (self or admin) |
+| `CompletedAt` | `datetimeoffset` | YES | When completed |
+| `CreatedAt` | `datetimeoffset` | NO | Audit |
+| `UpdatedAt` | `datetimeoffset` | NO | Audit |
+
+**Lifecycle:**
+
+```
+Confirmed ──cancel──► Cancelled
+     │
+     └── (BookingDate < today, office local) ──► Completed
+```
+
+#### `NotificationPreferences`
+
+Browser push opt-in per user. (REQ-026, REQ-027, NFR-006)
+
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `UserId` | `uniqueidentifier` | NO | PK + FK → `Users.Id` |
+| `PushOptIn` | `bit` | NO | Default `0` (BR-001.15) |
+| `PushSubscription` | `nvarchar(max)` | YES | JSON Web Push subscription; NULL when opted out |
+| `UpdatedAt` | `datetimeoffset` | NO | Audit |
+
+#### `BookingReminders`
+
+Idempotency for day-before reminder emails. (REQ-025, BR-001.14)
+
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `BookingId` | `uniqueidentifier` | NO | PK + FK → `Bookings.Id` |
+| `SentAt` | `datetimeoffset` | NO | Successful send timestamp |
+| `CreatedAt` | `datetimeoffset` | NO | Audit |
+
+#### `EmailDeliveryLogs`
+
+Operational log for transactional email attempts. (NFR-005)
+
+| Column | SQL Server type | Null | Notes |
+| ------ | --------------- | ---- | ----- |
+| `Id` | `uniqueidentifier` | NO | PK |
+| `BookingId` | `uniqueidentifier` | YES | FK → `Bookings.Id` |
+| `UserId` | `uniqueidentifier` | YES | FK → `Users.Id` |
+| `EmailType` | `tinyint` | NO | Confirmation, Cancellation, Reminder |
+| `Recipient` | `nvarchar(320)` | NO | Address attempted |
+| `Status` | `tinyint` | NO | Sent, Failed |
+| `ErrorMessage` | `nvarchar(max)` | YES | Provider error (no secrets) |
+| `CreatedAt` | `datetimeoffset` | NO | Audit |
+
+### 6.3 Critical constraints and indexes
+
+| Rule | Enforcement |
+| ---- | ----------- |
+| One confirmed booking per employee per date (BR-001.1) | Filtered unique index on `(UserId, BookingDate)` WHERE `Status = 0` |
+| One confirmed booking per desk per date (V-04) | Filtered unique index on `(DeskId, BookingDate)` WHERE `Status = 0` |
+| Unique email (case-insensitive, BR-001.10) | Unique index on `Users.EmailNormalized` |
+| Unique desk number (case-insensitive, BR-001.8) | Unique index on `Desks.DeskNumberNormalized` |
+| Admin filters / my bookings | Non-unique indexes on `(BookingDate, Status)` and `(UserId, BookingDate)` |
+
+**Filtered unique indexes (as-built SQL):**
+
+```sql
+-- BR-001.1: one confirmed booking per employee per date
+CREATE UNIQUE INDEX IX_Bookings_UserId_BookingDate_Confirmed
+ON Bookings (UserId, BookingDate)
+WHERE Status = 0;
+
+-- V-04: one confirmed booking per desk per date
+CREATE UNIQUE INDEX IX_Bookings_DeskId_BookingDate_Confirmed
+ON Bookings (DeskId, BookingDate)
+WHERE Status = 0;
+```
+
+**Application-enforced rules** (not DB constraints): BR-001.6 cancel eligibility, BR-001.9 desk deactivate guard, BR-001.11 last active Admin.
+
+**Concurrent booking (RISK-004):** `CreateBookingAsync` runs inside an EF transaction; unique-index violation → `DbUpdateException` → HTTP 409 / MVC error state.
+
+### 6.4 EF Core mapping
+
+| Concern | Implementation |
+| ------- | -------------- |
+| Configurations | Fluent API in `UserConfiguration`, `DeskConfiguration`, `BookingConfiguration`, `NotificationConfigurations.cs` |
+| Filtered indexes | `HasIndex(...).HasFilter("[Status] = 0")` in `BookingConfiguration` |
+| Enums | Stored as `tinyint` via `.HasConversion<byte>()` |
+| Normalized columns | `EmailNormalized`, `DeskNumberNormalized` set in Application layer before persist |
+| Push subscription | JSON validated in Application before persist |
+| Connection string | `ConnectionStrings:DefaultConnection` in `appsettings.json` |
+
+**Add migration:**
+
+```bash
+dotnet ef migrations add <Name> \
+  --project src/EmployeeDeskBooking.Infrastructure \
+  --startup-project src/EmployeeDeskBooking.Web
+```
+
+### 6.5 Migrations (applied order)
+
+| Migration | Purpose |
+| --------- | ------- |
+| `InitialUsers` | `Users` table |
+| `AddDesksAndBookings` | `Desks`, `Bookings`, filtered unique indexes |
+| `AddEmailNotifications` | `EmailDeliveryLogs`, `BookingReminders` |
+| `AddNotificationPreferences` | `NotificationPreferences` |
+| `AddDeskLocation` | `Desks.Location` column |
+
+Migrations apply automatically on startup via `InitializeDatabaseAsync`.
+
+### 6.6 Seed data (`DbInitializer`)
+
+| Item | Default |
+| ---- | ------- |
+| Admin account | `admin@trigent.com` / `Password1!` |
+| Employee account | `vishal_h@trigent.com` / `Password1!` |
+| Default desks | `A-01` … `A-05` (5 active desks, locations derived when blank) |
+| Extra desks | Removed on startup if no bookings; desks beyond default set deactivated if they have booking history |
 
 Legacy sample users (`admin@company.com`, `employee@company.com`) are removed on startup.
 
@@ -743,6 +900,7 @@ Detailed specs: `[inception/specs/](../specs/index.md)`
 | 1.4     | 2026-08-24 | AI-DLC (as-built) | Corrected topology: dual presentation hosts both reference Application + Infrastructure directly                                                                                   |
 | 1.5     | 2026-08-24 | AI-DLC (as-built) | Aligned to BRD/SRS v1.1: desk location (BR-001.17), Admin self-booking, reset-password page, user activate, five-desk seed, nav diagram, Web auth fix, API gap notes, dev workflow |
 | 1.6     | 2026-08-24 | AI-DLC (as-built) | Synced companion docs: `edbs.css` in §9; delivery-phase testing note in §16                                                                                                        |
+| 1.7     | 2026-08-24 | AI-DLC (as-built) | Expanded §6 with full DB design: ER diagram, all tables/columns, indexes, EF mapping, migrations, seed data                                                                        |
 
 
 ---
