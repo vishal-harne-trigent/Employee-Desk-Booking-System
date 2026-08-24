@@ -6,7 +6,7 @@ once requirements are frozen and before any code exists. Two documents:
 | File | Contains |
 | ---- | -------- |
 | [`technical-specification.md`](technical-specification.md) | **Consolidated TSD** — stack, **EDBS System Architecture** diagram (§2.4), API, UI, data, config |
-| [`edbs-system-architecture.png`](edbs-system-architecture.png) | Visual architecture diagram (Web → Api → Infrastructure → Domain) |
+| [`edbs-system-architecture.png`](edbs-system-architecture.png) | Visual architecture diagram (logical tiers — see TSD §2.4 for as-built wiring) |
 | `db-design.md` | Entities, relationships, keys, constraints |
 | `app-architecture.md` | Layered architecture, services, flows, decisions |
 
@@ -49,10 +49,10 @@ PR. Tailor this README to your project; it is yours from here.
 
 | File | Status |
 | ---- | ------ |
-| [`technical-specification.md`](technical-specification.md) | **v1.3** — as-built TSD + EDBS System Architecture diagram, 2026-08-24 |
+| [`technical-specification.md`](technical-specification.md) | **v1.5** — as-built TSD + EDBS System Architecture diagram, 2026-08-24 |
 | [`db-design.md`](db-design.md) | Draft — EF Core / SQL Server, 2026-08-17 |
 | [`app-architecture.md`](app-architecture.md) | Draft — .NET 8 MVC + Web API, 2026-08-17 |
 
-**Style:** API-first layered architecture — **Web → Api → Infrastructure → Domain → SQL Server**
+**Style:** Layered architecture — **Web + Api → Application/Infrastructure → Domain → SQL Server**
 
 **Stack:** .NET 8 · ASP.NET Core MVC (Razor) · Web API · EF Core 8.0.11 · SQL Server · MailKit · WebPush
