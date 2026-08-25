@@ -1,0 +1,75 @@
+<!-- @dsCard group="Employee settings" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Notification Settings — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-007/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-007 / ST-01 — Default opt-out</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#">Desk Availability</a><a href="#" class="active">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>Notification settings</h2><p>Manage browser push alerts for booking confirmations and cancellations.</p></div>
+      <div class="card settings-section">
+        <h3 class="card-title">Email notifications</h3>
+        <p style="margin:0;color:var(--color-text-muted);font-size:0.875rem">Confirmation, cancellation, and day-before reminder emails are sent automatically to your account email.</p>
+      </div>
+      <div class="card settings-section">
+        <h3 class="card-title">Browser push (optional)</h3>
+        <p style="margin:0 0 0.85rem;color:var(--color-text-muted);font-size:0.875rem">Instant alerts when you confirm or cancel a booking. Reminders are email only.</p>
+        <p style="margin:0 0 0.85rem">Status: <span class="pill pill-booked">Disabled</span></p>
+        <div class="btn-row"><button type="button" class="btn btn-primary btn-sm">Enable push notifications</button></div>
+      </div>
+      <a class="link-action" href="#">← Back to my bookings</a>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-007/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-007 / ST-02 — Push enabled</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main">
+      <div class="page-head"><h2>Notification settings</h2></div>
+      <div class="card"><h3 class="card-title">Browser push (optional)</h3><p>Status: <span class="pill pill-confirmed">Enabled</span></p><div class="btn-row"><button type="button" class="btn btn-outline-accent btn-sm">Disable push notifications</button></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-007/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-007 / ST-03 — Browser unsupported</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main">
+      <div class="alert alert-info"><span>ℹ</span><span>Browser push is not available here. You will still receive booking emails.</span></div>
+      <button type="button" class="btn btn-primary btn-sm" disabled>Enable push notifications</button>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-007/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-007 / ST-04 — Error saving</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="alert alert-error">! Could not save preference. <button type="button" class="btn btn-primary btn-sm">Retry</button></div></div></div>
+</div>
+
+<!-- @state SCR-007/ST-05 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-007 / ST-05 — Loading</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main" aria-busy="true"><div class="skeleton skeleton-pulse"></div></div></div>
+</div>
+
+</body>
+</html>

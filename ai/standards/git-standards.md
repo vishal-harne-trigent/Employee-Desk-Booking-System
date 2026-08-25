@@ -10,7 +10,7 @@
 | Pipeline / CI                  | `ci/<slug>`                       |
 | Refactor / chore               | `refactor/<slug>`, `chore/<slug>` |
 
-Never commit directly to `main` — branch protection enforces it.
+Never commit directly to `main` — branch protection enforces it when configured.
 
 ## Commits — conventional commits + artifact IDs
 
@@ -20,15 +20,15 @@ Never commit directly to `main` — branch protection enforces it.
 - bullet per meaningful change
 ```
 
-Types: `feat fix docs test refactor ci chore perf`. Scope = Nx project or domain (`routing`, `ui`, `graph-engine`, `product`, `stories`...). The reference links the commit into traceability: `[US-###]` for story work, `[#12]` for issue-driven fixes, `[BRD-###]` for Gate 1 artifacts.
+Types: `feat` `fix` `docs` `test` `refactor` `ci` `chore` `perf`. Scope = project or domain (`web`, `api`, `application`, `infrastructure`, `domain`, `tests`, `product`, `stories`, …). The reference links the commit into traceability: `[US-###]` for story work, `[#12]` for issue-driven fixes, `[BRD-###]` for Gate 1 artifacts.
 
 Example:
 
 ```
-feat(routing): implement Dijkstra shortest path [US-002]
+feat(application): send day-before reminder email [US-007]
 
-- adjacency + feasibility pruning per ADR-001
-- tests for US-002/AC-01..AC-05 incl. disconnected-graph edge case
+- ReminderEmailService + BookingReminders idempotency
+- tests for US-007/AC-04 incl. weekend skip edge case
 ```
 
 ## PRs

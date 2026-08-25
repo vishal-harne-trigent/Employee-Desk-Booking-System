@@ -3,10 +3,12 @@
 The Architect's **Gate 1 deliverable**: the shape the whole build shares, written
 once requirements are frozen and before any code exists. Two documents:
 
-| File                 | Contains                                                                                     |
-| -------------------- | -------------------------------------------------------------------------------------------- |
-| `db-design.md`       | Entities, their relationships and cardinality, keys, the shape the data takes, and why        |
-| `app-architecture.md` | Services/modules, their boundaries, how they talk, where shared logic sits, and why           |
+| File | Contains |
+| ---- | -------- |
+| [`technical-specification.md`](technical-specification.md) | **Consolidated TSD** — stack, **EDBS System Architecture** diagram (§2.4), API, UI, data, config |
+| [`edbs-system-architecture.png`](edbs-system-architecture.png) | Visual architecture diagram (logical tiers — see TSD §2.4 for as-built wiring) |
+| `db-design.md` | Entities, relationships, keys, constraints |
+| `app-architecture.md` | Layered architecture, services, flows, decisions |
 
 ## What goes in `db-design.md`
 
@@ -42,3 +44,16 @@ once requirements are frozen and before any code exists. Two documents:
 
 Written by the Architect persona (`/architect`), landed through its own reviewed
 PR. Tailor this README to your project; it is yours from here.
+
+## Documents (EPIC-001)
+
+| File | Status |
+| ---- | ------ |
+| [`technical-specification.md`](technical-specification.md) | **v1.7** — as-built TSD + full DB design in §6, 2026-08-24 |
+| [`STORIES-001-desk-booking.md`](../stories/STORIES-001-desk-booking.md) | **v1.1** — consolidated user stories US-001 … US-009, 2026-08-24 |
+| [`db-design.md`](db-design.md) | Draft — EF Core / SQL Server, 2026-08-17 |
+| [`app-architecture.md`](app-architecture.md) | Draft — .NET 8 MVC + Web API, 2026-08-17 |
+
+**Style:** Layered architecture — **Web + Api → Application/Infrastructure → Domain → SQL Server**
+
+**Stack:** .NET 8 · ASP.NET Core MVC (Razor) · Web API · EF Core 8.0.11 · SQL Server · MailKit · WebPush

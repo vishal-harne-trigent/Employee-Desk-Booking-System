@@ -4,36 +4,36 @@
 
 | Requirement | Stories | AC proven | Status |
 |---|---|---|---|
-| REQ-001 | — | — | unscheduled |
-| REQ-002 | — | — | unscheduled |
-| REQ-003 | — | — | unscheduled |
-| REQ-004 | — | — | unscheduled |
-| REQ-005 | — | — | unscheduled |
-| REQ-006 | — | — | unscheduled |
-| REQ-007 | — | — | unscheduled |
-| REQ-008 | — | — | unscheduled |
-| REQ-009 | — | — | unscheduled |
-| REQ-010 | — | — | unscheduled |
-| REQ-011 | — | — | unscheduled |
-| REQ-012 | — | — | unscheduled |
-| REQ-013 | — | — | unscheduled |
-| REQ-014 | — | — | unscheduled |
-| REQ-015 | — | — | unscheduled |
-| REQ-016 | — | — | unscheduled |
-| REQ-017 | — | — | unscheduled |
-| REQ-018 | — | — | unscheduled |
-| REQ-019 | — | — | unscheduled |
-| REQ-020 | — | — | unscheduled |
-| REQ-021 | — | — | unscheduled |
-| REQ-022 | — | — | unscheduled |
-| REQ-023 | — | — | unscheduled |
-| REQ-024 | — | — | unscheduled |
-| REQ-025 | — | — | unscheduled |
-| REQ-026 | — | — | unscheduled |
-| REQ-027 | — | — | unscheduled |
-| NFR-001 | — | — | unscheduled |
-| NFR-002 | — | — | unscheduled |
-| NFR-003 | — | — | unscheduled |
-| NFR-004 | — | — | unscheduled |
-| NFR-005 | — | — | unscheduled |
-| NFR-006 | — | — | unscheduled |
+| REQ-001 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| REQ-002 | US-001 | 5/5 | delivered |
+| REQ-003 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| REQ-004 | US-001, US-005, US-006 | 17/17 | delivered |
+| REQ-005 | US-001, US-006 | 12/12 | delivered |
+| REQ-006 | US-002 | 6/6 | delivered |
+| REQ-007 | US-002 | 6/6 | delivered |
+| REQ-008 | US-002 | 6/6 | delivered |
+| REQ-009 | US-003, US-009 | 7/7 | delivered |
+| REQ-010 | US-003 | 4/4 | delivered |
+| REQ-011 | US-004, US-009 | 7/7 | delivered |
+| REQ-012 | US-004 | 4/4 | delivered |
+| REQ-013 | US-004, US-009 | 7/7 | delivered |
+| REQ-014 | US-004 | 4/4 | delivered |
+| REQ-015 | US-005 | 5/5 | delivered |
+| REQ-016 | US-005 | 5/5 | delivered |
+| REQ-017 | US-005 | 5/5 | delivered |
+| REQ-018 | US-006 | 7/7 | delivered |
+| REQ-019 | US-006 | 7/7 | delivered |
+| REQ-020 | US-006 | 7/7 | delivered |
+| REQ-021 | US-006 | 7/7 | delivered |
+| REQ-022 | US-006 | 7/7 | delivered |
+| REQ-023 | US-007 | 5/5 | delivered |
+| REQ-024 | US-007 | 5/5 | delivered |
+| REQ-025 | US-007 | 5/5 | delivered |
+| REQ-026 | US-008 | 5/5 | delivered |
+| REQ-027 | US-008 | 5/5 | delivered |
+| NFR-001 | US-002 | 6/6 | delivered |
+| NFR-002 | US-002 | 6/6 | delivered |
+| NFR-003 | US-001 | 5/5 | delivered |
+| NFR-004 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| NFR-005 | US-007 | 5/5 | delivered |
+| NFR-006 | US-008 | 5/5 | delivered |

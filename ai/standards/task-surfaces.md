@@ -1,48 +1,64 @@
 # Project task surfaces
 
-Extends [`ai/context/task-classification.md`](../context/task-classification.md) with the surfaces **this codebase** has. The framework file names the five boundaries every AI-DLC project shares; this one names them in our files and adds what our stack has that the generic list doesn't.
+Extends [`ai/context/task-classification.md`](../context/task-classification.md) with the surfaces **this codebase** has. The framework file names the five boundaries every AI-DLC project shares; this one names them in our files and adds what our stack has that the generic list does not.
 
 **This file is project-owned** — not in `ai/framework-lock.json`, so the team edits it freely. Two rules: you may **add** surfaces and **named** Medium carve-outs; you may **not** remove or demote a framework surface (open a `change-request` issue upstream instead).
-
-> **Seed — rewrite this.** The entries below describe the framework's own reference stack (Nx, NestJS, Angular). Replace them with yours on the first story; delete any section your project doesn't have.
 
 ## Protected paths — always Complex
 
 Any change under these is Complex regardless of diff size:
 
-- `libs/api/client/**` — generated from OpenAPI; never hand-edited
-- `apps/api/src/**/migrations/**` — schema history
+- `src/EmployeeDeskBooking.Infrastructure/Data/Migrations/**` — schema history
 - `.github/workflows/**`, `ai/framework-lock.json` — gate machinery
 - `inception/design/tokens.css` — the design system's single source
+- `knowledge/traceability/manifest.json` — traceability graph (edit in same PR as linked artifacts)
 
-## Backend (`apps/api`)
+## API (`src/EmployeeDeskBooking.Api`)
 
-**Complex** — a new controller route or a new `@Post/@Put/@Patch/@Delete`; a new or changed **required** DTO field; a new or changed TypeORM entity/column/migration; anything touching guards, strategies, or `@nestjs/config` validation; a new module registered in `AppModule`.
+**Complex** — a new controller or route; a new or changed **required** contract field; new JWT claim or auth policy; new `[Authorize]` role combination; Swagger-visible breaking change.
 
-**Medium** — a change inside an existing service; a new optional DTO field where the column exists; a new `@Get` reusing an existing entity and repository; a repository query rewrite with no migration.
+**Medium** — a change inside an existing controller action mapping; a new optional contract field where the Application layer already supports it; a new `[HttpGet]` reusing an existing service method with no schema change.
 
-## UI (`apps/ui`)
+## Application (`src/EmployeeDeskBooking.Application`)
 
-**Complex** — the inputs/outputs of a component in `shared/`; a new lazy route; a new service in `core/`; a new signal store or a change to shared state shape; token changes in `styles.scss`.
+**Complex** — a new public service interface; a changed business rule (`BR-001.*`) with cross-story impact; new failure reason enum value that changes API contracts.
 
-**Medium** — a change inside one `features/<name>/` component that keeps its inputs and outputs; a new component private to one feature; styling that uses existing tokens.
+**Medium** — internal refactor within one service; new repository method supporting an existing use case; email template wording change with no rule change.
 
-**Also Complex regardless of location:** rendering unsanitized input, or bypassing the generated API client with a raw `HttpClient` call.
+## Infrastructure (`src/EmployeeDeskBooking.Infrastructure`)
 
-## Scripts & jobs
+**Complex** — new or altered EF migration; new external integration (email provider, push); change to hosted job schedule, retry, or idempotency; new `IHostedService`.
 
-**Complex** — a new script under `tools/`; a change to a job's schedule, retry, or idempotency behavior; any script that reads or writes production data, holds a production credential, or performs a bulk/destructive operation (backfill, purge, re-index); a change to a script's CLI arguments or exit codes when something else calls it.
+**Medium** — repository query optimization with no migration; configuration binding change with same behavior; MailKit/WebPush internals with same public contract.
 
-**Medium** — internals of an existing script with the same schedule, inputs, outputs, and blast radius.
+## Web (`src/EmployeeDeskBooking.Web`)
+
+**Complex** — new area or top-level route; change to cookie auth configuration; shared layout or navigation affecting all roles; new admin screen with new server-side behavior.
+
+**Medium** — view or view-model change within one existing screen; CSS using existing tokens; Razor markup fix with no new Application calls.
+
+## Domain (`src/EmployeeDeskBooking.Domain`)
+
+**Complex** — new entity; new enum value that changes persisted data semantics; removed or renamed property on a persisted entity.
+
+**Medium** — new helper on an entity with no schema impact; documentation-only enum comment.
+
+## Scripts and jobs (`tools/`)
+
+**Complex** — a new script under `tools/`; a change to a job's schedule, retry, or idempotency behavior; any script that reads or writes production data, holds a production credential, or performs a bulk/destructive operation; a change to CLI arguments or exit codes when something else calls it.
+
+**Medium** — internals of an existing script (`SendTestEmail`, `RunReminderEmail`) with the same inputs, outputs, and blast radius.
+
+**Also Complex regardless of location:** rendering unsanitized user HTML in Razor, bypassing Application services to query `AppDbContext` from Web/Api controllers, or storing secrets in committed config.
 
 ## Medium carve-outs
 
 Work our stack over-tiers. Each must be *named* — a general "use judgement" clause is not a carve-out:
 
-- Adding a field to an existing DTO **and** its entity in the same PR, where the migration is generated (not hand-written) and the field is nullable — Medium, not Complex
-- A new `@Get` lookup endpoint following the existing read-only pattern, reusing entity + repository + response DTO — Medium
-- Nx generator output committed unmodified (a scaffolded module or component with no logic yet) — Medium
+- Adding a nullable column via EF migration **and** the corresponding optional contract field in the same PR — Medium, not Complex
+- A new `[HttpGet]` read endpoint following an existing controller pattern, reusing Application service + response DTO — Medium
+- `dotnet ef migrations add` output committed unmodified except for the intended schema change — Medium
 
-## Escalate, don't decide
+## Escalate, do not decide
 
-Surfaces where the persona stops and asks the human even at Medium: adding a dependency, changing anything under `env/`, and any migration that is not additive.
+Surfaces where the persona stops and asks the human even at Medium: adding a NuGet dependency, changing JWT signing keys or cookie policy, any migration that is not additive, and Web→Api refactor boundaries.

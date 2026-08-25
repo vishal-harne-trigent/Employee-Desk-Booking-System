@@ -1,0 +1,88 @@
+@model EmployeeDeskBooking.Web.Models.MyBookingsViewModel
+@using EmployeeDeskBooking.Domain.Bookings
+@{
+    ViewData["Title"] = "My Bookings";
+    Layout = "_Layout";
+}
+
+<div class="page-header">
+    <h1>My Bookings</h1>
+    <p class="text-muted">Review your desk bookings and cancel upcoming ones if your plans change.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success" role="status" aria-live="polite">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.EmailWarning))
+{
+    <div class="alert alert-warning" role="alert">@Model.EmailWarning</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-error" role="alert">@Model.ErrorMessage</div>
+}
+
+@if (Model.Bookings.Count == 0)
+{
+    <div class="page-card empty-state">
+        <p>You do not have any desk bookings yet.</p>
+        <a asp-controller="Desks" asp-action="Availability" class="btn btn-primary">Book a desk</a>
+        <p class="settings-link">
+            <a asp-controller="NotificationSettings" asp-action="Index">Notification settings</a>
+        </p>
+    </div>
+}
+else
+{
+    <div class="page-card desk-table-card">
+        <table class="desk-table bookings-table">
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Desk</th>
+                    <th scope="col">Location</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in Model.Bookings)
+                {
+                    <tr>
+                        <td>@booking.BookingDate.ToString("dd MMM yyyy")</td>
+                        <td>@booking.DeskNumber</td>
+                        <td>@booking.Location</td>
+                        <td>
+                            <span class="status-pill status-@booking.StatusLabel.ToLowerInvariant()">
+                                <span class="status-icon" aria-hidden="true">●</span>
+                                @booking.StatusLabel
+                            </span>
+                        </td>
+                        <td>
+                            @if (booking.CanCancel)
+                            {
+                                <form asp-action="Cancel" method="post" class="inline-form"
+                                      onsubmit="return confirm('Cancel booking for desk @booking.DeskNumber on @booking.BookingDate.ToString("dd MMM yyyy")?');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                    <button type="submit" class="btn btn-secondary btn-sm">Cancel</button>
+                                </form>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <p class="settings-link">
+        <a asp-controller="NotificationSettings" asp-action="Index">Notification settings</a>
+    </p>
+}

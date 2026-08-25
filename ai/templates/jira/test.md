@@ -1,5 +1,5 @@
 ---
-issuetype: Test
+issuetype: Subtask
 summary: '${STORY_ID}/${AC_ID} — ${AC_TITLE}'
 labels: [aidlc, test]
 parent: '${STORY_KEY}'
