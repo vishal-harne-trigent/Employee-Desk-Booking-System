@@ -12,8 +12,10 @@ public static class DbInitializer
 {
     public const string DefaultAdminEmail = "admin@trigent.com";
     public const string DefaultEmployeeEmail = "vishal_h@trigent.com";
+    public const string DefaultDeactivatedEmail = "deactivated@trigent.com";
     public const string DefaultEmployeeName = "Vishal Harne";
     public const string DefaultAdminName = "Super Admin";
+    public const string DefaultDeactivatedName = "Deactivated Employee";
     public const string DefaultPassword = "Password1!";
 
     public const int DefaultDeskCount = 5;
@@ -55,6 +57,8 @@ public static class DbInitializer
             UserRole.Admin,
             resetDefaultPasswordsInDevelopment,
             now);
+
+        await EnsureDeactivatedUserAsync(dbContext, passwordVerifier, now);
 
         await SeedDesksAsync(dbContext);
     }
@@ -129,6 +133,28 @@ public static class DbInitializer
             user.Name = name;
             user.PasswordHash = passwordVerifier.HashPassword(user, DefaultPassword);
             user.UpdatedAt = now;
+            await dbContext.SaveChangesAsync();
+        }
+    }
+
+    private static async Task EnsureDeactivatedUserAsync(
+        AppDbContext dbContext,
+        IPasswordVerifier passwordVerifier,
+        DateTimeOffset now)
+    {
+        var normalized = NormalizeEmail(DefaultDeactivatedEmail);
+        var user = await dbContext.Users.FirstOrDefaultAsync(u => u.EmailNormalized == normalized);
+
+        if (user is null)
+        {
+            dbContext.Users.Add(
+                CreateUser(
+                    DefaultDeactivatedEmail,
+                    DefaultDeactivatedName,
+                    UserRole.Employee,
+                    isActive: false,
+                    passwordVerifier,
+                    now));
             await dbContext.SaveChangesAsync();
         }
     }

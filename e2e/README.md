@@ -23,9 +23,16 @@ If `npm install` fails with an authentication error, your machine may be pointin
 # From e2e/ — starts Web on http://localhost:5198 if not already running
 npm test
 
-# UI mode
+# Watch the browser (headed — every test signs in through the login form)
+npm run test:headed
+
+# Or: $env:E2E_HEADED = "1"; npm test
+
+# Interactive Playwright UI
 npm run test:ui
 ```
+
+Every test signs in through **SCR-001** (email, password, Sign in button). Cookie injection and `storageState` are not used.
 
 Override base URL or accounts:
 
@@ -33,6 +40,7 @@ Override base URL or accounts:
 $env:E2E_BASE_URL = "http://localhost:5198"
 $env:E2E_EMPLOYEE_EMAIL = "vishal_h@trigent.com"
 $env:E2E_ADMIN_EMAIL = "admin@trigent.com"
+$env:E2E_DEACTIVATED_EMAIL = "deactivated@trigent.com"
 $env:E2E_PASSWORD = "Password1!"
 npm test
 ```
@@ -51,4 +59,4 @@ npm test
 
 ## Auth
 
-`src/seed.setup.ts` signs in employee + admin once and saves session cookies under `.auth/` (gitignored).
+Sign-in is performed in each test (or `beforeEach` for smoke specs) via `signInViaUi()` in `src/login.helpers.ts` — fill email, fill password, click **Sign in**, wait for redirect.
