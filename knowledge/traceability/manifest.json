@@ -329,7 +329,8 @@
         "tests/EmployeeDeskBooking.Tests/SignInTests.cs",
         "tests/EmployeeDeskBooking.Tests/SignInTests.ac.test.js",
         "tests/EmployeeDeskBooking.Tests/ApiAuthTests.cs",
-        "tests/EmployeeDeskBooking.Tests/ApiAuthTests.ac.test.js"
+        "tests/EmployeeDeskBooking.Tests/ApiAuthTests.ac.test.js",
+        "e2e/tests/login.spec.ts"
       ],
       "jira": "EDBS-38"
     },
