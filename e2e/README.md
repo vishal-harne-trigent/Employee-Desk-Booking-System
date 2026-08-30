@@ -20,12 +20,20 @@ If `npm install` fails with an authentication error, your machine may be pointin
 ## Run
 
 ```powershell
-# From e2e/ — starts Web on http://localhost:5198 if not already running
+# All e2e tests
 npm test
 
-# UI mode
+# US-001 sign-in story only
+npx playwright test us-001-sign-in.spec.ts
+
+# Watch the browser
+npm run test:headed
+
+# Interactive Playwright UI
 npm run test:ui
 ```
+
+US-001 tests sign in through **SCR-001** (email, password, Sign in) — no cookie injection.
 
 Override base URL or accounts:
 
@@ -33,6 +41,7 @@ Override base URL or accounts:
 $env:E2E_BASE_URL = "http://localhost:5198"
 $env:E2E_EMPLOYEE_EMAIL = "vishal_h@trigent.com"
 $env:E2E_ADMIN_EMAIL = "admin@trigent.com"
+$env:E2E_DEACTIVATED_EMAIL = "deactivated@trigent.com"
 $env:E2E_PASSWORD = "Password1!"
 npm test
 ```
@@ -51,4 +60,5 @@ npm test
 
 ## Auth
 
-`src/seed.setup.ts` signs in employee + admin once and saves session cookies under `.auth/` (gitignored).
+- **US-001** (`tests/us-001-sign-in.spec.ts`) — signs in via the login form in each test.
+- **Smoke** — `beforeEach` UI sign-in for authenticated navigation checks.
