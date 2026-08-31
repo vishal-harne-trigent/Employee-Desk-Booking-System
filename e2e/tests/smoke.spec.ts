@@ -10,17 +10,13 @@ test.beforeEach(async ({ page }, testInfo) => {
   }
 });
 
-test('authenticated employee can open Desk Availability', async ({ page }) => {
+test('employee lands on Desk Availability after sign-in (US-001/AC-01)', async ({ page }) => {
   await page.goto('/Desks/Availability');
   await expect(page).toHaveURL(/\/Desks\/Availability/);
   await expect(page.getByRole('heading', { name: 'Desk Availability' })).toBeVisible();
 });
 
-test('authenticated admin can open All Bookings', async ({ page }) => {
-  test.skip(
-    test.info().project.name !== 'admin-chromium',
-    'Admin session required',
-  );
+test('admin can open All Bookings (US-001/AC-02)', async ({ page }) => {
   await page.goto('/Admin/AdminBookings');
   await expect(page).toHaveURL(/\/Admin\/AdminBookings/);
 });

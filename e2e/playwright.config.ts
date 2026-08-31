@@ -43,11 +43,13 @@ export default defineConfig({
     {
       name: 'employee-chromium',
       testIgnore: /us-001-sign-in\.spec\.ts/,
+      grepInvert: /\(US-001\/AC-02\)/,
       use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'admin-chromium',
       testIgnore: /us-001-sign-in\.spec\.ts/,
+      grep: /\(US-001\/AC-02\)/,
       use: { ...devices['Desktop Chrome'] },
     },
   ],

@@ -3,7 +3,7 @@
 |             |                                                                  |
 | ----------- | ---------------------------------------------------------------- |
 | **Story**   | `inception/stories/user-stories/US-009-booking-completion.md` |
-| **Tier**    | Complex                                                          |
+| **Tier**    | Medium                                                           |
 | **Updated** | 2026-08-22                                                       |
 
 ## Surfaces crossed

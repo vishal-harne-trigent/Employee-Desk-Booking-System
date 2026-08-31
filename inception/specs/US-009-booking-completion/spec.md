@@ -1,34 +1,42 @@
-# US-009 — spec (delivery slice)
+# US-009 — Auto-complete past bookings
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| **Story** | `inception/stories/user-stories/US-009-booking-completion.md` |
-| **Tier**  | Complex                                                          |
+> Technical expansion of US-009. Story defines business need; this defines code behaviour.
 
-## Functional requirements in scope
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **Story**         | `inception/stories/user-stories/US-009-booking-completion.md`   |
+| **Traces to**     | REQ-009, REQ-011, REQ-013, BR-001.5, NFR-001                     |
+| **Screen**        | none                                                             |
+| **Covering ADRs** | none                                                             |
+| **Tier**          | Medium                                                           |
+| **Status**        | implemented                                                      |
+| **Updated**       | 2026-08-31                                                       |
 
-| ID      | Summary |
-| ------- | ------- |
-| REQ-009 | Employee booking lists show accurate status including **Completed** |
-| REQ-011 | Admin booking lists show accurate status |
-| REQ-013 | Admin status filter includes **Completed** after date passes |
+## Problem
 
-## Business rules in scope
+Confirmed bookings whose date is before today in office local timezone must transition to Completed when the completion job runs. Cancelled bookings are unchanged. Today's Confirmed bookings remain Confirmed until the date passes.
 
-| ID       | Summary |
-| -------- | ------- |
-| BR-001.5 | Confirmed → Completed after booking date passes (office local) |
+## Functional requirements
 
-## Acceptance criteria
+| ID    | Requirement | Priority | Serves | Status |
+| ----- | ----------- | -------- | ------ | ------ |
+| FR-01 | Past Confirmed bookings become Completed when job runs | Must | AC-01 | implemented |
+| FR-02 | Cancelled bookings remain Cancelled when job runs | Must | AC-02 | implemented |
+| FR-03 | Today's Confirmed bookings stay Confirmed until booking date passes | Must | AC-03 | implemented |
 
-| AC    | Summary |
-| ----- | ------- |
-| AC-01 | Past Confirmed bookings become Completed when job runs |
-| AC-02 | Cancelled bookings are unchanged |
-| AC-03 | Today's Confirmed bookings stay Confirmed |
+## Non-functional requirements
+
+| ID     | Requirement | Serves |
+| ------ | ----------- | ------ |
+| NFR-01 | Job uses office local timezone for date comparison | NFR-001 |
+
+## Technical constraints
+
+- `IBookingCompletionService.CompletePastBookingsAsync` callable from tests with frozen `IOfficeClock`
+- Daily `CompletePastBookingsHostedService` on Web; idempotent transitions
+- No new UI or API endpoints
 
 ## Out of scope
 
-- New UI or API endpoints
 - Notifications on completion
 - Cancelling Completed bookings (BR-001.6 — already enforced)

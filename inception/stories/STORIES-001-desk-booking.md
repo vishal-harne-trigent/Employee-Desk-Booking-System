@@ -71,14 +71,15 @@ flowchart TD
 
 ### 2.2 Delivery order (summary)
 
-See [`delivery-plan-EPIC-001.md`](delivery-plan-EPIC-001.md) for sprint hours and risks.
+See [`delivery-plan-EPIC-001.md`](delivery-plan-EPIC-001.md) for agent-runtime estimates, phases, and risks (single sprint — baseline 2026-08-27).
 
-| Sprint | Stories |
-| ------ | ------- |
-| 1 | US-001, US-002 |
-| 2 | US-003, US-009 |
-| 3 | US-004, US-005, US-006 |
-| 4 | US-007, US-008 |
+| Phase | Stories |
+| ----- | ------- |
+| A — Foundation | Architecture, CI |
+| B — Auth + booking | US-001, US-002 |
+| C — Employee | US-003, US-009 |
+| D — Admin | US-004, US-005, US-006 |
+| E — Notifications | US-007, US-008 |
 
 ---
 
