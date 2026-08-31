@@ -6,7 +6,7 @@
 | --------- | ---------------------------------------------------------------- |
 | **Story** | `inception/stories/user-stories/US-009-booking-completion.md` |
 | **Spec**  | `spec.md`                                                        |
-| **Tier**  | Complex                                                          |
+| **Tier**  | Medium                                                           |
 
 ## Approval — Gate D1
 
