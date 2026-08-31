@@ -6,7 +6,7 @@
 | --------- | ---------------------------------------------------------------- |
 | **Story** | `inception/stories/user-stories/US-005-manage-desks.md`         |
 | **Spec**  | `spec.md`                                                        |
-| **Tier**  | Medium                                                           |
+| **Tier**  | Complex                                                          |
 
 ## Approval — Gate D1
 

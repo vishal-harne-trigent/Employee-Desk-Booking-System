@@ -5,8 +5,8 @@
 |           |                                                                  |
 | --------- | ---------------------------------------------------------------- |
 | **Story** | `inception/stories/user-stories/US-002-book-desk.md`             |
-| **Spec**  | — (Medium tier; story + SCR-002 + architecture docs)             |
-| **Tier**  | Medium                                                           |
+| **Spec**  | `spec.md`                                                        |
+| **Tier**  | Complex                                                          |
 
 ## Approval — Gate D1
 

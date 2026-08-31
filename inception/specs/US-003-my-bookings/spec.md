@@ -1,32 +1,40 @@
-# US-003 — spec (delivery slice)
+# US-003 — My bookings
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| **Story** | `inception/stories/user-stories/US-003-my-bookings.md`           |
-| **Screen**| `inception/design/screens/SCR-003-my-bookings.md`                |
-| **Tier**  | Medium                                                           |
+> Technical expansion of US-003. Story defines business need; this defines code behaviour.
 
-## Functional requirements in scope
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **Story**         | `inception/stories/user-stories/US-003-my-bookings.md`           |
+| **Traces to**     | REQ-009, REQ-010, NFR-004, BR-001.5, BR-001.6                    |
+| **Screen**        | SCR-003                                                          |
+| **Covering ADRs** | none                                                             |
+| **Tier**          | Medium                                                           |
+| **Status**        | implemented                                                      |
+| **Updated**       | 2026-08-31                                                       |
 
-| ID      | Summary |
-| ------- | ------- |
-| REQ-009 | Employee lists all their bookings with date, desk, status |
-| REQ-010 | Employee cancels **Confirmed** booking for today or future |
+## Problem
 
-## Non-functional requirements in scope
+Employees need to see all their bookings with date, desk, and status, and cancel Confirmed bookings for today or future working days. Past and Completed bookings must not offer cancel.
 
-| ID      | Summary |
-| ------- | ------- |
-| NFR-004 | Employee-only access on my-bookings routes |
+## Functional requirements
 
-## Acceptance criteria
+| ID    | Requirement | Priority | Serves | Status |
+| ----- | ----------- | -------- | ------ | ------ |
+| FR-01 | Employee sees all their bookings with date, desk number, and status (Confirmed / Cancelled / Completed) | Must | AC-01 | implemented |
+| FR-02 | Cancelling a Confirmed booking dated today or future sets status to Cancelled | Must | AC-02 | implemented |
+| FR-03 | Past-dated or Completed bookings show no cancel action | Must | AC-03 | implemented |
+| FR-04 | Employee with no bookings sees empty state with link to Book Desk | Must | AC-04 | implemented |
 
-| AC    | Summary |
-| ----- | ------- |
-| AC-01 | List shows date, desk number, status (Confirmed / Cancelled / Completed) |
-| AC-02 | Cancel today/future Confirmed → Cancelled |
-| AC-03 | Past or Completed — no cancel action |
-| AC-04 | Empty state with link to Book Desk |
+## Non-functional requirements
+
+| ID     | Requirement | Serves |
+| ------ | ----------- | ------ |
+| NFR-01 | My bookings routes restricted to signed-in Employee role | NFR-004 |
+
+## Technical constraints
+
+- Reuses `IBookingService` from US-002 for list and cancel operations
+- Cancel uses same office-local date rules as booking (BR-001.6)
 
 ## Out of scope
 

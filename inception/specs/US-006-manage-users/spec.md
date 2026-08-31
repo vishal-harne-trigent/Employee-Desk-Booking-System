@@ -1,49 +1,46 @@
-# US-006 — spec (delivery slice)
+# US-006 — Manage users
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| **Story** | `inception/stories/user-stories/US-006-manage-users.md`         |
-| **Screen**| `inception/design/screens/SCR-006-manage-users.md`              |
-| **Tier**  | Medium                                                           |
+> Technical expansion of US-006. Story defines business need; this defines code behaviour.
 
-## Functional requirements in scope
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **Story**         | `inception/stories/user-stories/US-006-manage-users.md`          |
+| **Traces to**     | REQ-018, REQ-019, REQ-020, REQ-021, REQ-022, REQ-005, NFR-004, V-10, V-11 |
+| **Screen**        | SCR-006                                                          |
+| **Covering ADRs** | none                                                             |
+| **Tier**          | Complex                                                          |
+| **Status**        | implemented                                                      |
+| **Updated**       | 2026-08-31                                                       |
 
-| ID      | Summary |
-| ------- | ------- |
-| REQ-018 | Admin creates user with email, name, role, initial password |
-| REQ-019 | Admin edits user name and email (unique) |
-| REQ-020 | Admin deactivates user |
-| REQ-021 | Admin resets password; shown once to Admin |
-| REQ-022 | Admin changes user role (Employee ↔ Admin) |
-| REQ-005 | Deactivated user cannot sign in |
+## Problem
 
-## Non-functional requirements in scope
+Admins need to create users, edit name and email, deactivate accounts, reset passwords (shown once), and change roles. Deactivated users cannot sign in. The last active Admin cannot be deactivated or demoted.
 
-| ID      | Summary |
-| ------- | ------- |
-| NFR-004 | Admin-only access (V-07) |
+## Functional requirements
 
-## Validation rules in scope
+| ID    | Requirement | Priority | Serves | Status |
+| ----- | ----------- | -------- | ------ | ------ |
+| FR-01 | Admin creates user with email, name, role, and password; user can sign in | Must | AC-01 | implemented |
+| FR-02 | Duplicate email on create or edit returns validation error (V-10) | Must | AC-02 | implemented |
+| FR-03 | Admin edits user name and email | Must | AC-03 | implemented |
+| FR-04 | Deactivated user cannot sign in | Must | AC-04 | implemented |
+| FR-05 | Password reset generates new password shown once to Admin | Must | AC-05 | implemented |
+| FR-06 | Admin changes user role between Employee and Admin | Must | AC-06 | implemented |
+| FR-07 | Last active Admin cannot be deactivated or demoted (V-11) | Must | AC-07 | implemented |
 
-| ID    | Summary |
-| ----- | ------- |
-| V-10  | Duplicate email rejected on create/edit |
-| V-11  | Last active Admin cannot be deactivated or demoted |
+## Non-functional requirements
 
-## Acceptance criteria
+| ID     | Requirement | Serves |
+| ------ | ----------- | ------ |
+| NFR-01 | Manage users routes restricted to Admin role (V-07) | NFR-004 |
 
-| AC    | Summary |
-| ----- | ------- |
-| AC-01 | Create user → can sign in |
-| AC-02 | Duplicate email → validation error (V-10) |
-| AC-03 | Edit name and email |
-| AC-04 | Deactivate user → cannot sign in |
-| AC-05 | Reset password → one-time display to Admin |
-| AC-06 | Change role Employee ↔ Admin |
-| AC-07 | Block deactivate/demote of last active Admin (V-11, ST-09) |
+## Technical constraints
+
+- `IUserAdminService` in Application; reuses `IAuthService` deactivated check from US-001
+- Passwords hashed via same verifier as sign-in (NFR-003)
 
 ## Out of scope
 
-- Password complexity rule V-12 (TBD by PO/security) — use non-empty admin-set password on create; generated reset password uses secure random string
+- Password complexity rule V-12 (non-empty admin-set password on create)
 - First Admin bootstrap / installer seed
-- User reactivation (no AC — deactivate only)
+- User reactivation

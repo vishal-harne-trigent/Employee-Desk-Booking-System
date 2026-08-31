@@ -5,8 +5,8 @@
 |           |                                                                  |
 | --------- | ---------------------------------------------------------------- |
 | **Story** | `inception/stories/user-stories/US-001-sign-in.md`               |
-| **Spec**  | — (Medium tier; story + SCR-001 + architecture docs)             |
-| **Tier**  | Medium                                                           |
+| **Spec**  | `spec.md`                                                        |
+| **Tier**  | Complex                                                          |
 
 ## Approval — Gate D1
 
