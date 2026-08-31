@@ -62,3 +62,7 @@ npm test
 
 - **US-001** (`tests/us-001-sign-in.spec.ts`) — signs in via the login form in each test.
 - **Smoke** — `beforeEach` UI sign-in for authenticated navigation checks.
+
+## CI
+
+GitHub Actions (`.github/workflows/e2e.yml`) starts SQL Server 2022 in Docker and sets `ConnectionStrings__DefaultConnection` for the Web app — LocalDB is Windows-only and cannot run on `ubuntu-latest`.
