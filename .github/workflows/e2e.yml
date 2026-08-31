@@ -6,6 +6,20 @@ on:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: E2e_Sql_Pass1!
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P E2e_Sql_Pass1! -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+          --health-start-period 30s
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,3 +39,5 @@ jobs:
         run: npm test
         env:
           CI: true
+          ConnectionStrings__DefaultConnection: >-
+            Server=localhost,1433;Database=EmployeeDeskBooking;User Id=sa;Password=E2e_Sql_Pass1!;TrustServerCertificate=True;MultipleActiveResultSets=true

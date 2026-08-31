@@ -22,8 +22,10 @@ export default defineConfig({
   ],
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5198',
+    headless: process.env.E2E_HEADED !== '1',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    video: process.env.E2E_HEADED === '1' ? 'on' : 'off',
   },
   webServer: {
     command: `dotnet run --project "${webProject}" --launch-profile http`,
@@ -32,23 +34,23 @@ export default defineConfig({
     timeout: 180_000,
     cwd: repoRoot,
   },
-  globalSetup: path.join(__dirname, 'src', 'seed.setup.ts'),
   projects: [
     {
+      name: 'us-001-chromium',
+      testMatch: /us-001-sign-in\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
       name: 'employee-chromium',
+      testIgnore: /us-001-sign-in\.spec\.ts/,
       grepInvert: /\(US-001\/AC-02\)/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: path.join(__dirname, '.auth', 'employee.json'),
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
     {
       name: 'admin-chromium',
+      testIgnore: /us-001-sign-in\.spec\.ts/,
       grep: /\(US-001\/AC-02\)/,
-      use: {
-        ...devices['Desktop Chrome'],
-        storageState: path.join(__dirname, '.auth', 'admin.json'),
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 });
