@@ -36,6 +36,7 @@ export default defineConfig({
   projects: [
     {
       name: 'employee-chromium',
+      grepInvert: /\(US-001\/AC-02\)/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: path.join(__dirname, '.auth', 'employee.json'),
@@ -43,6 +44,7 @@ export default defineConfig({
     },
     {
       name: 'admin-chromium',
+      grep: /\(US-001\/AC-02\)/,
       use: {
         ...devices['Desktop Chrome'],
         storageState: path.join(__dirname, '.auth', 'admin.json'),

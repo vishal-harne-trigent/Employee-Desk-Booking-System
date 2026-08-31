@@ -1,45 +1,43 @@
-# US-008 — spec (delivery slice)
+# US-008 — Push notifications
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| **Story** | `inception/stories/user-stories/US-008-push-notifications.md` |
-| **Tier**  | Complex                                                          |
+> Technical expansion of US-008. Story defines business need; this defines code behaviour.
 
-## Functional requirements in scope
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **Story**         | `inception/stories/user-stories/US-008-push-notifications.md`   |
+| **Traces to**     | REQ-026, REQ-027, NFR-004, NFR-006, BR-001.15, BR-001.16, V-14 |
+| **Screen**        | SCR-007                                                          |
+| **Covering ADRs** | none                                                             |
+| **Tier**          | Complex                                                          |
+| **Status**        | implemented                                                      |
+| **Updated**       | 2026-08-31                                                       |
 
-| ID      | Summary |
-| ------- | ------- |
-| REQ-026 | Employee can opt in/out of browser push; default opt-out |
-| REQ-027 | Push on Confirmed (book) and Cancelled events when opted in |
+## Problem
 
-## Non-functional requirements in scope
+Employees may opt in to browser push notifications for book and cancel events; default is opt-out. Push is sent only when opted in and a subscription is stored. Reminder events send email only. Unsupported browsers degrade gracefully.
 
-| ID      | Summary |
-| ------- | ------- |
-| NFR-004 | Role-based access — settings for signed-in Employee |
-| NFR-006 | Graceful degradation when push unsupported or permission denied |
+## Functional requirements
 
-## Validation rules in scope
+| ID    | Requirement | Priority | Serves | Status |
+| ----- | ----------- | -------- | ------ | ------ |
+| FR-01 | Default opt-out — no push on book or cancel until user opts in | Must | AC-01 | implemented |
+| FR-02 | Opt in via Notification Settings saves preference when browser subscription is registered | Must | AC-02 | implemented |
+| FR-03 | Push delivered on Confirmed and Cancelled when opted in (includes admin cancel) | Must | AC-03 | implemented |
+| FR-04 | Opt out stops subsequent push; email behaviour unchanged | Must | AC-04 | implemented |
+| FR-05 | Day-before reminder sends email only — no push regardless of preference | Must | AC-05 | implemented |
 
-| ID    | Summary |
-| ----- | ------- |
-| V-14  | Push sent only when `PushOptIn` is true |
+## Non-functional requirements
 
-## Screen in scope
+| ID     | Requirement | Serves |
+| ------ | ----------- | ------ |
+| NFR-01 | Notification settings restricted to signed-in Employee | NFR-004 |
+| NFR-02 | Graceful degradation when push unsupported or permission denied | NFR-006 |
 
-| ID      | Summary |
-| ------- | ------- |
-| SCR-007 | Notification Settings — opt-in/out toggle, email info (read-only) |
+## Technical constraints
 
-## Acceptance criteria
-
-| AC    | Summary |
-| ----- | ------- |
-| AC-01 | Default opt-out — no push on book/cancel |
-| AC-02 | Opt in via settings saves preference when subscription registered |
-| AC-03 | Push on book and cancel when opted in (includes admin cancel) |
-| AC-04 | Opt out stops subsequent push; email unchanged |
-| AC-05 | Day-before reminder sends email only — no push |
+- WebPush (VAPID) via `WebPush` NuGet; `InMemoryPushNotificationSender` in tests
+- `NotificationPreferences` table stores `PushOptIn` and subscription JSON
+- Booking commits even if push send fails (parity with US-007 email)
 
 ## Out of scope
 

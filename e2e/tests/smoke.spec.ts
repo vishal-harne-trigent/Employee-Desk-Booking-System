@@ -9,10 +9,6 @@ test('employee lands on Desk Availability after sign-in (US-001/AC-01)', async (
 });
 
 test('admin can open All Bookings (US-001/AC-02)', async ({ page }) => {
-  test.skip(
-    test.info().project.name !== 'admin-chromium',
-    'Admin storage state required',
-  );
   await page.goto('/Admin/AdminBookings');
   await expect(page).toHaveURL(/\/Admin\/AdminBookings/);
 });

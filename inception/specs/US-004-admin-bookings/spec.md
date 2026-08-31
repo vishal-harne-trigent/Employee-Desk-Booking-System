@@ -1,34 +1,40 @@
-# US-004 — spec (delivery slice)
+# US-004 — Admin all bookings
 
-|           |                                                                  |
-| --------- | ---------------------------------------------------------------- |
-| **Story** | `inception/stories/user-stories/US-004-admin-bookings.md`        |
-| **Screen**| `inception/design/screens/SCR-004-admin-bookings.md`             |
-| **Tier**  | Medium                                                           |
+> Technical expansion of US-004. Story defines business need; this defines code behaviour.
 
-## Functional requirements in scope
+|                   |                                                                  |
+| ----------------- | ---------------------------------------------------------------- |
+| **Story**         | `inception/stories/user-stories/US-004-admin-bookings.md`        |
+| **Traces to**     | REQ-011, REQ-012, REQ-013, REQ-014, NFR-004, BR-001.6            |
+| **Screen**        | SCR-004                                                          |
+| **Covering ADRs** | none                                                             |
+| **Tier**          | Complex                                                          |
+| **Status**        | implemented                                                      |
+| **Updated**       | 2026-08-31                                                       |
 
-| ID      | Summary |
-| ------- | ------- |
-| REQ-011 | Admin views all employee bookings |
-| REQ-012 | Filter bookings by date |
-| REQ-013 | Filter bookings by status |
-| REQ-014 | Admin cancels Confirmed today/future booking on employee's behalf |
+## Problem
 
-## Non-functional requirements in scope
+Admins need to view all employee bookings with date, desk, employee, and status; filter by date and status; and cancel Confirmed bookings on an employee's behalf for today or future dates.
 
-| ID      | Summary |
-| ------- | ------- |
-| NFR-004 | Admin-only access (V-07) |
+## Functional requirements
 
-## Acceptance criteria
+| ID    | Requirement | Priority | Serves | Status |
+| ----- | ----------- | -------- | ------ | ------ |
+| FR-01 | Admin sees all bookings with date, desk, employee, and status | Must | AC-01 | implemented |
+| FR-02 | Date filter narrows the booking list | Must | AC-02 | implemented |
+| FR-03 | Status filter (Confirmed / Cancelled / Completed) narrows the list | Must | AC-03 | implemented |
+| FR-04 | Admin cancel of Confirmed today/future booking sets status to Cancelled | Must | AC-04 | implemented |
 
-| AC    | Summary |
-| ----- | ------- |
-| AC-01 | All bookings listed with date, desk, employee, status |
-| AC-02 | Date filter narrows results |
-| AC-03 | Status filter narrows results |
-| AC-04 | Admin cancel → Cancelled |
+## Non-functional requirements
+
+| ID     | Requirement | Serves |
+| ------ | ----------- | ------ |
+| NFR-01 | Admin all-bookings routes restricted to Admin role (V-07) | NFR-004 |
+
+## Technical constraints
+
+- Admin area MVC + matching Api controllers share `IBookingService`
+- Same cancel date rules as employee cancel (BR-001.6)
 
 ## Out of scope
 

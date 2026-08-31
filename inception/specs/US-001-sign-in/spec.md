@@ -8,9 +8,9 @@
 | **Traces to**     | REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, NFR-003, NFR-004    |
 | **Screen**        | SCR-001                                                          |
 | **Covering ADRs** | none                                                             |
-| **Tier**          | Medium                                                           |
+| **Tier**          | Complex                                                          |
 | **Status**        | implemented                                                      |
-| **Updated**       | 2026-08-21                                                       |
+| **Updated**       | 2026-08-31                                                       |
 
 ## Problem
 
@@ -31,6 +31,7 @@ The scaffold has no authentication. Users must sign in with email and password, 
 | ID     | Requirement | Serves |
 | ------ | ----------- | ------ |
 | NFR-01 | Passwords hashed via `IPasswordHasher<User>`; never logged | NFR-003 |
+| NFR-02 | Employee and Admin routes enforce role-based access | NFR-004 |
 
 ## Technical constraints
 

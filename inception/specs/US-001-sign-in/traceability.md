@@ -3,18 +3,19 @@
 |             |                                                                  |
 | ----------- | ---------------------------------------------------------------- |
 | **Story**   | `inception/stories/user-stories/US-001-sign-in.md`               |
-| **Updated** | 2026-08-21                                                       |
+| **Updated** | 2026-08-31                                                       |
 
 ## Requirement to code
 
 | Req    | File | Symbol / location | Proven by | Status |
 | ------ | ---- | ----------------- | --------- | ------ |
-| FR-01  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | `RedirectToRoleHome` | `SignInTests.cs` | implemented |
-| FR-02  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | Admin branch | `SignInTests.cs` | implemented |
-| FR-03  | `src/EmployeeDeskBooking.Application/Auth/AuthService.cs` | `SignInAsync` | `SignInTests.cs` | implemented |
-| FR-04  | `src/EmployeeDeskBooking.Application/Auth/AuthService.cs` | `DeactivatedAccount` | `SignInTests.cs` | implemented |
-| FR-05  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | `Logout` | `SignInTests.cs` | implemented |
+| FR-01  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | `RedirectToRoleHome` | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
+| FR-02  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | Admin branch | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
+| FR-03  | `src/EmployeeDeskBooking.Application/Auth/AuthService.cs` | `SignInAsync` | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
+| FR-04  | `src/EmployeeDeskBooking.Application/Auth/AuthService.cs` | `DeactivatedAccount` | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
+| FR-05  | `src/EmployeeDeskBooking.Web/Controllers/AccountController.cs` | `Logout` | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
 | NFR-01 | `src/EmployeeDeskBooking.Infrastructure/Security/AspNetPasswordVerifier.cs` | `HashPassword` | — | implemented |
+| NFR-02 | `src/EmployeeDeskBooking.Web/Controllers/BookController.cs` | `[Authorize(Roles = Employee)]` | `tests/EmployeeDeskBooking.Tests/SignInTests.cs` | implemented |
 
 ## Key symbols
 
