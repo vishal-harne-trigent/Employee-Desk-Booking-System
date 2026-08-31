@@ -25,11 +25,11 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.HasIndex(booking => new { booking.UserId, booking.BookingDate })
             .IsUnique()
-            .HasFilter("[Status] = 0");
+            .HasFilter("Status = 0");
 
         builder.HasIndex(booking => new { booking.DeskId, booking.BookingDate })
             .IsUnique()
-            .HasFilter("[Status] = 0");
+            .HasFilter("Status = 0");
 
         builder.HasIndex(booking => new { booking.BookingDate, booking.Status });
         builder.HasIndex(booking => new { booking.UserId, booking.BookingDate });

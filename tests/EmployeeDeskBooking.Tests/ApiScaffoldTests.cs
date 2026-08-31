@@ -1,4 +1,5 @@
 using EmployeeDeskBooking.Api;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace EmployeeDeskBooking.Tests;
@@ -7,7 +8,8 @@ public class ApiScaffoldTests : IClassFixture<WebApplicationFactory<ApiAssemblyM
 {
     private readonly WebApplicationFactory<ApiAssemblyMarker> _factory;
 
-    public ApiScaffoldTests(WebApplicationFactory<ApiAssemblyMarker> factory) => _factory = factory;
+    public ApiScaffoldTests(WebApplicationFactory<ApiAssemblyMarker> factory) =>
+        _factory = factory.WithWebHostBuilder(builder => builder.UseEnvironment("Testing"));
 
     [Fact]
     public async Task Api_health_returns_ok()

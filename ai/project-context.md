@@ -21,7 +21,7 @@
 | Application | Clean Architecture services | `EmployeeDeskBooking.Application` |
 | Domain | Entities, enums, exceptions | `EmployeeDeskBooking.Domain` — no framework refs |
 | Infrastructure | EF Core 8, MailKit, WebPush, hosted jobs | `EmployeeDeskBooking.Infrastructure` |
-| Database | SQL Server (LocalDB in dev) | Connection string `DefaultConnection` |
+| Database | SQL Server (production) / **SQLite file** (Development default) | `Database:Provider` = `Sqlite` or `SqlServer`; dev DB at `data/employeedeskbooking.db` |
 | Tests | xUnit + `WebApplicationFactory` | `tests/EmployeeDeskBooking.Tests` |
 | CI | GitHub Actions | `.github/workflows/aidlc-check.yml` |
 | Issue tracking | Jira (convenience) | Keys `EDBS-###` in manifest; approval stays in GitHub |
@@ -80,7 +80,7 @@ See [`inception/architecture/technical-specification.md`](inception/architecture
 
 ## Run locally
 
-**Prerequisites:** .NET 8 SDK, SQL Server LocalDB (Windows) or LocalDB-compatible SQL Server.
+**Prerequisites:** .NET 8 SDK. **LocalDB is optional** — Development defaults to SQLite (`data/employeedeskbooking.db`). Set `Database:Provider` to `SqlServer` in `appsettings.Development.json` to use LocalDB instead.
 
 ```powershell
 # Restore and build
@@ -103,7 +103,9 @@ dotnet test EmployeeDeskBooking.sln
 - Local secrets (gitignored): `appsettings.Development.local.json` or user secrets id `EmployeeDeskBooking.Web-dev`
 - SMTP credentials: `Smtp:Username` / `Smtp:Password` (or `Email:*`); without credentials, use `Smtp:Mode` = `FileDrop`
 - Office timezone: `Office:TimeZone` (default `India Standard Time`)
-- Database is migrated and seeded on startup in Development (`InitializeDatabaseAsync`)
+- Database provider: `Database:Provider` — `Sqlite` (default in Development, no LocalDB) or `SqlServer` (LocalDB / SQL Server; uses EF migrations)
+- Database is migrated/created and seeded on startup in Development (`InitializeDatabaseAsync`)
+- **Rich dev dataset** (`Seed:RichDataset` in `appsettings.Development.json`, default `true`): inactive desk **B-99**, extra users, sample bookings (Confirmed/Cancelled/Completed), push opt-in for default employee. Skips sample bookings if any booking already exists — drop the DB to re-seed.
 
 **Dev utilities:**
 
