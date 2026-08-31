@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "defaultPassword": "Password123!",
+  "users": [
+    {
+      "email": "vishal_h@trigent.com",
+      "name": "Vishal Harne",
+      "role": "Employee",
+      "isActive": true
+    },
+    {
+      "email": "admin@trigent.com",
+      "name": "Super Admin",
+      "role": "Admin",
+      "isActive": true
+    },
+    {
+      "email": "employee2@trigent.com",
+      "name": "Priya Sharma",
+      "role": "Employee",
+      "isActive": true
+    },
+    {
+      "email": "deactivated@trigent.com",
+      "name": "Deactivated User",
+      "role": "Employee",
+      "isActive": false
+    }
+  ],
+  "desks": [
+    { "deskNumber": "A-01", "status": "Active" },
+    { "deskNumber": "A-02", "status": "Active" },
+    { "deskNumber": "A-03", "status": "Active" },
+    { "deskNumber": "A-04", "status": "Active" },
+    { "deskNumber": "A-05", "status": "Active" },
+    { "deskNumber": "B-99", "status": "Inactive" }
+  ],
+  "bookings": [
+    {
+      "userEmail": "vishal_h@trigent.com",
+      "deskNumber": "A-01",
+      "workingDayOffset": 0,
+      "status": "Confirmed"
+    },
+    {
+      "userEmail": "vishal_h@trigent.com",
+      "deskNumber": "A-02",
+      "workingDayOffset": 1,
+      "status": "Confirmed"
+    },
+    {
+      "userEmail": "employee2@trigent.com",
+      "deskNumber": "A-05",
+      "workingDayOffset": 2,
+      "status": "Confirmed"
+    },
+    {
+      "userEmail": "vishal_h@trigent.com",
+      "deskNumber": "A-03",
+      "workingDayOffset": -1,
+      "status": "Completed"
+    },
+    {
+      "userEmail": "vishal_h@trigent.com",
+      "deskNumber": "A-04",
+      "workingDayOffset": -2,
+      "status": "Cancelled"
+    }
+  ],
+  "notificationPreferences": [
+    {
+      "userEmail": "vishal_h@trigent.com",
+      "pushOptIn": true
+    }
+  ]
+}

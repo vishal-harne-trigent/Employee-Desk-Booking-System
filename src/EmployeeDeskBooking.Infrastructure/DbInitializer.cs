@@ -4,6 +4,8 @@ using EmployeeDeskBooking.Domain.Desks;
 using EmployeeDeskBooking.Domain.Users;
 using EmployeeDeskBooking.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using EmployeeDeskBooking.Infrastructure.Seed;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EmployeeDeskBooking.Infrastructure;
@@ -34,6 +36,40 @@ public static class DbInitializer
 
     public static async Task SeedAsync(IServiceProvider services, bool resetDefaultPasswordsInDevelopment)
     {
+        var configuration = services.GetRequiredService<IConfiguration>();
+        var mode = SeedOptions.ParseMode(configuration[$"{SeedOptions.SectionName}:Mode"]);
+
+        if (mode == SeedMode.None)
+        {
+            return;
+        }
+
+        if (mode == SeedMode.Json)
+        {
+            var replace = configuration.GetValue($"{SeedOptions.SectionName}:JsonReplaceExisting", false);
+            var onlyIfEmpty = configuration.GetValue($"{SeedOptions.SectionName}:JsonOnlyIfEmpty", false);
+
+            if (onlyIfEmpty && !replace)
+            {
+                var dbContext = services.GetRequiredService<AppDbContext>();
+                if (await dbContext.Users.AnyAsync())
+                {
+                    return;
+                }
+            }
+
+            await JsonDatasetSeeder.SeedAsync(
+                services,
+                resetDefaultPasswordsInDevelopment,
+                replaceExistingData: replace);
+            return;
+        }
+
+        await SeedMinimalAsync(services, resetDefaultPasswordsInDevelopment);
+    }
+
+    public static async Task SeedMinimalAsync(IServiceProvider services, bool resetDefaultPasswordsInDevelopment)
+    {
         var dbContext = services.GetRequiredService<AppDbContext>();
         var passwordVerifier = services.GetRequiredService<IPasswordVerifier>();
         var now = DateTimeOffset.UtcNow;
@@ -63,7 +99,7 @@ public static class DbInitializer
         await SeedDesksAsync(dbContext);
     }
 
-    private static async Task RemoveLegacySampleUsersAsync(AppDbContext dbContext)
+    internal static async Task RemoveLegacySampleUsersAsync(AppDbContext dbContext)
     {
         var normalizedEmails = LegacySampleUserEmails.Select(NormalizeEmail).ToList();
         var users = await dbContext.Users

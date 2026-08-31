@@ -24,7 +24,7 @@ public class AdminUsersTests(CustomWebApplicationFactory factory) : IClassFixtur
         var login = factory.CreateLoginTestClient();
         var loginResponse = await login.LoginAsync(email, TestPassword);
         Assert.Equal(302, (int)loginResponse.StatusCode);
-        Assert.StartsWith("/Book", loginResponse.Headers.Location?.OriginalString, StringComparison.Ordinal);
+        Assert.StartsWith("/Desks/Availability", loginResponse.Headers.Location?.OriginalString, StringComparison.Ordinal);
     }
 
     [Fact(DisplayName = "Admin cannot save duplicate email (US-006/AC-02)")]

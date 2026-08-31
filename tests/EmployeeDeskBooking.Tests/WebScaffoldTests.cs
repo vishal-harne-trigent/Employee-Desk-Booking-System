@@ -1,4 +1,5 @@
 using EmployeeDeskBooking.Web;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace EmployeeDeskBooking.Tests;
@@ -7,7 +8,8 @@ public class WebScaffoldTests : IClassFixture<WebApplicationFactory<WebAssemblyM
 {
     private readonly WebApplicationFactory<WebAssemblyMarker> _factory;
 
-    public WebScaffoldTests(WebApplicationFactory<WebAssemblyMarker> factory) => _factory = factory;
+    public WebScaffoldTests(WebApplicationFactory<WebAssemblyMarker> factory) =>
+        _factory = factory.WithWebHostBuilder(builder => builder.UseEnvironment("Testing"));
 
     [Fact]
     public async Task Web_home_returns_ok()
