@@ -7,6 +7,10 @@
 # Dev file-drop emails
 **/App_Data/sent-emails/
 
+# Local SQLite dev database
+data/*.db
+data/*.db-*
+
 bin/
 obj/
 .vs/

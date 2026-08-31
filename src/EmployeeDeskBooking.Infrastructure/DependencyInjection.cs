@@ -26,8 +26,8 @@ public static class DependencyInjection
         bool enableReminderJob = false,
         bool enableCompletionJob = false)
     {
-        services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContext<AppDbContext>((serviceProvider, options) =>
+            DatabaseBootstrap.ConfigureDbContext(options, serviceProvider.GetRequiredService<IConfiguration>()));
 
         services.AddScoped<IUserRepository, EfUserRepository>();
         services.AddScoped<IBookingRepository, EfBookingRepository>();
@@ -137,11 +137,18 @@ public static class DependencyInjection
         options.PrivateKey = vapid["PrivateKey"] ?? options.PrivateKey;
     }
 
-    public static async Task InitializeDatabaseAsync(IServiceProvider services, bool isDevelopment = false)
+    public static async Task InitializeDatabaseAsync(
+        IServiceProvider services,
+        bool isDevelopment = false,
+        bool runSeed = true)
     {
         using var scope = services.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.MigrateAsync();
-        await DbInitializer.SeedAsync(scope.ServiceProvider, isDevelopment);
+        var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+        await DatabaseBootstrap.InitializeAsync(dbContext, configuration);
+        if (runSeed)
+        {
+            await DbInitializer.SeedAsync(scope.ServiceProvider, isDevelopment);
+        }
     }
 }
