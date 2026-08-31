@@ -7,7 +7,7 @@
 | **Traces to**    | BRD-001, SRS-001                                                                 |
 | **Goal**         | Hybrid employees book desks; admins oversee bookings, desks, and users           |
 | **Stories**      | US-001 … US-009 ([`STORIES-001-desk-booking.md`](STORIES-001-desk-booking.md)) |
-| **Delivery plan**| `inception/stories/delivery-plan-EPIC-001.md` (locked 2026-08-17)                |
+| **Delivery plan**| `inception/stories/delivery-plan-EPIC-001.md` (locked 2026-08-27; single sprint) |
 
 ## Scope
 
@@ -19,10 +19,10 @@ Per BRD-001 §10 (SSO, self-service password reset, multi-office, weekend bookin
 
 ## Delivery order
 
-See **`delivery-plan-EPIC-001.md`** for sprint grouping, hours, and risks. Summary:
+See **`delivery-plan-EPIC-001.md`** for agent-runtime estimates, phases, and risks. Summary (single sprint — supersedes Sprints 0–4):
 
-1. **Sprint 0** — Foundation (architecture, CI, decisions) — fixed  
-2. **Sprint 1** — US-001, US-002  
-3. **Sprint 2** — US-003, US-009  
-4. **Sprint 3** — US-004, US-005, US-006  
-5. **Sprint 4** — US-007, US-008 (MVP complete)
+1. **Phase A** — Foundation (architecture, CI, exit criteria)  
+2. **Phase B** — US-001, US-002  
+3. **Phase C** — US-003, US-009  
+4. **Phase D** — US-004, US-005, US-006  
+5. **Phase E** — US-007, US-008 (MVP complete; ~21–31 h total agent runtime)
