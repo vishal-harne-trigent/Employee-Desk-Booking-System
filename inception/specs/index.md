@@ -4,15 +4,15 @@ Every development spec package in this repo. **Check here before creating a new 
 
 | Story | Feature | Tier | Status | Folder |
 | ----- | ------- | ---- | ------ | ------ |
-| US-001 | Sign in and sign out | Medium | implemented | [`US-001-sign-in/`](US-001-sign-in/) |
-| US-002 | Book a desk | Medium | implemented | [`US-002-book-desk/`](US-002-book-desk/) |
-| US-003 | View and cancel my bookings | Medium | implemented | [`US-003-my-bookings/`](US-003-my-bookings/) |
-| US-004 | Admin view and cancel all bookings | Medium | implemented | [`US-004-admin-bookings/`](US-004-admin-bookings/) |
-| US-005 | Admin manage desks | Medium | implemented | [`US-005-manage-desks/`](US-005-manage-desks/) |
-| US-006 | Admin manage users | Medium | implemented | [`US-006-manage-users/`](US-006-manage-users/) |
-| US-007 | Send booking email notifications | Complex | implemented | [`US-007-booking-emails/`](US-007-booking-emails/) |
-| US-008 | Browser push notification preferences | Complex | implemented | [`US-008-push-notifications/`](US-008-push-notifications/) |
-| US-009 | Complete past bookings automatically | Medium | implemented | [`US-009-booking-completion/`](US-009-booking-completion/) |
+| US-001 | Sign in and sign out | Complex | implemented | [`inception/specs/US-001-sign-in/`](US-001-sign-in/) |
+| US-002 | Book a desk | Complex | implemented | [`inception/specs/US-002-book-desk/`](US-002-book-desk/) |
+| US-003 | My bookings | Medium | implemented | [`inception/specs/US-003-my-bookings/`](US-003-my-bookings/) |
+| US-004 | Admin all bookings | Complex | implemented | [`inception/specs/US-004-admin-bookings/`](US-004-admin-bookings/) |
+| US-005 | Manage desks | Complex | implemented | [`inception/specs/US-005-manage-desks/`](US-005-manage-desks/) |
+| US-006 | Manage users | Complex | implemented | [`inception/specs/US-006-manage-users/`](US-006-manage-users/) |
+| US-007 | Booking email notifications | Complex | implemented | [`inception/specs/US-007-booking-emails/`](US-007-booking-emails/) |
+| US-008 | Push notifications | Complex | implemented | [`inception/specs/US-008-push-notifications/`](US-008-push-notifications/) |
+| US-009 | Auto-complete past bookings | Medium | implemented | [`inception/specs/US-009-booking-completion/`](US-009-booking-completion/) |
 
 ## How to update
 
