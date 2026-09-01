@@ -16,9 +16,13 @@ Sign in: `vishal_h@trigent.com` / `Password1!` or `admin@trigent.com` / `Passwor
 
 ---
 
-## Mode 1 — Daily development (database + dataset, data persists)
+## Mode 1 — Daily development (LocalDB + dataset, data persists)
 
-**Default** when you run with `Development` environment. Uses a **SQLite file** at `data/employeedeskbooking.db` — no LocalDB or SQL Server install required.
+**Default** when you run with `Development` environment. Uses **SQL Server LocalDB** (same as `develop`):
+
+```
+Server=(localdb)\mssqllocaldb;Database=EmployeeDeskBooking
+```
 
 - Bookings and changes **survive restarts**
 - `data/dataset.json` is loaded **only when the database is empty** (first run)
@@ -31,11 +35,13 @@ dotnet run --project src/EmployeeDeskBooking.Api
 
 Web: http://localhost:5198 — API: http://localhost:5285/swagger
 
+**Requires:** .NET 8 SDK + SQL Server LocalDB (Windows).
+
 ---
 
-## Mode 2 — Share / demo (no database install)
+## Mode 2 — Share / demo (dataset only, no database)
 
-For someone who only has .NET — **no LocalDB, no SQLite file to manage**. Uses in-memory storage loaded from `data/dataset.json` on each startup.
+For someone who only has .NET — **no LocalDB or SQL Server install**. Uses in-memory storage loaded from `data/dataset.json` on each startup.
 
 ```powershell
 dotnet run --project src/EmployeeDeskBooking.Web --launch-profile demo
@@ -55,7 +61,7 @@ SMTP, push notifications, and background jobs are disabled in Demo config.
 
 ---
 
-## Seed commands (reload or reset the SQLite file)
+## Seed commands (reload or reset LocalDB)
 
 ```powershell
 dotnet run --project tools/SeedDatabase -- json
@@ -64,21 +70,3 @@ dotnet run --project tools/SeedDatabase -- minimal
 dotnet run --project tools/SeedDatabase -- none
 dotnet run --project tools/SeedDatabase -- init
 ```
-
----
-
-## Optional — SQL Server / LocalDB
-
-In `appsettings.Development.json` (or a `.local` override):
-
-```json
-"Database": { "Provider": "SqlServer" },
-"Seed": {
-  "Mode": "Json",
-  "DatasetPath": "data/dataset.json",
-  "JsonOnlyIfEmpty": true,
-  "JsonReplaceExisting": false
-}
-```
-
-Then run `dotnet run --project tools/SeedDatabase -- json --reset` once to load JSON into LocalDB.
