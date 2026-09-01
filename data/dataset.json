@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "defaultPassword": "Password123!",
+  "defaultPassword": "Password1!",
   "users": [
     {
       "email": "vishal_h@trigent.com",
