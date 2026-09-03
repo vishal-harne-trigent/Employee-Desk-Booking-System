@@ -5,7 +5,8 @@
 //   node tools/aidlc-jira.mjs --epic EPIC-001
 //   node tools/aidlc-jira.mjs --bug 12                 from a GitHub `bug` issue
 //   node tools/aidlc-jira.mjs --change-request 12
-//   node tools/aidlc-jira.mjs --story US-003 --apply    actually write
+//   node tools/aidlc-jira.mjs --story US-003 --tests --report e2e/playwright-report.json
+//   node tools/aidlc-jira.mjs --story US-003 --tests --report e2e/playwright-report.json --run-url https://…
 //
 // Dry run is the DEFAULT and needs no credentials — so the exact text a client
 // will read is reviewable in a pull request before it reaches a live board.
@@ -20,6 +21,7 @@
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { coverageFromReport } from './aidlc-qa-coverage.mjs';
 
 // CRLF-normalized reads: Windows autocrlf checkouts must parse and compare like LF ones
 function read(p) {
@@ -646,7 +648,7 @@ function buildStory(us) {
   };
 }
 
-function buildTests(us, storyKey) {
+function buildTests(us, storyKey, reportOutcomes, ciRunUrl) {
   const mf = manifest();
   const entry = mf.stories[us];
   const { path, text } = storyFile(us);
@@ -661,6 +663,18 @@ function buildTests(us, storyKey) {
         `(?<![\\w.])(?:it|test)\\s*\\(\\s*[\`'"][^\`'"\\n]*${us}/${ac.id}`,
       ).test(c.text),
     );
+    const criterionKey = `${us}/${ac.id}`;
+    const fromReport = reportOutcomes?.get(criterionKey);
+    let result;
+    if (fromReport === 'pass') {
+      result = 'Pass';
+    } else if (fromReport === 'fail') {
+      result = 'Fail';
+    } else if (hit) {
+      result = 'Not yet run';
+    } else {
+      result = 'Not yet automated';
+    }
     const values = {
       STORY_ID: us,
       STORY_KEY: storyKey ?? '',
@@ -673,9 +687,8 @@ function buildTests(us, storyKey) {
           )?.[1] ?? `${us}/${ac.id}`)
         : '—',
       TEST_FILE: hit ? hit.file : '—',
-      // Never a pass we did not observe. No test at all is stated as such.
-      RESULT: hit ? 'Pass' : 'Not yet automated',
-      CI_RUN_URL: hit ? lastCiRun() : '—',
+      RESULT: result,
+      CI_RUN_URL: fromReport ? ciRunUrl ?? lastCiRun() : hit ? '—' : '—',
       ARTIFACT_URL: blobUrl(path),
     };
     return {
@@ -684,6 +697,21 @@ function buildTests(us, storyKey) {
       fields: render('test.md', values),
     };
   });
+}
+
+function loadReportOutcomes(reportPath) {
+  if (!reportPath || !existsSync(reportPath)) {
+    return null;
+  }
+  const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+  const doc = coverageFromReport(report, {
+    runUrl: flag('run-url') ?? lastCiRun(),
+  });
+  const map = new Map();
+  for (const row of doc.results) {
+    map.set(`${row.story}/${row.ac}`, row.outcome);
+  }
+  return map;
 }
 
 function lastCiRun() {
@@ -899,8 +927,12 @@ async function main() {
     id = flag('story');
     const s = buildStory(id);
     tickets.push(s);
-    if (WITH_TESTS)
-      tickets.push(...buildTests(id, manifest().stories[id]?.jira ?? ''));
+    if (WITH_TESTS) {
+      const reportPath = flag('report');
+      const outcomes = loadReportOutcomes(reportPath);
+      const ciRunUrl = flag('run-url') ?? lastCiRun();
+      tickets.push(...buildTests(id, manifest().stories[id]?.jira ?? '', outcomes, ciRunUrl));
+    }
   } else if (flag('epic')) {
     kind = 'epic';
     id = flag('epic');

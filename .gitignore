@@ -13,5 +13,6 @@ data/*.db-*
 
 bin/
 obj/
+node_modules/
 .vs/
 *.user

@@ -1,0 +1,8 @@
+{
+  "name": "@aidlc/tools",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "xmlrpc": "^1.3.2"
+  }
+}

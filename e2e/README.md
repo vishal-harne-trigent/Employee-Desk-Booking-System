@@ -58,6 +58,29 @@ npm test
 - HTML: `e2e/playwright-report/`
 - JSON (for `aidlc-qa-coverage.mjs`): `e2e/playwright-report.json`
 
+## Publish to TestLink + Jira
+
+After a run, push cases and pass/fail results to **TestLink**, then update **Jira** test tickets (see `ai/context/testlink-sync.md`):
+
+```powershell
+# Once: install tool dependencies
+cd tools && npm install && cd ..
+
+cd e2e && npm test && cd ..
+
+# Dry run (default)
+node tools/aidlc-testlink.mjs publish
+
+# Write to TestLink + Jira (needs .env credentials)
+node tools/aidlc-testlink.mjs publish --apply
+```
+
+Jira-only (no TestLink):
+
+```powershell
+node tools/aidlc-jira.mjs --story US-001 --tests --report e2e/playwright-report.json --apply
+```
+
 ## Auth
 
 - **US-001** (`tests/us-001-sign-in.spec.ts`) — signs in via the login form in each test.
