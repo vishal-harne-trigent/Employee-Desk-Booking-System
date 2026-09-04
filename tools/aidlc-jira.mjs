@@ -1001,15 +1001,51 @@ async function jira(method, path, body) {
   return text ? JSON.parse(text) : {};
 }
 
-async function findExistingExact(summary) {
+async function jiraSearchJql(jql, maxResults = 5) {
+  if (API === 'v3') {
+    return jira('POST', '/rest/api/3/search/jql', {
+      jql,
+      maxResults,
+      fields: ['key', 'summary', 'issuetype', 'parent'],
+    });
+  }
+  const path = `/rest/api/2/search?maxResults=${maxResults}&jql=${encodeURIComponent(jql)}`;
+  return jira('GET', path);
+}
+
+async function findExistingExact(summary, { parentKey } = {}) {
   const escaped = summary.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary = "${escaped}"`;
-  const path =
-    API === 'v3'
-      ? `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=key,issuetype`
-      : `/rest/api/2/search?maxResults=1&jql=${encodeURIComponent(jql)}`;
-  const r = await jira('GET', path);
-  return r.issues?.[0]?.key ?? null;
+  let jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary = "${escaped}"`;
+  if (parentKey) jql += ` AND parent = ${parentKey}`;
+  const r = await jiraSearchJql(jql, 5);
+  const hit =
+    r.issues?.find((i) => i.fields?.summary === summary) ?? r.issues?.[0];
+  return hit?.key ?? null;
+}
+
+/** Resolve the one test-evidence subtask for a story (manifest → Jira search). */
+async function findTestSubtask(storyId, parentKey, summary) {
+  const stored = manifest().stories?.[storyId]?.testJira;
+  if (stored) {
+    try {
+      const meta = await issueMeta(stored);
+      if (
+        meta.summary === summary
+        || meta.summary?.startsWith(`${storyId}/Tests`)
+      ) {
+        return stored;
+      }
+    } catch {
+      // stale manifest key — search Jira
+    }
+  }
+
+  const prefix = `${storyId}/Tests`.replace(/"/g, '\\"');
+  const jql = `parent = ${parentKey} AND summary ~ "${prefix}" ORDER BY created ASC`;
+  const r = await jiraSearchJql(jql, 10);
+  const issues = r.issues ?? [];
+  const exact = issues.find((i) => i.fields?.summary === summary);
+  return exact?.key ?? issues[0]?.key ?? null;
 }
 
 async function issueMeta(key) {
@@ -1060,6 +1096,17 @@ function recordKey(kind, id, key) {
   writeFileSync(MANIFEST, JSON.stringify(mf, null, 2) + '\n');
   console.log(
     `recorded ${id} → ${key} in knowledge/traceability/manifest.json`,
+  );
+}
+
+function recordTestKey(storyId, key) {
+  const mf = manifest();
+  if (!mf.stories?.[storyId]) return;
+  if (mf.stories[storyId].testJira === key) return;
+  mf.stories[storyId].testJira = key;
+  writeFileSync(MANIFEST, JSON.stringify(mf, null, 2) + '\n');
+  console.log(
+    `recorded ${storyId} test evidence → ${key} in knowledge/traceability/manifest.json`,
   );
 }
 
@@ -1155,8 +1202,9 @@ async function main() {
   const storyKey = kind === 'story' ? await upsert(tickets[0], mf.stories[id]?.jira) : null;
   if (storyKey && !mf.stories[id]?.jira) recordKey('story', id, storyKey);
   for (const t of tickets.slice(kind === 'story' ? 1 : 0)) {
+    let parentKey = storyKey;
     if (storyKey && t.tpl === 'test.md') {
-      const parentKey = mf.stories[id]?.jira ?? storyKey;
+      parentKey = mf.stories[id]?.jira ?? storyKey;
       const parent = await issueMeta(parentKey);
       if (String(parent.issuetype).toLowerCase().includes('sub')) {
         die(
@@ -1165,9 +1213,15 @@ async function main() {
       }
       t.fields.parent = parentKey;
     }
-    const preferred =
-      t.tpl === 'test.md' ? await findExistingExact(t.fields.summary) : null;
+    let preferred = null;
+    if (t.tpl === 'test.md' && parentKey) {
+      preferred = await findTestSubtask(id, parentKey, t.fields.summary);
+      if (preferred) {
+        console.log(`reusing test evidence subtask ${preferred} for ${id}`);
+      }
+    }
     const key = await upsert(t, preferred);
+    if (t.tpl === 'test.md' && key) recordTestKey(id, key);
   }
 }
 

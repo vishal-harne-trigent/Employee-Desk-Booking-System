@@ -98,7 +98,7 @@ async function uploadScreenshotToJira({ env, issueKey, shot, testTitle }) {
       method: 'POST',
       headers: {
         Authorization: auth,
-        'X-Atlassian-Authorization': 'no-check',
+        'X-Atlassian-Token': 'no-check',
       },
       body: form,
     });

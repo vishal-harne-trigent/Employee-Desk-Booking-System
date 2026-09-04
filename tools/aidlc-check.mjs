@@ -772,6 +772,16 @@ if (existsSync(join(REPO, 'ai', 'templates', 'jira'))) {
         warn(
           `${label} ${id}: jira key ${entry.jira} is not in JIRA_PROJECT_KEY (${project}) — tracking a ticket in another project?`,
         );
+      if (entry.testJira !== undefined) {
+        if (typeof entry.testJira !== 'string' || !KEY.test(entry.testJira))
+          err(
+            `${label} ${id}: testJira key "${entry.testJira}" is not a Jira issue key (expected e.g. "LOG-142")`,
+          );
+        else if (project && !entry.testJira.startsWith(`${project}-`))
+          warn(
+            `${label} ${id}: testJira key ${entry.testJira} is not in JIRA_PROJECT_KEY (${project})`,
+          );
+      }
     }
   }
 }

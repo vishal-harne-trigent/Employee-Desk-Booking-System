@@ -333,7 +333,8 @@
         "e2e/tests/us-001-sign-in.spec.ts",
         "e2e/tests/smoke.spec.ts"
       ],
-      "jira": "EDBS-38"
+      "jira": "EDBS-38",
+      "testJira": "EDBS-96"
     },
     "US-002": {
       "artifact": "inception/stories/user-stories/US-002-book-desk.md",

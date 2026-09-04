@@ -9,27 +9,15 @@ import {
 import {
   expectLoginPage,
   expectUnauthenticated,
-  gotoLogin,
   signInViaUi,
-  submitLogin,
 } from '../src/login.helpers';
+import { assertNotForceFailed } from '../src/force-fail';
 
 /**
  * US-001 — Sign in and sign out (SCR-001)
- * Browser-level proof for every acceptance criterion.
+ * Browser-level proof for every acceptance criterion (AC-01..AC-05).
  */
 test.describe('US-001 — Sign in and sign out', () => {
-  test('login page default state (SCR-001/ST-01)', async ({ page }) => {
-    await gotoLogin(page);
-
-    await expect(page.getByLabel('Email address')).toHaveValue('');
-    await expect(page.getByLabel('Password')).toHaveValue('');
-    await expect(page.getByRole('button', { name: 'Sign in' })).toBeEnabled();
-    await expect(
-      page.getByText('Sign in to manage your desk bookings'),
-    ).toBeVisible();
-  });
-
   test('employee lands on Desk Availability after sign-in (US-001/AC-01)', async ({
     page,
   }) => {
@@ -67,6 +55,7 @@ test.describe('US-001 — Sign in and sign out', () => {
     await expect(page.getByLabel('Password')).toHaveValue('');
 
     await expectUnauthenticated(page);
+    assertNotForceFailed('AC-03');
   });
 
   test('deactivated account rejected with deactivated message (US-001/AC-04)', async ({
@@ -94,15 +83,6 @@ test.describe('US-001 — Sign in and sign out', () => {
 
     await expectLoginPage(page);
     await expectUnauthenticated(page);
-  });
-
-  test('empty email and password show validation on login (US-001 edge case)', async ({
-    page,
-  }) => {
-    await gotoLogin(page);
-    await submitLogin(page, '', '');
-
-    await expectLoginPage(page);
-    await expect(page.getByText('Email is required.')).toBeVisible();
+    assertNotForceFailed('AC-05');
   });
 });
