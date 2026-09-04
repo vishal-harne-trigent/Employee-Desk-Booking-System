@@ -7,20 +7,60 @@ parent: '${STORY_KEY}'
 
 ## Test results for ${STORY_ID}
 
-Latest CI run: ${CI_RUN_URL}
-
-${AC_RESULTS_TABLE}
-
-## How this is verified
-
-Each row maps to an automated test whose name carries the criterion identifier (`US-###/AC-##`), so the test and the criterion cannot drift apart without the build noticing. Outcomes are filled from a real pipeline run only.
-
-**Not yet automated** means exactly that — no test exists for that criterion yet. It is never a substitute for a pass.
+${RUN_SUMMARY}
 
 ---
 
+## Test cases
+
+From approved browser test plan — [${STORY_ID} test plan](${PLAN_URL}).
+
+${TEST_CASES_TABLE}
+
+**Automated spec:** `${SPEC_PATH}`
+
+---
+
+## Test data (dev seed)
+
+${TEST_DATA_TABLE}
+
+---
+
+## Test trials (execution log)
+
+Each row is one Playwright execution from the latest run (`playwright-report.json`).
+
+${TEST_TRIALS_TABLE}
+
+---
+
+## Failure screenshots
+
+${FAILURE_SCREENSHOTS}
+
+---
+
+## AC summary
+
+${AC_SUMMARY_TABLE}
+
+---
+
+## Criterion ↔ automation map
+
+${AC_RESULTS_TABLE}
+
+**Latest CI / run link:** ${CI_RUN_URL}
+
+---
+
+## How this is verified
+
+Test case IDs map to the approved browser test plan. Trial rows and AC outcomes are filled from a real Playwright run only — never typed by hand.
+
 ### Covers
 
-[${STORY_ID}](${ARTIFACT_URL})
+[${STORY_ID}](${ARTIFACT_URL}) · [Test plan](${PLAN_URL})
 
-_Tracked automatically from the team's repository. Results are never set by hand._
+_Tracked automatically from the team's repository._

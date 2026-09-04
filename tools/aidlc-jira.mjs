@@ -18,8 +18,34 @@
 //      are never written, so the repository never becomes a second opinion
 //      about them.
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import { execFileSync } from 'node:child_process';
+import {
+  buildRichEvidence,
+  findTestPlan,
+  loadPlaywrightReport,
+  uploadFailureScreenshotsFromReport,
+} from './jira-test-evidence.mjs';
+import { coverageFromReport } from './aidlc-qa-coverage.mjs';
+
+/** Load repo-root `.env` when vars are not already set (local `--apply`). */
+function loadEnvFile(filePath) {
+  try {
+    for (const line of readFileSync(filePath, 'utf8').split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eq = trimmed.indexOf('=');
+      if (eq === -1) continue;
+      const key = trimmed.slice(0, eq).trim();
+      const value = trimmed.slice(eq + 1).trim();
+      if (process.env[key] === undefined) process.env[key] = value;
+    }
+  } catch {
+    // no .env — rely on shell / CI secrets
+  }
+}
+
+loadEnvFile(join(process.cwd(), '.env'));
 
 // CRLF-normalized reads: Windows autocrlf checkouts must parse and compare like LF ones
 function read(p) {
@@ -117,6 +143,14 @@ export const KNOWN_PLACEHOLDERS = [
   'STORY_KEY',
   'EPIC_KEY',
   'AC_RESULTS_TABLE',
+  'RUN_SUMMARY',
+  'TEST_CASES_TABLE',
+  'TEST_DATA_TABLE',
+  'TEST_TRIALS_TABLE',
+  'FAILURE_SCREENSHOTS',
+  'AC_SUMMARY_TABLE',
+  'PLAN_URL',
+  'SPEC_PATH',
 ];
 
 // ---- template parsing ------------------------------------------------------
@@ -682,7 +716,7 @@ function resolveTestHit(contents, us, acId) {
   return e2eHit ?? manifestHit;
 }
 
-function buildTestSummary(us, storyKey, reportIndex, ciRunUrl) {
+function buildTestSummary(us, storyKey, reportIndex, ciRunUrl, reportPath, screenshotUploads) {
   const mf = manifest();
   const entry = mf.stories[us];
   const { path, text } = storyFile(us);
@@ -716,6 +750,27 @@ function buildTestSummary(us, storyKey, reportIndex, ciRunUrl) {
     return `| ${ac.id} | ${ac.title} | ${result} | \`${testName}\` | \`${testFile}\` |`;
   });
 
+  const e2eSpec =
+    tests.find((t) => t.replace(/\\/g, '/').includes('e2e/tests/')) ?? 'e2e/tests/';
+  const planPath = findTestPlan(REPO, us);
+  const rich = buildRichEvidence({
+    storyId: us,
+    storyText: text,
+    acBlocks: acBlocks(text),
+    reportPath: reportPath ?? flag('report'),
+    reportIndex,
+    repoRoot: REPO,
+    baseUrl: process.env.E2E_BASE_URL ?? 'http://localhost:5198',
+    ciRunUrl: reportIndex ? ciRunUrl ?? lastCiRun() : '—',
+    artifactUrl: blobUrl(path),
+    planUrl: planPath
+      ? blobUrl(relative(REPO, planPath).replace(/\\/g, '/'))
+      : '—',
+    specPath: e2eSpec.replace(/\\/g, '/'),
+    screenshotUploads,
+    storyIssueKey: storyKey ?? process.env.JIRA_ISSUE_KEY,
+  });
+
   const values = {
     STORY_ID: us,
     STORY_KEY: storyKey ?? '',
@@ -723,13 +778,29 @@ function buildTestSummary(us, storyKey, reportIndex, ciRunUrl) {
       '| AC | Criterion | Outcome | Automated test | Location |\n'
       + '| --- | --- | --- | --- | --- |\n'
       + rows.join('\n'),
-    CI_RUN_URL: reportIndex ? ciRunUrl ?? lastCiRun() : '—',
-    ARTIFACT_URL: blobUrl(path),
+    CI_RUN_URL: rich.CI_RUN_URL,
+    ARTIFACT_URL: rich.ARTIFACT_URL,
+    ...rich,
   };
   return {
     name: `${us}/Tests`,
     tpl: 'test.md',
     fields: render('test.md', values),
+  };
+}
+
+/** Append the same test-evidence body from the subtask onto the parent story (EDBS-38). */
+function mergeStoryWithTestEvidence(storyFields, testFields) {
+  const testBody = testFields.description?.trim() ?? '';
+  if (!testBody) return storyFields;
+  const label = testFields.summary?.trim() ?? 'Test evidence';
+  return {
+    ...storyFields,
+    description:
+      `${storyFields.description?.trim() ?? ''}\n\n---\n\n`
+      + `_Automated test evidence (same content as subtask **${label}**). `
+      + `Updated from the latest Playwright run._\n\n`
+      + testBody,
   };
 }
 
@@ -930,20 +1001,39 @@ async function jira(method, path, body) {
   return text ? JSON.parse(text) : {};
 }
 
-async function findExisting(summaryId) {
-  const escaped = summaryId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "\\"${escaped}\\"" ORDER BY created DESC`;
+async function findExistingExact(summary) {
+  const escaped = summary.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary = "${escaped}"`;
   const path =
     API === 'v3'
-      ? `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=key`
+      ? `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=key,issuetype`
       : `/rest/api/2/search?maxResults=1&jql=${encodeURIComponent(jql)}`;
   const r = await jira('GET', path);
   return r.issues?.[0]?.key ?? null;
 }
 
-async function upsert(ticket) {
-  const idToken = ticket.fields.summary.split('—')[0].trim();
-  const existing = await findExisting(idToken);
+async function issueMeta(key) {
+  const r = await jira(
+    'GET',
+    `/rest/api/${API === 'v3' ? 3 : 2}/issue/${key}?fields=issuetype,summary`,
+  );
+  return {
+    key,
+    summary: r.fields?.summary,
+    issuetype: r.fields?.issuetype?.name ?? r.fields?.issuetype,
+  };
+}
+
+async function upsert(ticket, preferredKey) {
+  if (preferredKey) {
+    await jira('PUT', `/rest/api/${API === 'v3' ? 3 : 2}/issue/${preferredKey}`, {
+      fields: payloadForUpdate(ticket.fields).fields,
+    });
+    console.log(`updated ${preferredKey}  ${ticket.fields.summary}`);
+    return preferredKey;
+  }
+
+  const existing = await findExistingExact(ticket.fields.summary);
   if (existing) {
     await jira('PUT', `/rest/api/${API === 'v3' ? 3 : 2}/issue/${existing}`, {
       fields: payloadForUpdate(ticket.fields).fields,
@@ -988,15 +1078,31 @@ async function main() {
     const s = buildStory(id);
     tickets.push(s);
     if (WITH_TESTS) {
-      const reportPath = flag('report');
+      const reportPath =
+        flag('report') ?? join(REPO, 'e2e', 'playwright-report.json');
       const reportIndex = loadReportIndex(reportPath);
       const ciRunUrl = flag('run-url') ?? lastCiRun();
+      const storyJiraKey = manifest().stories[id]?.jira ?? process.env.JIRA_ISSUE_KEY;
+      let screenshotUploads = new Map();
+      if (APPLY && existsSync(reportPath)) {
+        const report = loadPlaywrightReport(reportPath);
+        if (report && storyJiraKey) {
+          screenshotUploads = await uploadFailureScreenshotsFromReport({
+            report,
+            reportPath,
+            env: process.env,
+            issueKey: storyJiraKey,
+          });
+        }
+      }
       tickets.push(
         buildTestSummary(
           id,
-          manifest().stories[id]?.jira ?? '',
+          storyJiraKey ?? '',
           reportIndex,
           ciRunUrl,
+          reportPath,
+          screenshotUploads,
         ),
       );
     }
@@ -1013,6 +1119,15 @@ async function main() {
       'nothing to do. Try --story US-003, --epic EPIC-001, --bug 12, or --change-request 12',
     );
   }
+
+  if (kind === 'story' && WITH_TESTS && tickets.length >= 2) {
+    tickets[0].fields = mergeStoryWithTestEvidence(
+      tickets[0].fields,
+      tickets[1].fields,
+    );
+  }
+
+  const mf = manifest();
 
   if (!APPLY) {
     console.log(
@@ -1031,12 +1146,28 @@ async function main() {
     return;
   }
 
-  const storyKey = kind === 'story' ? await upsert(tickets[0]) : null;
-  if (storyKey) recordKey('story', id, storyKey);
+  if (kind === 'epic') {
+    const key = await upsert(tickets[0], mf.epics?.[id]?.jira);
+    if (!mf.epics?.[id]?.jira) recordKey('epic', id, key);
+    return;
+  }
+
+  const storyKey = kind === 'story' ? await upsert(tickets[0], mf.stories[id]?.jira) : null;
+  if (storyKey && !mf.stories[id]?.jira) recordKey('story', id, storyKey);
   for (const t of tickets.slice(kind === 'story' ? 1 : 0)) {
-    if (storyKey && t.tpl === 'test.md') t.fields.parent = storyKey;
-    const key = await upsert(t);
-    if (kind === 'epic') recordKey('epic', id, key);
+    if (storyKey && t.tpl === 'test.md') {
+      const parentKey = mf.stories[id]?.jira ?? storyKey;
+      const parent = await issueMeta(parentKey);
+      if (String(parent.issuetype).toLowerCase().includes('sub')) {
+        die(
+          `${id}: manifest jira ${parentKey} is a sub-task — set stories.${id}.jira to the Story key (e.g. EDBS-38), not the test subtask.`,
+        );
+      }
+      t.fields.parent = parentKey;
+    }
+    const preferred =
+      t.tpl === 'test.md' ? await findExistingExact(t.fields.summary) : null;
+    const key = await upsert(t, preferred);
   }
 }
 
