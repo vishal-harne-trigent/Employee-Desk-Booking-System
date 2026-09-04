@@ -28,6 +28,16 @@ export function findTestPlan(repoRoot, storyId) {
   return hit ? join(plansDir, hit) : null;
 }
 
+/** Split one markdown pipe-table row into trimmed cells (trailing empty cell omitted). */
+function splitPipeRow(line) {
+  const cells = line
+    .replace(/^\||\|$/g, '')
+    .split('|')
+    .map((c) => c.trim());
+  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+  return cells;
+}
+
 /** Parse markdown pipe tables under a ## heading. */
 export function parsePlanTable(planText, heading) {
   const re = new RegExp(
@@ -37,16 +47,10 @@ export function parsePlanTable(planText, heading) {
   const section = (planText.match(re)?.[1] ?? '').trim();
   const lines = section.split('\n').filter((l) => /^\s*\|.*\|\s*$/.test(l));
   if (lines.length < 2) return [];
-  const headers = lines[0]
-    .replace(/^\||\|$/g, '')
-    .split('|')
-    .map((c) => c.trim());
+  const headers = splitPipeRow(lines[0]);
   const rows = [];
   for (let i = 2; i < lines.length; i++) {
-    const cells = lines[i]
-      .replace(/^\||\|$/g, '')
-      .split('|')
-      .map((c) => c.trim());
+    const cells = splitPipeRow(lines[i]);
     if (cells.length === headers.length) {
       const row = {};
       headers.forEach((h, idx) => {

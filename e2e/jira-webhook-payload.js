@@ -20,6 +20,15 @@ function mapStory(title) {
   return CITATION.exec(title ?? '')?.[1] ?? null;
 }
 
+function splitPipeRow(line) {
+  const cells = line
+    .replace(/^\||\|$/g, '')
+    .split('|')
+    .map((c) => c.trim());
+  if (cells.length > 0 && cells[cells.length - 1] === '') cells.pop();
+  return cells;
+}
+
 function parsePlanScenarios(repoRoot, storyId) {
   const plansDir = path.join(repoRoot, 'e2e', 'plans');
   if (!fs.existsSync(plansDir)) return [];
@@ -34,16 +43,10 @@ function parsePlanScenarios(repoRoot, storyId) {
   const lines = section.split('\n').filter((l) => /^\s*\|.*\|\s*$/.test(l));
   if (lines.length < 2) return [];
 
-  const headers = lines[0]
-    .replace(/^\||\|$/g, '')
-    .split('|')
-    .map((c) => c.trim());
+  const headers = splitPipeRow(lines[0]);
   const rows = [];
   for (let i = 2; i < lines.length; i++) {
-    const cells = lines[i]
-      .replace(/^\||\|$/g, '')
-      .split('|')
-      .map((c) => c.trim());
+    const cells = splitPipeRow(lines[i]);
     if (cells.length !== headers.length) continue;
     const row = {};
     headers.forEach((h, idx) => {
@@ -70,16 +73,10 @@ function parsePlanAccounts(repoRoot, storyId) {
   const lines = section.split('\n').filter((l) => /^\s*\|.*\|\s*$/.test(l));
   if (lines.length < 2) return [];
 
-  const headers = lines[0]
-    .replace(/^\||\|$/g, '')
-    .split('|')
-    .map((c) => c.trim());
+  const headers = splitPipeRow(lines[0]);
   const rows = [];
   for (let i = 2; i < lines.length; i++) {
-    const cells = lines[i]
-      .replace(/^\||\|$/g, '')
-      .split('|')
-      .map((c) => c.trim());
+    const cells = splitPipeRow(lines[i]);
     if (cells.length !== headers.length) continue;
     const row = {};
     headers.forEach((h, idx) => {
