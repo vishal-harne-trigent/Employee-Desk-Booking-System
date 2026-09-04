@@ -1,0 +1,18 @@
+[    8073ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:151
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:159
+[    8074ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:201
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:240
+[   18947ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:151
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:159
+[   18948ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:201
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:240
+[   29747ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:151
+    at http://localhost:5198/lib/jquery-validation/dist/jquery.validate.min.js:4:159
+[   29747ms] ReferenceError: jQuery is not defined
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:201
+    at http://localhost:5198/lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js:8:240

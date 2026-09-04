@@ -1,0 +1,110 @@
+- generic [active] [ref=f6e1]:
+  - banner [ref=f6e2]:
+    - img "Desk Booking" [ref=f6e4]
+    - navigation "Main" [ref=f6e5]:
+      - link "Desk Availability" [ref=f6e6] [cursor=pointer]:
+        - /url: /Desks/Availability
+      - link "My Bookings" [ref=f6e7] [cursor=pointer]:
+        - /url: /MyBookings/Index
+      - link "Desks" [ref=f6e8] [cursor=pointer]:
+        - /url: /Admin/AdminDesks
+      - link "Users" [ref=f6e9] [cursor=pointer]:
+        - /url: /Admin/AdminUsers
+      - link "All Bookings" [ref=f6e10] [cursor=pointer]:
+        - /url: /Admin/AdminBookings
+    - generic [ref=f6e11]:
+      - generic [aria-hidden] [ref=f6e12]: SA
+      - generic [ref=f6e13]: Super Admin
+      - button "Sign out" [ref=f6e15] [cursor=pointer]
+  - main [ref=f6e17]:
+    - generic [ref=f6e18]:
+      - heading "All bookings" [level=1] [ref=f6e19]
+      - paragraph [ref=f6e20]: View and manage bookings across all employees.
+    - generic [ref=f6e22]:
+      - generic [ref=f6e23]:
+        - generic [ref=f6e24]: Office date
+        - textbox "Office date" [ref=f6e25]
+      - generic [ref=f6e26]:
+        - generic [ref=f6e27]: Status
+        - combobox "Status" [ref=f6e28]:
+          - option "All statuses" [selected]
+          - option "Confirmed"
+          - option "Cancelled"
+          - option "Completed"
+      - button "Apply filters" [ref=f6e29] [cursor=pointer]
+    - table [ref=f6e31]:
+      - rowgroup [ref=f6e32]:
+        - row [ref=f6e33]:
+          - columnheader "Employee" [ref=f6e34]
+          - columnheader "Desk" [ref=f6e35]
+          - columnheader "Office date" [ref=f6e36]
+          - columnheader "Status" [ref=f6e37]
+          - columnheader "Created" [ref=f6e38]
+          - columnheader "Cancelled on" [ref=f6e39]
+          - columnheader "Actions" [ref=f6e40]
+      - rowgroup [ref=f6e42]:
+        - row [ref=f6e43]:
+          - cell "Priya Sharma employee2@trigent.com" [ref=f6e44]:
+            - generic [ref=f6e45]: Priya Sharma
+            - generic [ref=f6e46]: employee2@trigent.com
+          - cell "A-05" [ref=f6e47]
+          - cell "Wed, Sep 2, 2026" [ref=f6e48]
+          - cell [ref=f6e49]:
+            - generic [ref=f6e50]:
+              - generic [aria-hidden] [ref=f6e51]: ●
+              - text: Completed
+          - cell "Aug 31, 17:40" [ref=f6e52]
+          - cell "—" [ref=f6e53]
+          - cell "—" [ref=f6e54]
+        - row [ref=f6e55]:
+          - cell "Vishal Harne vishal_h@trigent.com" [ref=f6e56]:
+            - generic [ref=f6e57]: Vishal Harne
+            - generic [ref=f6e58]: vishal_h@trigent.com
+          - cell "A-02" [ref=f6e59]
+          - cell "Tue, Sep 1, 2026" [ref=f6e60]
+          - cell [ref=f6e61]:
+            - generic [ref=f6e62]:
+              - generic [aria-hidden] [ref=f6e63]: ●
+              - text: Completed
+          - cell "Aug 31, 17:40" [ref=f6e64]
+          - cell "—" [ref=f6e65]
+          - cell "—" [ref=f6e66]
+        - row [ref=f6e67]:
+          - cell "Vishal Harne vishal_h@trigent.com" [ref=f6e68]:
+            - generic [ref=f6e69]: Vishal Harne
+            - generic [ref=f6e70]: vishal_h@trigent.com
+          - cell "A-01" [ref=f6e71]
+          - cell "Mon, Aug 31, 2026" [ref=f6e72]
+          - cell [ref=f6e73]:
+            - generic [ref=f6e74]:
+              - generic [aria-hidden] [ref=f6e75]: ●
+              - text: Completed
+          - cell "Aug 31, 17:40" [ref=f6e76]
+          - cell "—" [ref=f6e77]
+          - cell "—" [ref=f6e78]
+        - row [ref=f6e79]:
+          - cell "Vishal Harne vishal_h@trigent.com" [ref=f6e80]:
+            - generic [ref=f6e81]: Vishal Harne
+            - generic [ref=f6e82]: vishal_h@trigent.com
+          - cell "A-03" [ref=f6e83]
+          - cell "Fri, Aug 28, 2026" [ref=f6e84]
+          - cell [ref=f6e85]:
+            - generic [ref=f6e86]:
+              - generic [aria-hidden] [ref=f6e87]: ●
+              - text: Completed
+          - cell "Aug 31, 17:40" [ref=f6e88]
+          - cell "—" [ref=f6e89]
+          - cell "—" [ref=f6e90]
+        - row [ref=f6e91]:
+          - cell "Vishal Harne vishal_h@trigent.com" [ref=f6e92]:
+            - generic [ref=f6e93]: Vishal Harne
+            - generic [ref=f6e94]: vishal_h@trigent.com
+          - cell "A-04" [ref=f6e95]
+          - cell "Thu, Aug 27, 2026" [ref=f6e96]
+          - cell [ref=f6e97]:
+            - generic [ref=f6e98]:
+              - generic [aria-hidden] [ref=f6e99]: ●
+              - text: Cancelled
+          - cell "Aug 31, 17:40" [ref=f6e100]
+          - cell "Aug 31, 17:40" [ref=f6e101]
+          - cell "—" [ref=f6e102]
