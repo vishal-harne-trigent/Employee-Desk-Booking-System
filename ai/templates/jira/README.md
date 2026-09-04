@@ -10,7 +10,7 @@ Templates a persona fills in to create or update a Jira ticket. Rules that gover
 | ------------------- | --------------------- | --------------------------------------------- |
 | `epic.md`           | Epic                  | `EPIC-###` in `inception/stories/epics/`      |
 | `story.md`          | Story                 | `US-###` in `inception/stories/user-stories/` |
-| `test.md`           | Test                  | One per `AC-##` of a story                    |
+| `test.md`           | Test (subtask)        | One per story — table of every `AC-##` and its result |
 | `bug.md`            | Bug                   | A GitHub issue labelled `bug`                 |
 | `change-request.md` | Task (change request) | A GitHub issue labelled `change-request`      |
 
@@ -47,7 +47,7 @@ Fill them with the tool, never by hand:
 
 ```bash
 node tools/aidlc-jira.mjs --story US-003            # dry run — prints the payload, writes nothing
-node tools/aidlc-jira.mjs --story US-003 --tests    # also a test ticket per acceptance criterion
+node tools/aidlc-jira.mjs --story US-003 --tests    # also one test subtask (all ACs + results)
 node tools/aidlc-jira.mjs --story US-003 --api v2   # render wiki markup instead of ADF
 node tools/aidlc-jira.mjs --story US-003 --apply    # create or update in Jira
 ```
@@ -76,10 +76,7 @@ Every placeholder any template uses. The tool fails loudly on an unknown one rat
 | `${AC_ID}`           | `AC-##`                                                           |
 | `${AC_TITLE}`        | The criterion's heading                                           |
 | `${AC_BODY}`         | Its Given/When/Then                                               |
-| `${TEST_NAME}`       | The active test's name, which cites `US-###/AC-##`                |
-| `${TEST_FILE}`       | Path of the test file                                             |
-| `${RESULT}`          | `Pass` · `Fail` · `Not yet automated` — from a real run only      |
-| `${CI_RUN_URL}`      | The CI run the result came from                                   |
+| `${AC_RESULTS_TABLE}` | Markdown table — every AC with outcome, test name, and file |
 | `${ISSUE_NUMBER}`    | GitHub issue number, e.g. `#12`                                   |
 | `${ISSUE_URL}`       | Link to that issue                                                |
 | `${REQUESTER_WORDS}` | The request verbatim, as the requester put it                     |

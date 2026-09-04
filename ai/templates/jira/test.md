@@ -1,33 +1,26 @@
 ---
 issuetype: Subtask
-summary: '${STORY_ID}/${AC_ID} — ${AC_TITLE}'
+summary: '${STORY_ID}/Tests — Test evidence'
 labels: [aidlc, test]
 parent: '${STORY_KEY}'
 ---
 
-## What is being proven
+## Test results for ${STORY_ID}
 
-${AC_BODY}
+Latest CI run: ${CI_RUN_URL}
 
-## Result
-
-| Field          | Value          |
-| -------------- | -------------- |
-| Outcome        | ${RESULT}      |
-| Evidence       | ${CI_RUN_URL}  |
-| Automated test | `${TEST_NAME}` |
-| Location       | `${TEST_FILE}` |
+${AC_RESULTS_TABLE}
 
 ## How this is verified
 
-An automated test carries this criterion's identifier in its name, so the test and the criterion cannot drift apart without the build noticing. The result above is filled from a real pipeline run.
+Each row maps to an automated test whose name carries the criterion identifier (`US-###/AC-##`), so the test and the criterion cannot drift apart without the build noticing. Outcomes are filled from a real pipeline run only.
 
-**Not yet automated** means exactly that — no test exists for this criterion yet. It is never a substitute for a pass.
+**Not yet automated** means exactly that — no test exists for that criterion yet. It is never a substitute for a pass.
 
 ---
 
 ### Covers
 
-${STORY_ID} / ${AC_ID} — [${STORY_ID}](${ARTIFACT_URL})
+[${STORY_ID}](${ARTIFACT_URL})
 
 _Tracked automatically from the team's repository. Results are never set by hand._

@@ -1,7 +1,7 @@
 // aidlc-jira — the ONLY writer to Jira. Rules: ai/context/jira-sync.md
 //
 //   node tools/aidlc-jira.mjs --story US-003            dry run: print the payload
-//   node tools/aidlc-jira.mjs --story US-003 --tests    also a test ticket per AC
+//   node tools/aidlc-jira.mjs --story US-003 --tests    also one test subtask (all ACs)
 //   node tools/aidlc-jira.mjs --epic EPIC-001
 //   node tools/aidlc-jira.mjs --bug 12                 from a GitHub `bug` issue
 //   node tools/aidlc-jira.mjs --change-request 12
@@ -116,6 +116,7 @@ export const KNOWN_PLACEHOLDERS = [
   'JIRA_KEY',
   'STORY_KEY',
   'EPIC_KEY',
+  'AC_RESULTS_TABLE',
 ];
 
 // ---- template parsing ------------------------------------------------------
@@ -226,7 +227,7 @@ const IS_CLI = Boolean(process.argv[1]?.endsWith('aidlc-jira.mjs'));
 const USAGE = `aidlc-jira — the only writer to Jira (rules: ai/context/jira-sync.md)
 
   --story US-003            dry run: print the ticket payload
-  --story US-003 --tests    also one test ticket per acceptance criterion
+  --story US-003 --tests    also one test subtask listing every AC and result
   --epic EPIC-001
   --bug 12                  from a GitHub issue labelled bug
   --change-request 12
@@ -586,12 +587,45 @@ function render(tplName, values) {
   return out;
 }
 
+/** Updates must not resend issuetype/project/parent — Jira rejects type changes. */
+function payloadForUpdate(fields) {
+  const p = {
+    fields: {
+      summary: fields.summary,
+      description:
+        API === 'v3'
+          ? mdToAdf(fields.description)
+          : mdToWiki(fields.description),
+    },
+  };
+  if (fields.labels) p.fields.labels = fields.labels;
+  return p;
+}
+
+function issueTypeName(fields) {
+  if (fields.issuetype === 'Subtask' && process.env.JIRA_TEST_ISSUETYPE) {
+    return process.env.JIRA_TEST_ISSUETYPE;
+  }
+  if (fields.issuetype === 'Story' && process.env.JIRA_STORY_ISSUETYPE) {
+    return process.env.JIRA_STORY_ISSUETYPE;
+  }
+  return fields.issuetype;
+}
+
+function issuetypeField(fields) {
+  const type = fields.issuetype;
+  if (type && typeof type === 'object') {
+    return type.id ? { id: String(type.id) } : { name: type.name };
+  }
+  return { name: issueTypeName(fields) };
+}
+
 function payloadFor(fields) {
   const project = process.env.JIRA_PROJECT_KEY || 'PROJ';
   const p = {
     fields: {
       project: { key: project },
-      issuetype: { name: fields.issuetype },
+      issuetype: issuetypeField(fields),
       summary: fields.summary,
       // The one place the wire format is decided.
       description:
@@ -604,6 +638,99 @@ function payloadFor(fields) {
   if (fields.priority) p.fields.priority = { name: fields.priority };
   if (fields.parent) p.fields.parent = { key: fields.parent };
   return p;
+}
+
+function normalizeReportPath(filePath) {
+  if (!filePath) return '—';
+  const normalized = filePath.replace(/\\/g, '/');
+  const marker = '/e2e/';
+  const idx = normalized.toLowerCase().indexOf(marker);
+  if (idx !== -1) {
+    return normalized.slice(idx + 1);
+  }
+  return normalized.replace(`${REPO}/`.replace(/\\/g, '/'), '').replace(/^\//, '');
+}
+
+function loadReportIndex(reportPath) {
+  if (!reportPath || !existsSync(reportPath)) {
+    return null;
+  }
+  const report = JSON.parse(readFileSync(reportPath, 'utf8'));
+  const doc = coverageFromReport(report, {
+    runUrl: flag('run-url') ?? lastCiRun(),
+  });
+  const map = new Map();
+  for (const row of doc.results) {
+    map.set(`${row.story}/${row.ac}`, {
+      outcome: row.outcome,
+      test: row.test,
+      file: normalizeReportPath(row.file),
+    });
+  }
+  return map;
+}
+
+function resolveTestHit(contents, us, acId) {
+  const re = new RegExp(
+    `(?<![\\w.])(?:it|test)\\s*\\(\\s*[\`'"][^\`'"\\n]*${us}/${acId}`,
+  );
+  const manifestHit = contents.find((c) => re.test(c.text));
+  const e2eHit = contents.find(
+    (c) =>
+      c.file.replace(/\\/g, '/').includes('e2e/') && re.test(c.text),
+  );
+  return e2eHit ?? manifestHit;
+}
+
+function buildTestSummary(us, storyKey, reportIndex, ciRunUrl) {
+  const mf = manifest();
+  const entry = mf.stories[us];
+  const { path, text } = storyFile(us);
+  const tests = entry.tests ?? [];
+  const contents = tests
+    .filter((t) => existsSync(join(REPO, t)))
+    .map((t) => ({ file: t, text: read(join(REPO, t)) }));
+
+  const rows = acBlocks(text).map((ac) => {
+    const hit = resolveTestHit(contents, us, ac.id);
+    const criterionKey = `${us}/${ac.id}`;
+    const fromReport = reportIndex?.get(criterionKey);
+    let result;
+    if (fromReport?.outcome === 'pass') {
+      result = 'Pass';
+    } else if (fromReport?.outcome === 'fail') {
+      result = 'Fail';
+    } else if (hit || fromReport) {
+      result = 'Not yet run';
+    } else {
+      result = 'Not yet automated';
+    }
+    const testName =
+      fromReport?.test
+      ?? (hit
+        ? (hit.text.match(
+            new RegExp(`[\`'"]([^\`'"\\n]*${us}/${ac.id}[^\`'"\\n]*)`),
+          )?.[1] ?? `${us}/${ac.id}`)
+        : '—');
+    const testFile = fromReport?.file ?? (hit ? hit.file : '—');
+    return `| ${ac.id} | ${ac.title} | ${result} | \`${testName}\` | \`${testFile}\` |`;
+  });
+
+  const values = {
+    STORY_ID: us,
+    STORY_KEY: storyKey ?? '',
+    AC_RESULTS_TABLE:
+      '| AC | Criterion | Outcome | Automated test | Location |\n'
+      + '| --- | --- | --- | --- | --- |\n'
+      + rows.join('\n'),
+    CI_RUN_URL: reportIndex ? ciRunUrl ?? lastCiRun() : '—',
+    ARTIFACT_URL: blobUrl(path),
+  };
+  return {
+    name: `${us}/Tests`,
+    tpl: 'test.md',
+    fields: render('test.md', values),
+  };
 }
 
 // ---- builders --------------------------------------------------------------
@@ -644,46 +771,6 @@ function buildStory(us) {
     acs,
     entry,
   };
-}
-
-function buildTests(us, storyKey) {
-  const mf = manifest();
-  const entry = mf.stories[us];
-  const { path, text } = storyFile(us);
-  const tests = entry.tests ?? [];
-  const contents = tests
-    .filter((t) => existsSync(join(REPO, t)))
-    .map((t) => ({ file: t, text: read(join(REPO, t)) }));
-
-  return acBlocks(text).map((ac) => {
-    const hit = contents.find((c) =>
-      new RegExp(
-        `(?<![\\w.])(?:it|test)\\s*\\(\\s*[\`'"][^\`'"\\n]*${us}/${ac.id}`,
-      ).test(c.text),
-    );
-    const values = {
-      STORY_ID: us,
-      STORY_KEY: storyKey ?? '',
-      AC_ID: ac.id,
-      AC_TITLE: ac.title,
-      AC_BODY: md(ac.body),
-      TEST_NAME: hit
-        ? (hit.text.match(
-            new RegExp(`[\`'"]([^\`'"\\n]*${us}/${ac.id}[^\`'"\\n]*)`),
-          )?.[1] ?? `${us}/${ac.id}`)
-        : '—',
-      TEST_FILE: hit ? hit.file : '—',
-      // Never a pass we did not observe. No test at all is stated as such.
-      RESULT: hit ? 'Pass' : 'Not yet automated',
-      CI_RUN_URL: hit ? lastCiRun() : '—',
-      ARTIFACT_URL: blobUrl(path),
-    };
-    return {
-      name: `${us}/${ac.id}`,
-      tpl: 'test.md',
-      fields: render('test.md', values),
-    };
-  });
 }
 
 function lastCiRun() {
@@ -844,21 +931,22 @@ async function jira(method, path, body) {
 }
 
 async function findExisting(summaryId) {
-  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "${summaryId}" ORDER BY created DESC`;
-  const r = await jira(
-    'GET',
-    `/rest/api/${API === 'v3' ? 3 : 2}/search?maxResults=1&jql=${encodeURIComponent(jql)}`,
-  );
+  const escaped = summaryId.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  const jql = `project = "${process.env.JIRA_PROJECT_KEY}" AND summary ~ "\\"${escaped}\\"" ORDER BY created DESC`;
+  const path =
+    API === 'v3'
+      ? `/rest/api/3/search/jql?jql=${encodeURIComponent(jql)}&maxResults=1&fields=key`
+      : `/rest/api/2/search?maxResults=1&jql=${encodeURIComponent(jql)}`;
+  const r = await jira('GET', path);
   return r.issues?.[0]?.key ?? null;
 }
 
 async function upsert(ticket) {
-  const payload = payloadFor(ticket.fields);
   const idToken = ticket.fields.summary.split('—')[0].trim();
   const existing = await findExisting(idToken);
   if (existing) {
     await jira('PUT', `/rest/api/${API === 'v3' ? 3 : 2}/issue/${existing}`, {
-      fields: payload.fields,
+      fields: payloadForUpdate(ticket.fields).fields,
     });
     console.log(`updated ${existing}  ${ticket.fields.summary}`);
     return existing;
@@ -866,7 +954,7 @@ async function upsert(ticket) {
   const created = await jira(
     'POST',
     `/rest/api/${API === 'v3' ? 3 : 2}/issue`,
-    payload,
+    payloadFor(ticket.fields),
   );
   console.log(`created ${created.key}  ${ticket.fields.summary}`);
   return created.key;
@@ -899,8 +987,19 @@ async function main() {
     id = flag('story');
     const s = buildStory(id);
     tickets.push(s);
-    if (WITH_TESTS)
-      tickets.push(...buildTests(id, manifest().stories[id]?.jira ?? ''));
+    if (WITH_TESTS) {
+      const reportPath = flag('report');
+      const reportIndex = loadReportIndex(reportPath);
+      const ciRunUrl = flag('run-url') ?? lastCiRun();
+      tickets.push(
+        buildTestSummary(
+          id,
+          manifest().stories[id]?.jira ?? '',
+          reportIndex,
+          ciRunUrl,
+        ),
+      );
+    }
   } else if (flag('epic')) {
     kind = 'epic';
     id = flag('epic');

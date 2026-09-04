@@ -15,7 +15,7 @@ ${REQ_LIST}
 
 ## When is it done
 
-These are the criteria this story is accepted against. Each one gets its own linked test ticket.
+These are the criteria this story is accepted against. Test results for every criterion are tracked on one linked test subtask.
 
 ${AC_LIST}
 

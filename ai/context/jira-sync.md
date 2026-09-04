@@ -8,7 +8,7 @@ Jira is a **parallel tracking flow**: it makes work visible, shareable with the 
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Delivery tracking** | Epics and stories appear on the board the team already runs. Sprints, assignees and estimates stay Jira's business                              |
 | **Client visibility** | A client reads tickets, not a repository. Tickets are written to be read by someone outside the team                                            |
-| **Test evidence**     | Each acceptance criterion gets a test ticket whose result is filled from a real CI run, so "what was tested" is answerable without reading code |
+| **Test evidence**     | One test subtask per story lists every acceptance criterion and its result from CI, so "what was tested" is answerable without reading code |
 | **Not approval**      | No Jira field, transition, or comment opens or closes a gate                                                                                    |
 
 ## The one rule that matters
@@ -42,7 +42,7 @@ Because tickets are shared outside the team, they are held to a different standa
 | ----------------------------------------- | ------------- | -------------------------------------------------------------------------- |
 | Epic and story tickets                    | GitHub → Jira | Created from the merged artifact, never before Gate 1 merges               |
 | Acceptance criteria text                  | GitHub → Jira | Copied for readability; the repository file stays canonical                |
-| **Test ticket per acceptance criterion**  | GitHub → Jira | One per `AC-##`, linked to its story; see below                            |
+| **Test subtask per story (all ACs)**      | GitHub → Jira | One subtask linked to the story; table of every `AC-##` with Pass/Fail; see below |
 | **Test result + the CI run it came from** | GitHub → Jira | Filled from a real run only. Never typed by hand, never inferred           |
 | Delivery status (in progress / merged)    | GitHub → Jira | Derived from the PR and check runs                                         |
 | Deep links to the artifact and the PR     | GitHub → Jira | So Jira is never where someone reads the spec                              |
@@ -58,10 +58,10 @@ That last row is deliberate: duplicating sprint and assignee data into the repos
 This is the part that earns Jira its place. Our tests already cite the criterion they prove (`US-003/AC-02` in the test name), and CI already runs them. The sync turns that into something a client or a test manager can read:
 
 ```
-AC-02 in the story  →  test ticket "US-003/AC-02 — Leg detail expanded"
-                       linked to the story ticket
-                       result: Pass / Fail / Not yet automated
-                       evidence: the CI run URL and the test's file
+Story US-003 in GitHub  →  one test subtask "US-003/Tests — Test evidence"
+                           linked to the story ticket
+                           table: each AC-## → Pass / Fail / Not yet automated
+                           evidence: the CI run URL and each test's file
 ```
 
 Rules:
@@ -88,7 +88,7 @@ Rules:
 
 ```bash
 node tools/aidlc-jira.mjs --story US-003             # dry run — prints the payload, writes nothing
-node tools/aidlc-jira.mjs --story US-003 --tests     # include a test ticket per AC
+node tools/aidlc-jira.mjs --story US-003 --tests     # include one test subtask (all ACs)
 node tools/aidlc-jira.mjs --story US-003 --apply     # perform the write
 ```
 

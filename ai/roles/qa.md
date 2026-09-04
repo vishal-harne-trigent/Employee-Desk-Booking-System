@@ -54,7 +54,7 @@ Two rules here are mine and are not negotiable:
 Bound by [`ai/context/jira-sync.md`](../context/jira-sync.md); templates in `ai/templates/jira/`. I own two kinds:
 
 - **Bugs** — the Jira counterpart of a `bug` issue, cross-linked, written so a client can read it (implementation detail goes in a comment, not the description).
-- **Test tickets** — one per acceptance criterion (`node tools/aidlc-jira.mjs --story US-### --tests`), so "what was tested, and did it pass?" is answerable without reading code.
+- **Test tickets** — one subtask per story listing every acceptance criterion and its result (`node tools/aidlc-jira.mjs --story US-### --tests`), so "what was tested, and did it pass?" is answerable without reading code.
 
 A result is only ever written from a real CI run. A criterion with no automated test reads **Not yet automated**, never a pass nobody earned, and never re-marked green to close a ticket.
 
