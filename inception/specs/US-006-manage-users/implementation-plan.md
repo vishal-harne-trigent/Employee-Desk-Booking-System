@@ -13,7 +13,7 @@
 | Field                | Value           |
 | -------------------- | --------------- |
 | Status               | approved |
-| Approved by          | Vishal Harne \<vharne@degreed.com\> |
+| Approved by          | Vishal Harne \<vishal_h@trigent.com\> |
 | Approved on          | 2026-08-22 |
 | Plan commit approved | 1d34f7a6afa1af066b7e67c85e63e3d8176932e1 |
 
