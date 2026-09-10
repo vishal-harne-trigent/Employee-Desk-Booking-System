@@ -1,0 +1,12 @@
+DO NOT import this parent folder into Figma.
+
+Import the plugin subfolder only:
+
+  tools/EDBS_Wireframes/plugin
+
+Steps:
+  1. Run build.ps1 in tools/EDBS_Wireframes (if code.js is missing)
+  2. Figma → Plugins → Development → Import plugin from manifest…
+  3. Select tools/EDBS_Wireframes/plugin  (contains IMPORT-ME.txt)
+
+For hi-fi colourful screens, use tools/EDBS_Figma/plugin (separate plugin).

@@ -1,0 +1,25 @@
+{
+  "Smtp": {
+    "Enabled": true,
+    "Mode": "Smtp",
+    "Host": "smtp.gmail.com",
+    "Port": 587,
+    "UseSsl": true,
+    "FromName": "Desk Booking System",
+    "FromAddress": "your-mailbox@gmail.com",
+    "Username": "your-mailbox@gmail.com",
+    "Password": "YOUR_GMAIL_APP_PASSWORD"
+  },
+  "Vapid": {
+    "Enabled": true,
+    "Subject": "mailto:your-mailbox@gmail.com",
+    "PublicKey": "YOUR_VAPID_PUBLIC_KEY",
+    "PrivateKey": "YOUR_VAPID_PRIVATE_KEY"
+  },
+  "Push": {
+    "Enabled": true,
+    "Subject": "mailto:your-mailbox@gmail.com",
+    "PublicKey": "YOUR_VAPID_PUBLIC_KEY",
+    "PrivateKey": "YOUR_VAPID_PRIVATE_KEY"
+  }
+}

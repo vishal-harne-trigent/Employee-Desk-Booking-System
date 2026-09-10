@@ -1,0 +1,63 @@
+<style>
+  body { font: 13px/1.4 Inter, system-ui, sans-serif; margin: 16px; color: #18181b; }
+  h1 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; color: #71717a; }
+  button { width: 100%; padding: 10px 16px; margin-bottom: 8px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; }
+  #beside-wireframes { background: #2563eb; color: #fff; }
+  #generate-all { background: #333; color: #fff; }
+  button:disabled { opacity: 0.6; cursor: wait; }
+  #cancel { background: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; }
+  #status { font-size: 12px; min-height: 36px; margin-top: 8px; }
+  #status.ok { color: #15803d; }
+  #status.err { color: #dc2626; }
+</style>
+
+<h1>EDBS_Figma</h1>
+<p><strong>Colourful full hi-fi screens</strong> from <code>inception/design/tokens.css</code>. Does not create wireframes.</p>
+<p>Wireframes first: <strong>EDBS_Wireframes</strong> (<code>tools/EDBS_Wireframes/plugin</code>).</p>
+<button id="beside-wireframes">Colourful screens beside wireframes</button>
+<button id="generate-all">All 44 colourful screens (grid)</button>
+<button id="cancel">Close</button>
+<p id="status"></p>
+
+<script>
+  const status = document.getElementById('status');
+  const btnBeside = document.getElementById('beside-wireframes');
+  const btnAll = document.getElementById('generate-all');
+
+  function setBusy(b) { btnBeside.disabled = b; btnAll.disabled = b; }
+
+  btnBeside.onclick = () => {
+    setBusy(true);
+    status.textContent = 'Creating colourful hi-fi screens beside wireframes…';
+    status.className = '';
+    parent.postMessage({ pluginMessage: { type: 'beside-wireframes' } }, '*');
+  };
+
+  btnAll.onclick = () => {
+    setBusy(true);
+    status.textContent = 'Creating 44 colourful hi-fi screens…';
+    status.className = '';
+    parent.postMessage({ pluginMessage: { type: 'generate-all' } }, '*');
+  };
+
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+  };
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    setBusy(false);
+    if (msg.type === 'done') {
+      status.textContent = msg.mode === 'beside'
+        ? 'Done — ' + msg.count + ' hi-fi screens beside wireframes.'
+        : 'Done — ' + msg.count + ' hi-fi screens. Zoom out to see the grid.';
+      status.className = 'ok';
+    }
+    if (msg.type === 'error') {
+      status.textContent = msg.message;
+      status.className = 'err';
+    }
+  };
+</script>

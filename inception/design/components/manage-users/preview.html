@@ -1,0 +1,88 @@
+<!-- @dsCard group="Admin" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Manage Users — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-006/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-01 — Default</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#">Desks</a><a href="#" class="active">Users</a><a href="#">All Bookings</a></nav>
+      <div class="right"><div class="avatar">ML</div><span class="user-label">Admin</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head-row page-head" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><h2>Manage users</h2><p>Create accounts and manage roles.</p></div>
+        <button type="button" class="btn btn-primary">+ Add user</button>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td>Jane Smith</td><td>jane@company.com</td><td>Employee</td><td><span class="pill pill-confirmed">Active</span></td><td><a class="link-action" href="#">Edit</a> · <a class="link-action" href="#">Reset password</a> · <a class="link-action" href="#" style="color:var(--color-error)">Deactivate</a></td></tr>
+            <tr><td>Marcus Lee</td><td>admin@company.com</td><td>Admin</td><td><span class="pill pill-confirmed">Active</span></td><td><a class="link-action" href="#">Edit</a> · <a class="link-action" href="#">Reset password</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-006/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-02 — Loading</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main" aria-busy="true"><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-03 — Empty</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="empty"><p>No users found.</p><button type="button" class="btn btn-primary btn-sm">+ Add user</button></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-04 — Error</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="alert alert-error">! Could not load users. Retry</div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-05 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-05 — Add user</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:420px"><div class="modal" role="dialog"><h3>Add user</h3><label>Name</label><input type="text" /><label>Email</label><input type="email" /><label>Role</label><select><option>Employee</option><option>Admin</option></select><label>Initial password</label><input type="password" /><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Create</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-06 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-06 — Edit user</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:400px"><div class="modal" role="dialog"><h3>Edit user</h3><label>Name</label><input type="text" value="Jane Smith" /><label>Email</label><input type="email" value="jane@company.com" /><label>Role</label><select><option selected>Employee</option><option>Admin</option></select><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-primary">Save</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-07 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-07 — Reset password result</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:360px"><div class="modal" role="dialog"><h3>Password reset</h3><p>New password for <strong>jane@company.com</strong> (shown once):</p><p style="font-family:monospace;font-size:1.1rem">Kx9#mP2vLq</p><p class="helper-text">Copy now — this password will not be shown again.</p><div class="modal-actions"><button type="button" class="btn btn-primary">Done</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-08 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-08 — Deactivate confirm</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main modal-backdrop" style="min-height:360px"><div class="modal" role="dialog"><h3>Deactivate user?</h3><p><strong>jane@company.com</strong> will not be able to sign in.</p><div class="modal-actions"><button type="button" class="btn btn-secondary">Cancel</button><button type="button" class="btn btn-danger">Deactivate</button></div></div></div></div>
+</div>
+
+<!-- @state SCR-006/ST-09 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-006 / ST-09 — Last admin blocked</div>
+  <div class="device"><header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header><div class="main"><div class="alert alert-error" role="alert"><span>!</span><span>Cannot deactivate the last active Admin account.</span></div></div></div>
+</div>
+
+</body>
+</html>

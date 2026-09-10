@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@playwright/mcp@latest",
+        "--browser=chromium"
+      ],
+      "env": {
+        "npm_config_registry": "https://registry.npmjs.org/"
+      }
+    }
+  }
+}

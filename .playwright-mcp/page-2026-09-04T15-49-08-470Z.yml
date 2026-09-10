@@ -1,0 +1,14 @@
+- generic [ref=f10e2]:
+  - img "Desk Booking" [ref=f10e3]
+  - heading "Welcome back" [level=1] [ref=f10e4]
+  - paragraph [ref=f10e5]: Sign in to manage your desk bookings
+  - generic [ref=f10e6]:
+    - generic [ref=f10e7]:
+      - generic [ref=f10e8]: Email address
+      - textbox "Email address" [ref=f10e9]:
+        - /placeholder: you@company.com
+    - generic [ref=f10e10]:
+      - generic [ref=f10e11]: Password
+      - textbox "Password" [ref=f10e12]:
+        - /placeholder: Enter your password
+    - button "Sign in" [ref=f10e13] [cursor=pointer]

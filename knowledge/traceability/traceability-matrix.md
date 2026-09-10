@@ -1,0 +1,39 @@
+# Traceability matrix
+
+> GENERATED from manifest.json by tools/aidlc-check.mjs --write — do not edit.
+
+| Requirement | Stories | AC proven | Status |
+|---|---|---|---|
+| REQ-001 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| REQ-002 | US-001 | 5/5 | delivered |
+| REQ-003 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| REQ-004 | US-001, US-005, US-006 | 17/17 | delivered |
+| REQ-005 | US-001, US-006 | 12/12 | delivered |
+| REQ-006 | US-002 | 6/6 | delivered |
+| REQ-007 | US-002 | 6/6 | delivered |
+| REQ-008 | US-002 | 6/6 | delivered |
+| REQ-009 | US-003, US-009 | 7/7 | delivered |
+| REQ-010 | US-003 | 4/4 | delivered |
+| REQ-011 | US-004, US-009 | 7/7 | delivered |
+| REQ-012 | US-004 | 4/4 | delivered |
+| REQ-013 | US-004, US-009 | 7/7 | delivered |
+| REQ-014 | US-004 | 4/4 | delivered |
+| REQ-015 | US-005 | 5/5 | delivered |
+| REQ-016 | US-005 | 5/5 | delivered |
+| REQ-017 | US-005 | 5/5 | delivered |
+| REQ-018 | US-006 | 7/7 | delivered |
+| REQ-019 | US-006 | 7/7 | delivered |
+| REQ-020 | US-006 | 7/7 | delivered |
+| REQ-021 | US-006 | 7/7 | delivered |
+| REQ-022 | US-006 | 7/7 | delivered |
+| REQ-023 | US-007 | 5/5 | delivered |
+| REQ-024 | US-007 | 5/5 | delivered |
+| REQ-025 | US-007 | 5/5 | delivered |
+| REQ-026 | US-008 | 5/5 | delivered |
+| REQ-027 | US-008 | 5/5 | delivered |
+| NFR-001 | US-002 | 6/6 | delivered |
+| NFR-002 | US-002 | 6/6 | delivered |
+| NFR-003 | US-001 | 5/5 | delivered |
+| NFR-004 | US-001, US-002, US-003, US-004, US-005, US-006, US-008 | 36/36 | delivered |
+| NFR-005 | US-007 | 5/5 | delivered |
+| NFR-006 | US-008 | 5/5 | delivered |

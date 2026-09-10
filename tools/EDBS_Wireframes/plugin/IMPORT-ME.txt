@@ -1,0 +1,20 @@
+IMPORT THIS EXACT FOLDER INTO FIGMA
+===================================
+
+Path: tools/EDBS_Wireframes/plugin
+
+This folder must contain ONLY:
+  manifest.json
+  ui.html
+  code.js   (~47 KB — NOT a one-line error)
+
+Steps:
+  1. Run:  powershell -File tools/install-figma-plugins.ps1
+  2. Figma -> Plugins -> Development -> remove ALL old "EDBS" plugins
+  3. Import plugin from manifest... -> select THIS folder's manifest.json
+
+WRONG (causes TypeScript error):
+  tools/EDBS_Wireframes          (parent folder)
+  tools/EDBS_Wireframes/source
+
+Hi-fi colourful screens: tools/EDBS_Figma/plugin

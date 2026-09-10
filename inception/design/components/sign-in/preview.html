@@ -1,0 +1,83 @@
+<!-- @dsCard group="Authentication" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sign In — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-001/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-001 / ST-01 — Default</div>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" />
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email1">Email address</label><input id="email1" type="email" placeholder="you@company.com" /></div>
+        <div class="field"><label for="pw1">Password</label><input id="pw1" type="password" placeholder="Enter your password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-001/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-001 / ST-02 — Loading</div>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" />
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email2">Email address</label><input id="email2" type="email" value="jane@company.com" disabled /></div>
+        <div class="field"><label for="pw2">Password</label><input id="pw2" type="password" disabled /></div>
+        <button type="button" class="btn btn-primary" disabled><span class="spinner"></span>Signing in…</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-001/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-001 / ST-03 — Invalid credentials</div>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" />
+        <div class="alert alert-error" role="alert"><span aria-hidden="true">!</span><span>Invalid email or password. Please try again.</span></div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email3">Email address</label><input id="email3" type="email" value="jane@company.com" /></div>
+        <div class="field"><label for="pw3">Password</label><input id="pw3" type="password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-001/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-001 / ST-04 — Deactivated account</div>
+  <div class="device">
+    <div class="login-screen">
+      <div class="login-card">
+        <img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" />
+        <div class="alert alert-error" role="alert"><span aria-hidden="true">!</span><span>Your account has been deactivated. Contact your administrator.</span></div>
+        <h2>Welcome back</h2>
+        <p class="sub">Sign in to manage your desk bookings</p>
+        <div class="field"><label for="email4">Email address</label><input id="email4" type="email" value="former@company.com" /></div>
+        <div class="field"><label for="pw4">Password</label><input id="pw4" type="password" /></div>
+        <button type="button" class="btn btn-primary">Sign in</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

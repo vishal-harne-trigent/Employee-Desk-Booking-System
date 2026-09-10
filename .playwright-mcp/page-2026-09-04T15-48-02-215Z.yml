@@ -1,0 +1,64 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - img "Desk Booking" [ref=f1e4]
+    - navigation "Main" [ref=f1e5]:
+      - link "Desk Availability" [ref=f1e6] [cursor=pointer]:
+        - /url: /Desks/Availability
+      - link "My Bookings" [ref=f1e7] [cursor=pointer]:
+        - /url: /MyBookings/Index
+    - generic [ref=f1e8]:
+      - generic [aria-hidden] [ref=f1e9]: VH
+      - generic [ref=f1e10]: Vishal Harne
+      - button "Sign out" [ref=f1e12] [cursor=pointer]
+  - main [ref=f1e14]:
+    - generic [ref=f1e15]:
+      - heading "Desk Availability" [level=2] [ref=f1e16]
+      - paragraph [ref=f1e17]: Choose a date to see which desks are open for booking.
+    - generic [ref=f1e19]:
+      - generic [ref=f1e20]:
+        - generic [ref=f1e21]: Office date
+        - textbox "Office date" [ref=f1e22]: 2026-09-04
+      - button "Check availability" [ref=f1e23] [cursor=pointer]
+    - table [ref=f1e25]:
+      - rowgroup [ref=f1e26]:
+        - row [ref=f1e27]:
+          - columnheader "Desk" [ref=f1e28]
+          - columnheader "Location" [ref=f1e29]
+          - columnheader "Status" [ref=f1e30]
+          - columnheader [ref=f1e31]
+      - rowgroup [ref=f1e32]:
+        - row [ref=f1e33]:
+          - cell "A-01" [ref=f1e34]
+          - cell "Floor 1, Zone C" [ref=f1e35]
+          - cell "Available" [ref=f1e36]
+          - cell [ref=f1e38]:
+            - link "Book desk" [ref=f1e39] [cursor=pointer]:
+              - /url: /Desks/Book?deskId=19ca2d40-1ac0-441e-b292-44e0987f0b41&date=2026-09-04
+        - row [ref=f1e40]:
+          - cell "A-02" [ref=f1e41]
+          - cell "Floor 1, Zone C" [ref=f1e42]
+          - cell "Available" [ref=f1e43]
+          - cell [ref=f1e45]:
+            - link "Book desk" [ref=f1e46] [cursor=pointer]:
+              - /url: /Desks/Book?deskId=3c13ddb6-20f9-4a05-8ee1-548c3fd16b26&date=2026-09-04
+        - row [ref=f1e47]:
+          - cell "A-03" [ref=f1e48]
+          - cell "Floor 1, Zone C" [ref=f1e49]
+          - cell "Available" [ref=f1e50]
+          - cell [ref=f1e52]:
+            - link "Book desk" [ref=f1e53] [cursor=pointer]:
+              - /url: /Desks/Book?deskId=a4052d22-5154-4537-beb7-a0dce4088841&date=2026-09-04
+        - row [ref=f1e54]:
+          - cell "A-04" [ref=f1e55]
+          - cell "Floor 1, Zone C" [ref=f1e56]
+          - cell "Available" [ref=f1e57]
+          - cell [ref=f1e59]:
+            - link "Book desk" [ref=f1e60] [cursor=pointer]:
+              - /url: /Desks/Book?deskId=ee5912e5-1eee-4508-a005-a96b69068fc0&date=2026-09-04
+        - row [ref=f1e61]:
+          - cell "A-05" [ref=f1e62]
+          - cell "Floor 1, Zone C" [ref=f1e63]
+          - cell "Available" [ref=f1e64]
+          - cell [ref=f1e66]:
+            - link "Book desk" [ref=f1e67] [cursor=pointer]:
+              - /url: /Desks/Book?deskId=23c49f4a-957a-47a4-9d6f-0fe0f67244e4&date=2026-09-04

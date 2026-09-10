@@ -1,0 +1,84 @@
+<!-- @dsCard group="Employee bookings" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Bookings — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-003/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-003 / ST-01 — Default</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#">Desk Availability</a><a href="#" class="active">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>My bookings</h2><p>Your upcoming and past desk reservations.</p></div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Desk</th><th>Date</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="desk-id">A-01</td><td>Tue, 14 Aug 2026</td><td><span class="pill pill-confirmed">Confirmed</span></td><td><button type="button" class="btn btn-danger btn-sm">Cancel</button></td></tr>
+            <tr><td class="desk-id">B-02</td><td>Mon, 10 Aug 2026</td><td><span class="pill pill-completed">Completed</span></td><td></td></tr>
+            <tr><td class="desk-id">C-05</td><td>Tue, 5 Aug 2026</td><td><span class="pill pill-cancelled">Cancelled</span></td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="footer">© 2026 Employee Desk Booking System</div>
+  </div>
+</div>
+
+<!-- @state SCR-003/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-003 / ST-02 — Loading</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main" aria-busy="true"><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div></div>
+  </div>
+</div>
+
+<!-- @state SCR-003/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-003 / ST-03 — Empty</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main"><div class="empty"><p>No bookings yet.</p><p><a class="link-action" href="#">Book a desk →</a></p></div></div>
+  </div>
+</div>
+
+<!-- @state SCR-003/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-003 / ST-04 — Error</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main"><div class="alert alert-error">! Could not load bookings. <button type="button" class="btn btn-outline-accent btn-sm">Retry</button></div></div>
+  </div>
+</div>
+
+<!-- @state SCR-003/ST-05 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-003 / ST-05 — Cancel confirm</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main modal-backdrop" style="min-height:360px">
+      <div class="modal" role="dialog">
+        <h3>Cancel booking?</h3>
+        <p>Desk <strong>A-01</strong> on <strong>14 Aug 2026</strong></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary">Keep booking</button>
+          <button type="button" class="btn btn-primary">Confirm cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

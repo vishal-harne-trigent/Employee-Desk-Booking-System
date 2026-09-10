@@ -1,0 +1,72 @@
+<style>
+  body {
+    font: 13px/1.4 Inter, system-ui, sans-serif;
+    margin: 16px;
+    color: #18181b;
+  }
+  h1 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 12px; color: #71717a; }
+  ul { margin: 0 0 12px; padding-left: 18px; color: #52525b; }
+  button {
+    width: 100%;
+    padding: 10px 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #generate { background: #333; color: #fff; }
+  button:disabled { opacity: 0.6; cursor: wait; }
+  #cancel { background: #f4f4f5; color: #18181b; border: 1px solid #e4e4e7; }
+  #status { font-size: 12px; min-height: 32px; margin-top: 8px; }
+  #status.ok { color: #15803d; }
+  #status.err { color: #dc2626; }
+  .hint { font-size: 12px; color: #52525b; margin-bottom: 12px; }
+</style>
+
+<h1>EDBS Wireframes</h1>
+<p>44 B&amp;W screen states on the <strong>current page</strong> (free Figma — no new pages).</p>
+<p class="hint">For colourful hi-fi screens, use the separate <strong>EDBS_Figma</strong> plugin after wireframes.</p>
+<ul>
+  <li>Sign In — 4 states</li>
+  <li>Book a Desk — 7 states</li>
+  <li>My Bookings — 5 states</li>
+  <li>Admin Bookings — 6 states</li>
+  <li>Manage Desks — 8 states</li>
+  <li>Manage Users — 9 states</li>
+  <li>Notification Settings — 5 states</li>
+</ul>
+<button id="generate">Generate wireframes</button>
+<button id="cancel">Close</button>
+<p id="status"></p>
+
+<script>
+  const status = document.getElementById('status');
+  const wireBtn = document.getElementById('generate');
+
+  wireBtn.onclick = () => {
+    wireBtn.disabled = true;
+    status.textContent = 'Creating wireframes…';
+    status.className = '';
+    parent.postMessage({ pluginMessage: { type: 'generate' } }, '*');
+  };
+
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*');
+  };
+
+  window.onmessage = (event) => {
+    const msg = event.data.pluginMessage;
+    if (!msg) return;
+    wireBtn.disabled = false;
+    if (msg.type === 'done') {
+      status.textContent = 'Done — ' + msg.count + ' wireframes added. Zoom out to see the grid.';
+      status.className = 'ok';
+    }
+    if (msg.type === 'error') {
+      status.textContent = msg.message;
+      status.className = 'err';
+    }
+  };
+</script>

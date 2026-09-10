@@ -1,0 +1,136 @@
+@model EmployeeDeskBooking.Web.Models.BookIndexViewModel
+@{
+    ViewData["Title"] = "Desk Availability";
+    Layout = "_Layout";
+}
+
+<div class="page-head mb-4">
+    <h2>Desk Availability</h2>
+    <p class="text-edbs-muted mb-0">Choose a date to see which desks are open for booking.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="edbs-alert edbs-alert-success" role="status">@Model.SuccessMessage</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.EmailWarning))
+{
+    <div class="edbs-alert edbs-alert-warning" role="alert">@Model.EmailWarning</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.DateError))
+{
+    <div class="edbs-alert edbs-alert-error" role="alert">@Model.DateError</div>
+}
+
+@if (!string.IsNullOrEmpty(Model.BookingError))
+{
+    <div class="edbs-alert edbs-alert-error" role="alert">@Model.BookingError</div>
+}
+
+@if (Model.HasExistingBooking)
+{
+    <div class="edbs-alert edbs-alert-info" role="status">
+        You already have desk <strong>@Model.ExistingBooking!.DeskLabel</strong> booked for this date.
+        Cancel it from My Bookings before booking another desk.
+    </div>
+}
+
+<div class="edbs-card mb-4">
+    <form method="get" class="edbs-form-row" asp-controller="Desks" asp-action="Availability">
+        <div class="edbs-field">
+            <label for="date">Office date</label>
+            <input type="date" id="date" name="date"
+                   value="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+                   min="@Model.MinBookingDate.ToString("yyyy-MM-dd")"
+                   max="@Model.MaxBookingDate.ToString("yyyy-MM-dd")"
+                   required />
+        </div>
+        <button type="submit" class="edbs-btn edbs-btn-primary">Check availability</button>
+    </form>
+</div>
+
+@if (Model.AvailabilityRequested && string.IsNullOrEmpty(Model.DateError))
+{
+    <div class="edbs-card edbs-table-card">
+        @if (Model.HasExistingBooking)
+        {
+            <h3 class="edbs-section-title mb-3">Your booking for this date</h3>
+            <table class="edbs-table">
+                <thead>
+                    <tr>
+                        <th>Desk</th>
+                        <th>Location</th>
+                        <th>Booking date</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="desk-id">@Model.ExistingBooking!.DeskNumber</td>
+                        <td>@Model.ExistingBooking.Location</td>
+                        <td>@Model.ExistingBooking.BookingDateLabel</td>
+                        <td>
+                            <span class="edbs-pill edbs-pill-booked">Your booking</span>
+                        </td>
+                        <td class="text-end">
+                            <a class="edbs-btn edbs-btn-outline-accent edbs-btn-sm"
+                               asp-controller="MyBookings" asp-action="Index">
+                                Manage booking
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+        else if (Model.Desks.Count == 0)
+        {
+            <p class="edbs-empty">All desks are booked for this date. Try another working day.</p>
+        }
+        else
+        {
+            <table class="edbs-table">
+                <thead>
+                    <tr>
+                        <th>Desk</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var desk in Model.Desks)
+                {
+                    <tr>
+                        <td class="desk-id">@desk.DeskNumber</td>
+                        <td>@desk.Location</td>
+                        <td>
+                            @if (desk.IsAvailable)
+                            {
+                                <span class="edbs-pill edbs-pill-available">Available</span>
+                            }
+                            else
+                            {
+                                <span class="edbs-pill edbs-pill-booked">Booked</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            @if (desk.IsAvailable)
+                            {
+                                <a class="edbs-btn edbs-btn-outline-accent edbs-btn-sm"
+                                   asp-controller="Desks" asp-action="Book"
+                                   asp-route-deskId="@desk.DeskId"
+                                   asp-route-date="@Model.SelectedDate.ToString("yyyy-MM-dd")">
+                                    Book desk
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+}

@@ -1,0 +1,128 @@
+<!-- @dsCard group="Employee booking" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Book Desk — component preview</title>
+  <link rel="stylesheet" href="../../tokens.css" />
+  <link rel="stylesheet" href="../edbs-hifi.css" />
+</head>
+<body class="preview-doc">
+
+<!-- @state SCR-002/ST-01 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-01 — Default</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span><a class="signout" href="#">Sign out</a></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>Desk Availability</h2><p>Choose a date to see which desks are open for booking.</p></div>
+      <div class="card">
+        <div class="form-row">
+          <div><label for="date1">Office date</label><input id="date1" type="date" value="2026-08-14" /></div>
+          <button type="button" class="btn btn-primary">Check availability</button>
+        </div>
+      </div>
+      <p style="color:var(--color-text-muted);margin:0">Select a date to view desk availability.</p>
+    </div>
+    <div class="footer">© 2026 Employee Desk Booking System</div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-02 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-02 — Loading</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span></div>
+    </header>
+    <div class="main" aria-busy="true">
+      <div class="page-head"><h2>Desk Availability</h2></div>
+      <div class="card"><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div><div class="skeleton skeleton-pulse"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-03 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-03 — Desks available</div>
+  <div class="device">
+    <header class="topnav">
+      <div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div>
+      <nav><a href="#" class="active">Desk Availability</a><a href="#">My Bookings</a></nav>
+      <div class="right"><div class="avatar">JS</div><span class="user-label">Jane Smith</span></div>
+    </header>
+    <div class="main">
+      <div class="page-head"><h2>Desk Availability</h2></div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Desk</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="desk-id">A-01</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+            <tr><td class="desk-id">A-02</td><td><span class="pill pill-booked">Booked</span></td><td></td></tr>
+            <tr><td class="desk-id">B-01</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+            <tr><td class="desk-id">B-02</td><td><span class="pill pill-available">Available</span></td><td><button type="button" class="btn btn-outline-accent btn-sm">Book desk</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="footer">© 2026 Employee Desk Booking System</div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-04 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-04 — Empty</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main"><div class="empty"><p>✗ All desks are booked for this date.</p><p>Try another working day.</p></div></div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-05 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-05 — Error</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main">
+      <div class="alert alert-error"><span>!</span><span>Could not load desks. <button type="button" class="btn btn-primary btn-sm">Retry</button></span></div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-06 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-06 — Already booked</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main">
+      <div class="alert alert-info"><span>ℹ</span><span>You already have desk <strong>A-01</strong> on this date. Cancel it in My Bookings to choose another desk.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- @state SCR-002/ST-07 -->
+<div class="preview-block">
+  <div class="preview-label">SCR-002 / ST-07 — Confirm booking</div>
+  <div class="device">
+    <header class="topnav"><div class="brand"><img class="brand-logo" src="../../assets/desk-booking-logo.png" alt="Desk Booking" /></div></header>
+    <div class="main modal-backdrop" style="min-height:360px">
+      <div class="modal" role="dialog" aria-labelledby="confirm-title">
+        <h3 id="confirm-title">Confirm booking</h3>
+        <p>Desk <strong>B-01</strong> on <strong>Thu 14 Aug 2026</strong></p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary">Cancel</button>
+          <button type="button" class="btn btn-primary">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
